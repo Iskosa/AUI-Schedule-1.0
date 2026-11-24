@@ -4,6 +4,7 @@ import type {
   GroupFilter,
   Lesson,
   ScheduleOverlay,
+  ScheduleScopeMode,
   Teacher,
   ViewMode,
 } from '../types/schedule';
@@ -14,6 +15,12 @@ export function createEmptyOverlay(): ScheduleOverlay {
     updatedAt: new Date().toISOString(),
     settings: {
       selectedGroup: 'COMSE26A',
+      defaultGroup: 'COMSE26A',
+      hideSaturdayConflicts: false,
+      reduceMotion: false,
+      saturdayNotesCollapsed: false,
+      scheduleScopeMode: 'group',
+      focusedTeacherId: null,
     },
     customTeachers: [],
     editedTeachers: {},
@@ -22,6 +29,7 @@ export function createEmptyOverlay(): ScheduleOverlay {
     editedLessons: {},
     deletedLessonIds: [],
     pinnedSubgroups: {},
+    subjectTeacherOverrides: {},
   };
 }
 
@@ -37,6 +45,11 @@ function sanitizeGroupFilter(val: unknown): GroupFilter {
   return 'COMSE26A';
 }
 
+function sanitizeOptionalGroupFilter(val: unknown): GroupFilter | undefined {
+  if (val === undefined) return undefined;
+  return sanitizeGroupFilter(val);
+}
+
 function sanitizeViewMode(val: unknown): ViewMode | undefined {
   if (val === 'day' || val === 'week') return val;
   return undefined;
@@ -47,6 +60,20 @@ function sanitizeDay(val: unknown): DayOfWeek | undefined {
     return val as DayOfWeek;
   }
   return undefined;
+}
+
+function sanitizeScopeMode(val: unknown): ScheduleScopeMode {
+  return val === 'teacher' ? 'teacher' : 'group';
+}
+
+function sanitizeStringRecord(val: unknown): Record<string, string> {
+  if (!isRecord(val)) return {};
+  return Object.fromEntries(
+    Object.entries(val).filter(
+      (entry): entry is [string, string] =>
+        typeof entry[0] === 'string' && typeof entry[1] === 'string'
+    )
+  );
 }
 
 export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
@@ -73,14 +100,14 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
   const deletedLessonIds = Array.isArray(candidate.deletedLessonIds)
     ? candidate.deletedLessonIds.filter((id): id is string => typeof id === 'string')
     : [];
-  const pinnedSubgroups = isRecord(candidate.pinnedSubgroups)
-    ? Object.fromEntries(
-        Object.entries(candidate.pinnedSubgroups).filter(
-          (entry): entry is [string, string] =>
-            typeof entry[0] === 'string' && typeof entry[1] === 'string'
-        )
-      )
-    : {};
+  const pinnedSubgroups = sanitizeStringRecord(candidate.pinnedSubgroups);
+  const subjectTeacherOverrides = sanitizeStringRecord(
+    candidate.subjectTeacherOverrides
+  );
+
+  const selectedGroup = sanitizeGroupFilter(settingsRaw.selectedGroup);
+  const defaultGroup =
+    sanitizeOptionalGroupFilter(settingsRaw.defaultGroup) ?? selectedGroup;
 
   return {
     version: 1,
@@ -89,9 +116,20 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
         ? candidate.updatedAt
         : new Date().toISOString(),
     settings: {
-      selectedGroup: sanitizeGroupFilter(settingsRaw.selectedGroup),
+      selectedGroup,
       viewMode: sanitizeViewMode(settingsRaw.viewMode),
       selectedDay: sanitizeDay(settingsRaw.selectedDay),
+      defaultGroup,
+      defaultViewMode: sanitizeViewMode(settingsRaw.defaultViewMode),
+      hideSaturdayConflicts: Boolean(settingsRaw.hideSaturdayConflicts),
+      reduceMotion: Boolean(settingsRaw.reduceMotion),
+      saturdayNotesCollapsed: Boolean(settingsRaw.saturdayNotesCollapsed),
+      scheduleScopeMode: sanitizeScopeMode(settingsRaw.scheduleScopeMode),
+      focusedTeacherId:
+        typeof settingsRaw.focusedTeacherId === 'string' &&
+        settingsRaw.focusedTeacherId.trim() !== ''
+          ? settingsRaw.focusedTeacherId
+          : null,
     },
     customTeachers,
     editedTeachers,
@@ -100,6 +138,7 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
     editedLessons,
     deletedLessonIds,
     pinnedSubgroups,
+    subjectTeacherOverrides,
   };
 }
 
@@ -130,7 +169,8 @@ export function countOverlayChanges(overlay: ScheduleOverlay): number {
     overlay.addedLessons.length +
     Object.keys(overlay.editedLessons).length +
     overlay.deletedLessonIds.length +
-    Object.keys(overlay.pinnedSubgroups).length
+    Object.keys(overlay.pinnedSubgroups).length +
+    Object.keys(overlay.subjectTeacherOverrides ?? {}).length
   );
 }
 

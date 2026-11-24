@@ -76,6 +76,7 @@ export function mergeScheduleData(
 ): MergedSchedule {
   const deletedTeacherSet = new Set(overlay.deletedTeacherIds);
   const deletedLessonSet = new Set(overlay.deletedLessonIds);
+  const subjectOverrides = overlay.subjectTeacherOverrides ?? {};
 
   const teachersList: EffectiveTeacher[] = [];
 
@@ -128,6 +129,57 @@ export function mergeScheduleData(
       : rawLesson;
 
     const synced = syncLessonTeachers(mergedRaw, teachersById);
+    const baseSubgroups = synced.subgroups;
+    const subjectKey = mergedRaw.subject.trim().toLowerCase();
+    const overrideTeacherId = subjectOverrides[subjectKey] ?? null;
+    const overrideTeacher =
+      overrideTeacherId && teachersById[overrideTeacherId]
+        ? teachersById[overrideTeacherId]
+        : null;
+
+    if (overrideTeacher) {
+      const matchesSubgroup = synced.subgroups?.some(
+        (sg) => sg.teacherId === overrideTeacher.id
+      );
+
+      if (matchesSubgroup && synced.subgroups) {
+        const pinnedCandidate =
+          overlay.pinnedSubgroups[mergedRaw.id] ?? overrideTeacher.id;
+        const pinnedSubgroupTeacherId = synced.subgroups.some(
+          (sg) => sg.teacherId === pinnedCandidate
+        )
+          ? pinnedCandidate
+          : overrideTeacher.id;
+
+        lessonsList.push({
+          ...mergedRaw,
+          ...synced,
+          baseSubgroups,
+          isBase,
+          isCustom: !isBase,
+          isModified: Boolean(patch && Object.keys(patch).length > 0),
+          pinnedSubgroupTeacherId,
+          teacherOverrideApplied: true,
+        });
+        return;
+      }
+
+      lessonsList.push({
+        ...mergedRaw,
+        teacherId: overrideTeacher.id,
+        teacherIds: [overrideTeacher.id],
+        teacherName: overrideTeacher.name,
+        subgroups: undefined,
+        baseSubgroups,
+        isBase,
+        isCustom: !isBase,
+        isModified: true,
+        pinnedSubgroupTeacherId: null,
+        teacherOverrideApplied: true,
+      });
+      return;
+    }
+
     const pinnedCandidate = overlay.pinnedSubgroups[mergedRaw.id] ?? null;
     const pinnedSubgroupTeacherId =
       pinnedCandidate &&
@@ -138,6 +190,7 @@ export function mergeScheduleData(
     lessonsList.push({
       ...mergedRaw,
       ...synced,
+      baseSubgroups,
       isBase,
       isCustom: !isBase,
       isModified: Boolean(patch && Object.keys(patch).length > 0),

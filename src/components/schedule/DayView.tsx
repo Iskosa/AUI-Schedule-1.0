@@ -1,5 +1,5 @@
 import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
-import { AlertTriangle, Plus } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import {
   DAY_LABELS_RU,
   DAY_SHORT_EN,
@@ -10,13 +10,14 @@ import type {
   DayOfWeek,
   EffectiveLesson,
   GroupFilter,
+  ScheduleScopeMode,
 } from '../../types/schedule';
 import {
   getCardSlamItemVariants,
   getCursorSpring,
   getStaggerContainerVariants,
 } from '../../utils/p5Motion';
-import { filterLessonsByGroup } from '../../utils/time';
+import { filterLessonsByScope } from '../../utils/time';
 import { LessonCard } from './LessonCard';
 
 interface DayViewProps {
@@ -25,7 +26,11 @@ interface DayViewProps {
   onSelectDay: (day: DayOfWeek) => void;
   lessons: EffectiveLesson[];
   selectedGroup: GroupFilter;
+  scopeMode: ScheduleScopeMode;
+  focusedTeacherId: string | null;
   saturdayNotes: string[];
+  saturdayNotesCollapsed: boolean;
+  onToggleSaturdayNotes: () => void;
   currentLessonIds: Set<string>;
   onSelectLesson: (lesson: EffectiveLesson) => void;
   onAddLessonForDay: (day: DayOfWeek) => void;
@@ -47,7 +52,11 @@ export function DayView({
   onSelectDay,
   lessons,
   selectedGroup,
+  scopeMode,
+  focusedTeacherId,
   saturdayNotes,
+  saturdayNotesCollapsed,
+  onToggleSaturdayNotes,
   currentLessonIds,
   onSelectLesson,
   onAddLessonForDay,
@@ -63,10 +72,16 @@ export function DayView({
         transition: { type: 'spring' as const, stiffness: 800, damping: 30 },
       };
 
-  const groupLessons = filterLessonsByGroup(lessons, selectedGroup);
-  const dayLessons = groupLessons.filter((ls) => ls.day === selectedDay);
+  const scopedLessons = filterLessonsByScope(
+    lessons,
+    selectedGroup,
+    scopeMode,
+    focusedTeacherId
+  );
+  const dayLessons = scopedLessons.filter((ls) => ls.day === selectedDay);
   const isToday = selectedDay === todayDay;
   const dayIndexStr = String(DAYS.indexOf(selectedDay) + 1).padStart(2, '0');
+  const showGroupsAlways = scopeMode === 'teacher';
 
   return (
     <div className="space-y-4">
@@ -79,7 +94,7 @@ export function DayView({
             className="grid grid-cols-3 gap-2 sm:grid-cols-6"
           >
             {DAYS.map((day) => {
-              const count = groupLessons.filter((ls) => ls.day === day).length;
+              const count = scopedLessons.filter((ls) => ls.day === day).length;
               const active = selectedDay === day;
               const dayIsToday = day === todayDay;
               return (
@@ -196,7 +211,7 @@ export function DayView({
               className="flex flex-col gap-2"
             >
               {DAYS.map((day) => {
-                const count = groupLessons.filter((ls) => ls.day === day).length;
+                const count = scopedLessons.filter((ls) => ls.day === day).length;
                 const active = selectedDay === day;
                 const dayIsToday = day === todayDay;
 
@@ -263,23 +278,50 @@ export function DayView({
         {/* Right Column: Dynamic Lesson Cards with Diagonal Slam-In */}
         <div className="min-w-0 space-y-4 lg:col-span-8 xl:col-span-9">
           {selectedDay === 'SATURDAY' && saturdayNotes.length > 0 && (
-            <div className="flex items-start gap-2.5 border-2 border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#060606] px-3.5 py-2.5 text-xs text-white shadow-[5px_5px_0_#050505]">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#FFE600]" />
-              <div className="space-y-0.5">
-                <div className="font-condensed text-[11px] font-bold uppercase tracking-wider text-[#FFE600]">
-                  Примечания по субботе (Satur_comments)
+            <div className="border-2 border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#060606] px-3.5 py-2.5 text-xs text-white shadow-[5px_5px_0_#050505]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-[#FFE600]" />
+                  <span className="font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+                    ПРИМЕЧАНИЯ ПО СУББОТЕ
+                  </span>
                 </div>
-                <p className="leading-snug text-neutral-200">
+
+                <button
+                  type="button"
+                  onClick={onToggleSaturdayNotes}
+                  aria-expanded={!saturdayNotesCollapsed}
+                  className="p5-skew inline-flex items-center border border-white/70 bg-[#050505] px-2.5 py-1 text-white transition-colors hover:border-[#FFE600] hover:text-[#FFE600]"
+                >
+                  <span className="p5-unskew inline-flex items-center gap-1 font-condensed text-[11px] font-bold uppercase tracking-wider">
+                    {saturdayNotesCollapsed ? (
+                      <>
+                        <span>Показать</span>
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </>
+                    ) : (
+                      <>
+                        <span>Свернуть</span>
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
+
+              {!saturdayNotesCollapsed && (
+                <p className="mt-1.5 leading-snug text-neutral-200">
                   {saturdayNotes.slice(0, 2).join(' · ')}
                 </p>
-              </div>
+              )}
             </div>
           )}
 
           {dayLessons.length === 0 ? (
             <div className="flex flex-col items-center justify-center border-2 border-white bg-[#060606] px-6 py-12 text-center shadow-[6px_6px_0_#E60012]">
               <p className="font-display text-sm uppercase tracking-wider text-white sm:text-base">
-                На {DAY_LABELS_RU[selectedDay].toLowerCase()} пар не запланировано.
+                На {DAY_LABELS_RU[selectedDay].toLowerCase()} пар не
+                запланировано.
               </p>
               <button
                 type="button"
@@ -294,14 +336,14 @@ export function DayView({
             </div>
           ) : (
             <motion.div
-              key={`${selectedDay}-${selectedGroup}`}
+              key={`${selectedDay}-${selectedGroup}-${scopeMode}-${focusedTeacherId ?? ''}`}
               variants={containerVariants}
               initial="hidden"
               animate="visible"
               className={
                 selectedGroup === 'ALL'
                   ? 'grid gap-x-5 gap-y-6 pt-3 xl:grid-cols-2'
-                  : 'max-w-3xl space-y-6 pt-3'
+                  : 'max-w-4xl space-y-6 pt-3'
               }
             >
               {dayLessons.map((lesson, idx) => (
@@ -312,6 +354,7 @@ export function DayView({
                     compact={false}
                     isToday={isToday}
                     tiltIndex={idx}
+                    showGroupLineOverride={showGroupsAlways}
                     isCurrent={currentLessonIds.has(lesson.id)}
                     onClick={() => onSelectLesson(lesson)}
                   />

@@ -101,6 +101,10 @@ export function BackupModal({
             <div>
               Изменено преподав.: {Object.keys(overlay.editedTeachers).length}
             </div>
+            <div>
+              Переопределено предм.:{' '}
+              {Object.keys(overlay.subjectTeacherOverrides ?? {}).length}
+            </div>
           </div>
         </div>
 

@@ -5,14 +5,17 @@ import type {
   DayOfWeek,
   EffectiveLesson,
   GroupFilter,
+  ScheduleScopeMode,
 } from '../../types/schedule';
 import { getCardSlamItemVariants } from '../../utils/p5Motion';
-import { filterLessonsByGroup } from '../../utils/time';
+import { filterLessonsByScope } from '../../utils/time';
 import { LessonCard } from './LessonCard';
 
 interface WeekViewProps {
   lessons: EffectiveLesson[];
   selectedGroup: GroupFilter;
+  scopeMode: ScheduleScopeMode;
+  focusedTeacherId: string | null;
   todayDay: DayOfWeek | 'SUNDAY';
   currentLessonIds: Set<string>;
   onSelectLesson: (lesson: EffectiveLesson) => void;
@@ -22,6 +25,8 @@ interface WeekViewProps {
 export function WeekView({
   lessons,
   selectedGroup,
+  scopeMode,
+  focusedTeacherId,
   todayDay,
   currentLessonIds,
   onSelectLesson,
@@ -29,7 +34,13 @@ export function WeekView({
 }: WeekViewProps) {
   const reduced = useReducedMotion();
   const itemVariants = getCardSlamItemVariants(reduced);
-  const filtered = filterLessonsByGroup(lessons, selectedGroup);
+  const filtered = filterLessonsByScope(
+    lessons,
+    selectedGroup,
+    scopeMode,
+    focusedTeacherId
+  );
+  const showGroupsAlways = scopeMode === 'teacher';
 
   return (
     <div className="grid grid-cols-1 gap-6 pt-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:gap-4">
@@ -144,6 +155,7 @@ export function WeekView({
                         compact
                         isToday={isToday}
                         tiltIndex={idx + colIdx}
+                        showGroupLineOverride={showGroupsAlways}
                         isCurrent={currentLessonIds.has(lesson.id)}
                         onClick={() => onSelectLesson(lesson)}
                       />

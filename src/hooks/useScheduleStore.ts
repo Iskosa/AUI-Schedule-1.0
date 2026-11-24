@@ -10,6 +10,7 @@ import type {
   LessonType,
   OfficeHour,
   ScheduleOverlay,
+  ScheduleScopeMode,
   Subgroup,
   Teacher,
   ViewMode,
@@ -24,7 +25,7 @@ import {
   parseImportedOverlay,
   saveOverlay,
 } from '../utils/storage';
-import { getDefaultStudyDay } from '../utils/time';
+import { getDefaultStudyDay, isDisputedSaturdayLesson } from '../utils/time';
 import { useIsMobile } from './useIsMobile';
 
 export interface LessonDraftInput {
@@ -69,7 +70,9 @@ export function useScheduleStore() {
       const data = (await res.json()) as BaseScheduleData;
       setBaseData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить расписание');
+      setError(
+        err instanceof Error ? err.message : 'Не удалось загрузить расписание'
+      );
     } finally {
       setLoading(false);
     }
@@ -96,18 +99,65 @@ export function useScheduleStore() {
     []
   );
 
-  const merged = useMemo(() => mergeScheduleData(baseData, overlay), [baseData, overlay]);
+  const merged = useMemo(
+    () => mergeScheduleData(baseData, overlay),
+    [baseData, overlay]
+  );
 
   const selectedGroup: GroupFilter = overlay.settings.selectedGroup;
-  const viewMode: ViewMode = overlay.settings.viewMode ?? (isMobile ? 'day' : 'week');
+  const defaultGroup: GroupFilter =
+    overlay.settings.defaultGroup ?? overlay.settings.selectedGroup ?? 'COMSE26A';
+  const defaultViewMode: ViewMode | undefined = overlay.settings.defaultViewMode;
+  const viewMode: ViewMode =
+    overlay.settings.viewMode ?? defaultViewMode ?? (isMobile ? 'day' : 'week');
   const selectedDay: DayOfWeek =
     overlay.settings.selectedDay ?? getDefaultStudyDay(new Date());
+  const hideSaturdayConflicts = Boolean(overlay.settings.hideSaturdayConflicts);
+  const reduceMotion = Boolean(overlay.settings.reduceMotion);
+  const saturdayNotesCollapsed = Boolean(
+    overlay.settings.saturdayNotesCollapsed
+  );
+  const scheduleScopeMode: ScheduleScopeMode =
+    overlay.settings.scheduleScopeMode ?? 'group';
+  const focusedTeacherId: string | null =
+    overlay.settings.focusedTeacherId &&
+    merged.teachersById[overlay.settings.focusedTeacherId]
+      ? overlay.settings.focusedTeacherId
+      : null;
+  const subjectTeacherOverrides = overlay.subjectTeacherOverrides ?? {};
+
+  const visibleLessons = useMemo(
+    () =>
+      hideSaturdayConflicts
+        ? merged.lessons.filter((ls) => !isDisputedSaturdayLesson(ls))
+        : merged.lessons,
+    [merged.lessons, hideSaturdayConflicts]
+  );
 
   const setSelectedGroup = useCallback(
     (group: GroupFilter) => {
       updateOverlay((prev) => ({
         ...prev,
-        settings: { ...prev.settings, selectedGroup: group },
+        settings: {
+          ...prev.settings,
+          selectedGroup: group,
+          scheduleScopeMode: 'group',
+        },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setDefaultGroup = useCallback(
+    (group: GroupFilter) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          defaultGroup: group,
+          selectedGroup: group,
+          scheduleScopeMode: 'group',
+        },
       }));
     },
     [updateOverlay]
@@ -123,11 +173,85 @@ export function useScheduleStore() {
     [updateOverlay]
   );
 
+  const setDefaultViewMode = useCallback(
+    (mode: ViewMode) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          defaultViewMode: mode,
+          viewMode: mode,
+        },
+      }));
+    },
+    [updateOverlay]
+  );
+
   const setSelectedDay = useCallback(
     (day: DayOfWeek) => {
       updateOverlay((prev) => ({
         ...prev,
         settings: { ...prev.settings, selectedDay: day },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setHideSaturdayConflicts = useCallback(
+    (hide: boolean) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: { ...prev.settings, hideSaturdayConflicts: hide },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setReduceMotion = useCallback(
+    (enabled: boolean) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: { ...prev.settings, reduceMotion: enabled },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setSaturdayNotesCollapsed = useCallback(
+    (collapsed: boolean) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: { ...prev.settings, saturdayNotesCollapsed: collapsed },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setScheduleScopeMode = useCallback(
+    (mode: ScheduleScopeMode, teacherId?: string | null) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          scheduleScopeMode: mode,
+          focusedTeacherId:
+            teacherId !== undefined
+              ? teacherId
+              : prev.settings.focusedTeacherId ?? null,
+        },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setFocusedTeacherId = useCallback(
+    (teacherId: string | null) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          focusedTeacherId: teacherId,
+        },
       }));
     },
     [updateOverlay]
@@ -149,6 +273,64 @@ export function useScheduleStore() {
       });
     },
     [updateOverlay]
+  );
+
+  const setSubjectPinnedSubgroup = useCallback(
+    (subject: string, teacherId: string | null) => {
+      const normalizedSubject = subject.trim().toLowerCase();
+      updateOverlay((prev) => {
+        const nextPins = { ...prev.pinnedSubgroups };
+        for (const ls of merged.lessons) {
+          if (ls.subject.trim().toLowerCase() !== normalizedSubject) continue;
+          const subgroups = ls.baseSubgroups ?? ls.subgroups;
+          if (!subgroups || subgroups.length === 0) continue;
+          if (teacherId === null) {
+            delete nextPins[ls.id];
+          } else if (subgroups.some((sg) => sg.teacherId === teacherId)) {
+            nextPins[ls.id] = teacherId;
+          }
+        }
+        return {
+          ...prev,
+          pinnedSubgroups: nextPins,
+        };
+      });
+    },
+    [merged.lessons, updateOverlay]
+  );
+
+  const setSubjectTeacherOverride = useCallback(
+    (subject: string, teacherId: string | null) => {
+      const normalizedSubject = subject.trim().toLowerCase();
+      if (!normalizedSubject) return;
+      updateOverlay((prev) => {
+        const nextOverrides = { ...(prev.subjectTeacherOverrides ?? {}) };
+        const nextPins = { ...prev.pinnedSubgroups };
+
+        if (teacherId === null) {
+          delete nextOverrides[normalizedSubject];
+        } else {
+          nextOverrides[normalizedSubject] = teacherId;
+          for (const ls of merged.lessons) {
+            if (ls.subject.trim().toLowerCase() !== normalizedSubject) continue;
+            const subgroups = ls.baseSubgroups ?? ls.subgroups;
+            if (
+              subgroups &&
+              subgroups.some((sg) => sg.teacherId === teacherId)
+            ) {
+              nextPins[ls.id] = teacherId;
+            }
+          }
+        }
+
+        return {
+          ...prev,
+          pinnedSubgroups: nextPins,
+          subjectTeacherOverrides: nextOverrides,
+        };
+      });
+    },
+    [merged.lessons, updateOverlay]
   );
 
   const buildLessonFields = useCallback(
@@ -233,7 +415,8 @@ export function useScheduleStore() {
                 ? {
                     ...item,
                     ...fields,
-                    subgroups: fields.subgroups.length > 0 ? fields.subgroups : undefined,
+                    subgroups:
+                      fields.subgroups.length > 0 ? fields.subgroups : undefined,
                   }
                 : item
             ),
@@ -355,10 +538,28 @@ export function useScheduleStore() {
   const deleteTeacher = useCallback(
     (teacher: EffectiveTeacher) => {
       updateOverlay((prev) => {
+        const nextOverrides = { ...(prev.subjectTeacherOverrides ?? {}) };
+        for (const [subKey, tid] of Object.entries(nextOverrides)) {
+          if (tid === teacher.id) {
+            delete nextOverrides[subKey];
+          }
+        }
+
+        const nextSettings =
+          prev.settings.focusedTeacherId === teacher.id
+            ? {
+                ...prev.settings,
+                scheduleScopeMode: 'group' as const,
+                focusedTeacherId: null,
+              }
+            : prev.settings;
+
         if (teacher.isCustom) {
           return {
             ...prev,
+            settings: nextSettings,
             customTeachers: prev.customTeachers.filter((t) => t.id !== teacher.id),
+            subjectTeacherOverrides: nextOverrides,
           };
         }
 
@@ -367,8 +568,12 @@ export function useScheduleStore() {
 
         return {
           ...prev,
-          deletedTeacherIds: Array.from(new Set([...prev.deletedTeacherIds, teacher.id])),
+          settings: nextSettings,
+          deletedTeacherIds: Array.from(
+            new Set([...prev.deletedTeacherIds, teacher.id])
+          ),
           editedTeachers: nextEdited,
+          subjectTeacherOverrides: nextOverrides,
         };
       });
     },
@@ -406,15 +611,33 @@ export function useScheduleStore() {
     overlayChangeCount,
     teachers: merged.teachers,
     teachersById: merged.teachersById,
-    lessons: merged.lessons,
+    lessons: visibleLessons,
+    allLessons: merged.lessons,
     targetGroupTeacherIds: merged.targetGroupTeacherIds,
     selectedGroup,
+    defaultGroup,
+    defaultViewMode,
     viewMode,
     selectedDay,
+    hideSaturdayConflicts,
+    reduceMotion,
+    saturdayNotesCollapsed,
+    scheduleScopeMode,
+    focusedTeacherId,
+    subjectTeacherOverrides,
     setSelectedGroup,
+    setDefaultGroup,
     setViewMode,
+    setDefaultViewMode,
     setSelectedDay,
+    setHideSaturdayConflicts,
+    setReduceMotion,
+    setSaturdayNotesCollapsed,
+    setScheduleScopeMode,
+    setFocusedTeacherId,
     togglePinSubgroup,
+    setSubjectPinnedSubgroup,
+    setSubjectTeacherOverride,
     addLesson,
     updateLesson,
     deleteLesson,

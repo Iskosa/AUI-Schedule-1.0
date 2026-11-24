@@ -1,9 +1,10 @@
 import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
-import { Calendar, Columns3, MapPin, Plus, UserCheck } from 'lucide-react';
+import { Calendar, Columns3, MapPin, Plus, UserCheck, X } from 'lucide-react';
 import type {
   EffectiveTeacher,
   GroupFilter,
   GroupInfo,
+  ScheduleScopeMode,
   ViewMode,
 } from '../../types/schedule';
 import { getCursorSpring } from '../../utils/p5Motion';
@@ -18,6 +19,9 @@ interface ScheduleToolbarProps {
   viewMode: ViewMode;
   onChangeViewMode: (mode: ViewMode) => void;
   onAddLesson: () => void;
+  scheduleScopeMode?: ScheduleScopeMode;
+  focusedTeacherName?: string | null;
+  onClearTeacherScope?: () => void;
 }
 
 export function ScheduleToolbar({
@@ -29,6 +33,9 @@ export function ScheduleToolbar({
   viewMode,
   onChangeViewMode,
   onAddLesson,
+  scheduleScopeMode = 'group',
+  focusedTeacherName = null,
+  onClearTeacherScope,
 }: ScheduleToolbarProps) {
   const reduced = useReducedMotion();
   const cursorSpring = getCursorSpring(reduced);
@@ -57,15 +64,38 @@ export function ScheduleToolbar({
       aria-label="Панель управления расписанием"
       className="flex flex-wrap items-center justify-between gap-2.5"
     >
-      {/* Left: Groups */}
-      <GroupSwitcher
-        selectedGroup={selectedGroup}
-        onSelectGroup={onSelectGroup}
-      />
+      {/* Left: Groups or Teacher Scope Pill */}
+      <div className="flex flex-wrap items-center gap-2">
+        <GroupSwitcher
+          selectedGroup={selectedGroup}
+          onSelectGroup={onSelectGroup}
+        />
+
+        {scheduleScopeMode === 'teacher' && focusedTeacherName && (
+          <div className="p5-skew inline-flex items-center border-2 border-[#050505] bg-[#FFE600] px-2.5 py-1 text-[#050505] shadow-[3px_3px_0_#E60012]">
+            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+              <UserCheck className="h-3.5 w-3.5 text-[#E60012]" />
+              <span>УЧИТЕЛЬ: {focusedTeacherName}</span>
+              {onClearTeacherScope && (
+                <button
+                  type="button"
+                  onClick={onClearTeacherScope}
+                  title="Вернуться к расписанию группы"
+                  aria-label="Выйти из режима преподавателя"
+                  className="ml-1 inline-flex items-center gap-0.5 bg-[#050505] px-1.5 py-0.5 text-[10px] text-white transition-colors hover:bg-[#E60012]"
+                >
+                  <X className="h-3 w-3" />
+                  <span>К ГРУППЕ</span>
+                </button>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Right: Advisor Indicator + View Mode Switcher + Add Lesson CTA */}
       <div className="flex flex-wrap items-center gap-2">
-        {activeGroupInfo?.advisor && (
+        {scheduleScopeMode === 'group' && activeGroupInfo?.advisor && (
           <div className="p5-skew border-2 border-white bg-[#060606] px-2.5 py-1 shadow-[3px_3px_0_#050505]">
             <div className="p5-unskew flex items-center gap-1.5 text-xs">
               <UserCheck className="h-3.5 w-3.5 shrink-0 text-[#E60012]" />

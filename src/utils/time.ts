@@ -4,7 +4,9 @@ import type {
   DayPhase,
   EffectiveLesson,
   GroupFilter,
+  ScheduleScopeMode,
 } from '../types/schedule';
+import { getNoteSeverity } from './links';
 
 const JS_WEEKDAY_TO_DAY: Record<number, DayOfWeek | null> = {
   0: null, // Sunday
@@ -22,6 +24,15 @@ export function parseTimeToMinutes(hhmm: string): number {
   const m = Number.parseInt(mStr ?? '0', 10);
   if (Number.isNaN(h) || Number.isNaN(m)) return 0;
   return h * 60 + m;
+}
+
+export function formatLessonDuration(
+  startTime: string,
+  endTime: string
+): string | null {
+  const diff = parseTimeToMinutes(endTime) - parseTimeToMinutes(startTime);
+  if (diff <= 0) return null;
+  return `${diff} МИН`;
 }
 
 export function getTimeParts(hhmm: string): { hours: number; minutes: number } {
@@ -106,6 +117,14 @@ export interface LiveHudState {
   nextSlot: NextHudSlot | null;
 }
 
+export function isDisputedSaturdayLesson(lesson: EffectiveLesson): boolean {
+  if (lesson.day !== 'SATURDAY' || lesson.isOnline) return false;
+  return (
+    getNoteSeverity(lesson.notes) === 'warning' ||
+    Boolean(lesson.notes?.toLowerCase().includes('satur_comments'))
+  );
+}
+
 export function filterLessonsByGroup(
   lessons: EffectiveLesson[],
   selectedGroup: GroupFilter
@@ -114,15 +133,41 @@ export function filterLessonsByGroup(
   return lessons.filter((ls) => ls.groupIds.includes(selectedGroup));
 }
 
+export function filterLessonsByScope(
+  lessons: EffectiveLesson[],
+  selectedGroup: GroupFilter,
+  scopeMode: ScheduleScopeMode = 'group',
+  focusedTeacherId: string | null = null
+): EffectiveLesson[] {
+  if (scopeMode === 'teacher' && focusedTeacherId) {
+    return lessons.filter(
+      (ls) =>
+        ls.teacherId === focusedTeacherId ||
+        ls.teacherIds.includes(focusedTeacherId) ||
+        ls.pinnedSubgroupTeacherId === focusedTeacherId
+    );
+  }
+  return filterLessonsByGroup(lessons, selectedGroup);
+}
+
 export function computeLiveHudState(
   now: Date,
   allLessons: EffectiveLesson[],
-  selectedGroup: GroupFilter
+  selectedGroup: GroupFilter,
+  scope?: {
+    scopeMode?: ScheduleScopeMode;
+    focusedTeacherId?: string | null;
+  }
 ): LiveHudState {
   const phase = getDayPhase(now);
   const todayDay = getWeekdayOrSunday(now);
   const isSunday = todayDay === 'SUNDAY';
-  const filtered = filterLessonsByGroup(allLessons, selectedGroup);
+  const filtered = filterLessonsByScope(
+    allLessons,
+    selectedGroup,
+    scope?.scopeMode ?? 'group',
+    scope?.focusedTeacherId ?? null
+  );
 
   const nowTotalSeconds =
     now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();

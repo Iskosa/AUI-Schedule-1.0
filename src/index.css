@@ -116,6 +116,10 @@ body {
   clip-path: polygon(5% 5%, 100% 0%, 94% 94%, 0% 100%);
 }
 
+.p5-clip-pause-cursor {
+  clip-path: polygon(2% 8%, 100% 0%, 97% 92%, 0% 100%);
+}
+
 .p5-halftone {
   background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
   background-size: 12px 12px;
@@ -204,6 +208,19 @@ body {
 .p5-star-spin {
   animation: p5-star-spin 56s linear infinite;
   will-change: transform;
+}
+
+.p5-reduce-motion .p5-star-spin {
+  animation: none !important;
+}
+
+.p5-reduce-motion *,
+.p5-reduce-motion *::before,
+.p5-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

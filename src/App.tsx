@@ -1,18 +1,26 @@
-import { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  useReducedMotion,
+} from 'framer-motion';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { BackupModal } from './components/common/BackupModal';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
 import { P5TransitionSlash } from './components/common/P5TransitionSlash';
 import { AppShell } from './components/layout/AppShell';
 import { LiveHudBar } from './components/layout/LiveHudBar';
+import { P5MenuOverlay } from './components/layout/P5MenuOverlay';
 import { DayView } from './components/schedule/DayView';
 import { LessonDetailModal } from './components/schedule/LessonDetailModal';
 import { LessonEditorModal } from './components/schedule/LessonEditorModal';
 import { ScheduleToolbar } from './components/schedule/ScheduleToolbar';
 import { WeekView } from './components/schedule/WeekView';
+import { SettingsView } from './components/settings/SettingsView';
 import { TeacherEditorModal } from './components/teachers/TeacherEditorModal';
 import { TeachersView } from './components/teachers/TeachersView';
+import { DAYS, TARGET_GROUPS } from './constants/schedule';
 import { useLiveClock } from './hooks/useLiveClock';
 import {
   useScheduleStore,
@@ -35,7 +43,12 @@ import {
   playSwitch,
   toggleSfx,
 } from './utils/p5Sound';
-import { computeLiveHudState, getWeekdayOrSunday } from './utils/time';
+import {
+  computeLiveHudState,
+  filterLessonsByGroup,
+  getDefaultStudyDay,
+  getWeekdayOrSunday,
+} from './utils/time';
 
 type ConfirmState =
   | { kind: 'deleteLesson'; lesson: EffectiveLesson }
@@ -46,13 +59,18 @@ type ConfirmState =
 export default function App() {
   const store = useScheduleStore();
   const now = useLiveClock(1000);
-  const reduced = useReducedMotion();
+  const systemReduced = useReducedMotion();
+  const reduced = store.reduceMotion || systemReduced;
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('schedule');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [slashId, setSlashId] = useState(0);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(
     null
   );
+  const [lastCreatedTeacherId, setLastCreatedTeacherId] = useState<
+    string | null
+  >(null);
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(() => isSfxEnabled());
 
   const [detailLessonId, setDetailLessonId] = useState<string | null>(null);
@@ -79,6 +97,13 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
+    document.documentElement.classList.toggle(
+      'p5-reduce-motion',
+      store.reduceMotion
+    );
+  }, [store.reduceMotion]);
+
+  useEffect(() => {
     if (!toast) return;
     const id = window.setTimeout(() => setToast(null), 2600);
     return () => window.clearTimeout(id);
@@ -98,39 +123,85 @@ export default function App() {
     ? store.lessons.find((ls) => ls.id === detailLessonId) ?? null
     : null;
 
-  const triggerSlash = () => {
+  const focusedTeacherName = store.focusedTeacherId
+    ? store.teachersById[store.focusedTeacherId]?.name ?? null
+    : null;
+
+  const streamStats = useMemo(() => {
+    const scoped = filterLessonsByGroup(store.allLessons, store.selectedGroup);
+    const bySubject = new Map<string, EffectiveLesson[]>();
+    for (const ls of scoped) {
+      const sgs = ls.baseSubgroups ?? ls.subgroups;
+      if (!sgs || sgs.length === 0) continue;
+      const key = ls.subject.trim().toLowerCase();
+      const arr = bySubject.get(key) ?? [];
+      arr.push(ls);
+      bySubject.set(key, arr);
+    }
+    let pinnedCount = 0;
+    for (const groupLessons of bySubject.values()) {
+      if (groupLessons.some((ls) => Boolean(ls.pinnedSubgroupTeacherId))) {
+        pinnedCount += 1;
+      }
+    }
+    return {
+      total: bySubject.size,
+      pinned: pinnedCount,
+    };
+  }, [store.allLessons, store.selectedGroup]);
+
+  const triggerSlash = useCallback(() => {
     setSlashId((n) => n + 1);
-  };
+  }, []);
 
   const handleToggleSfx = () => {
     setSfxEnabled(toggleSfx());
   };
 
-  const handleTabChange = (tab: ActiveTab) => {
-    if (tab !== activeTab) {
-      playSwitch();
-      triggerSlash();
-    }
-    setActiveTab(tab);
-  };
+  const handleTabChange = useCallback(
+    (tab: ActiveTab) => {
+      if (tab !== activeTab) {
+        playSwitch();
+        triggerSlash();
+      }
+      setActiveTab(tab);
+    },
+    [activeTab, triggerSlash]
+  );
 
-  const handleSelectGroup = (group: GroupFilter) => {
-    if (group !== store.selectedGroup) {
-      playSwitch();
-      triggerSlash();
-    }
-    store.setSelectedGroup(group);
-  };
+  const handleSelectGroup = useCallback(
+    (group: GroupFilter) => {
+      if (group !== store.selectedGroup || store.scheduleScopeMode !== 'group') {
+        playSwitch();
+        triggerSlash();
+      }
+      store.setSelectedGroup(group);
+    },
+    [store, triggerSlash]
+  );
 
   const handleChangeViewMode = (mode: ViewMode) => {
     if (mode !== store.viewMode) playSwitch();
     store.setViewMode(mode);
   };
 
-  const handleSelectDay = (day: DayOfWeek) => {
-    if (day !== store.selectedDay) playSwitch();
-    store.setSelectedDay(day);
-  };
+  const handleSelectDay = useCallback(
+    (day: DayOfWeek) => {
+      if (day !== store.selectedDay) playSwitch();
+      store.setSelectedDay(day);
+    },
+    [store]
+  );
+
+  const handleJumpToToday = useCallback(() => {
+    const studyToday = getDefaultStudyDay(now);
+    playSwitch();
+    store.setSelectedDay(studyToday);
+    if (activeTab !== 'schedule') {
+      triggerSlash();
+      setActiveTab('schedule');
+    }
+  }, [activeTab, now, store, triggerSlash]);
 
   const handleSelectTeacher = (teacherId: string | null) => {
     if (teacherId) {
@@ -181,6 +252,7 @@ export default function App() {
     } else {
       const created = store.addTeacher(draft);
       setSelectedTeacherId(created.id);
+      setLastCreatedTeacherId(created.id);
       setToast('Преподаватель добавлен');
     }
     setTeacherEditorState((prev) => ({ ...prev, open: false }));
@@ -218,6 +290,90 @@ export default function App() {
     playConfirm();
     setConfirmState(null);
   };
+
+  // Global desktop keyboard shortcuts: Esc (Pause Menu), 1-4 (Groups), ArrowLeft/Right (Days)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isEditable = Boolean(
+        target &&
+          (target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable)
+      );
+      if (isEditable) return;
+
+      const hasOpenModal = Boolean(
+        detailLessonId ||
+          lessonEditorState.open ||
+          teacherEditorState.open ||
+          backupOpen ||
+          confirmState
+      );
+
+      if (e.key === 'Escape') {
+        if (hasOpenModal) return;
+        e.preventDefault();
+        setMenuOpen((prev) => {
+          const next = !prev;
+          if (next) {
+            playOpen();
+          } else {
+            playCancel();
+          }
+          return next;
+        });
+        return;
+      }
+
+      if (menuOpen || hasOpenModal || e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+
+      if (e.key >= '1' && e.key <= '4') {
+        const idx = Number(e.key) - 1;
+        const targetGroup = TARGET_GROUPS[idx];
+        if (!targetGroup) return;
+        e.preventDefault();
+        if (activeTab !== 'schedule') {
+          setActiveTab('schedule');
+          triggerSlash();
+        }
+        handleSelectGroup(targetGroup);
+        return;
+      }
+
+      if (
+        (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
+        activeTab === 'schedule' &&
+        store.viewMode === 'day'
+      ) {
+        e.preventDefault();
+        const currIdx = DAYS.indexOf(store.selectedDay);
+        const safeIdx = currIdx === -1 ? 0 : currIdx;
+        const delta = e.key === 'ArrowRight' ? 1 : -1;
+        const nextDay = DAYS[(safeIdx + delta + DAYS.length) % DAYS.length];
+        handleSelectDay(nextDay);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [
+    activeTab,
+    backupOpen,
+    confirmState,
+    detailLessonId,
+    handleSelectDay,
+    handleSelectGroup,
+    lessonEditorState.open,
+    menuOpen,
+    store.selectedDay,
+    store.viewMode,
+    teacherEditorState.open,
+    triggerSlash,
+  ]);
 
   if (store.loading && !store.baseData) {
     return (
@@ -259,12 +415,12 @@ export default function App() {
   }
 
   const todayDay = getWeekdayOrSunday(now);
-  const scheduleContentKey = `${store.selectedGroup}-${store.viewMode}-${
-    store.viewMode === 'day' ? store.selectedDay : 'week'
-  }`;
+  const scheduleContentKey = `${store.selectedGroup}-${store.scheduleScopeMode}-${
+    store.focusedTeacherId ?? 'none'
+  }-${store.viewMode}-${store.viewMode === 'day' ? store.selectedDay : 'week'}`;
 
   return (
-    <>
+    <MotionConfig reducedMotion={store.reduceMotion ? 'always' : 'user'}>
       <P5TransitionSlash slashId={slashId} />
 
       <AppShell
@@ -275,9 +431,10 @@ export default function App() {
         overlayChangeCount={store.overlayChangeCount}
         sfxEnabled={sfxEnabled}
         onToggleSfx={handleToggleSfx}
-        onOpenBackup={() => {
+        menuOpen={menuOpen}
+        onOpenMenu={() => {
           playOpen();
-          setBackupOpen(true);
+          setMenuOpen(true);
         }}
         hud={
           <LiveHudBar
@@ -286,7 +443,11 @@ export default function App() {
             selectedGroup={store.selectedGroup}
             selectedDay={store.selectedDay}
             viewMode={store.viewMode}
+            showSelectedDayChip={activeTab === 'schedule'}
+            scopeMode={store.scheduleScopeMode}
+            focusedTeacherId={store.focusedTeacherId}
             onSelectLesson={handleOpenLessonDetail}
+            onJumpToToday={handleJumpToToday}
           />
         }
       >
@@ -300,6 +461,13 @@ export default function App() {
               onOpenTeacher={handleOpenTeacher}
               viewMode={store.viewMode}
               onChangeViewMode={handleChangeViewMode}
+              scheduleScopeMode={store.scheduleScopeMode}
+              focusedTeacherName={focusedTeacherName}
+              onClearTeacherScope={() => {
+                playSwitch();
+                triggerSlash();
+                store.setScheduleScopeMode('group');
+              }}
               onAddLesson={() => {
                 playOpen();
                 setLessonEditorState({
@@ -318,7 +486,16 @@ export default function App() {
                   onSelectDay={handleSelectDay}
                   lessons={store.lessons}
                   selectedGroup={store.selectedGroup}
+                  scopeMode={store.scheduleScopeMode}
+                  focusedTeacherId={store.focusedTeacherId}
                   saturdayNotes={store.baseData?.meta.saturdayNotes ?? []}
+                  saturdayNotesCollapsed={store.saturdayNotesCollapsed}
+                  onToggleSaturdayNotes={() => {
+                    playSwitch();
+                    store.setSaturdayNotesCollapsed(
+                      !store.saturdayNotesCollapsed
+                    );
+                  }}
                   currentLessonIds={currentLessonIds}
                   onSelectLesson={handleOpenLessonDetail}
                   onAddLessonForDay={(day) => {
@@ -334,6 +511,8 @@ export default function App() {
                 <WeekView
                   lessons={store.lessons}
                   selectedGroup={store.selectedGroup}
+                  scopeMode={store.scheduleScopeMode}
+                  focusedTeacherId={store.focusedTeacherId}
                   todayDay={todayDay}
                   currentLessonIds={currentLessonIds}
                   onSelectLesson={handleOpenLessonDetail}
@@ -346,7 +525,7 @@ export default function App() {
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'teachers' ? (
           <div key="tab-teachers">
             <TeachersView
               teachers={store.teachers}
@@ -372,8 +551,129 @@ export default function App() {
               onSelectLesson={handleOpenLessonDetail}
             />
           </div>
+        ) : (
+          <div key="tab-settings">
+            <SettingsView
+              selectedGroup={store.selectedGroup}
+              defaultGroup={store.defaultGroup}
+              defaultViewMode={store.defaultViewMode ?? store.viewMode}
+              hideSaturdayConflicts={store.hideSaturdayConflicts}
+              sfxEnabled={sfxEnabled}
+              reduceMotion={store.reduceMotion}
+              scheduleScopeMode={store.scheduleScopeMode}
+              focusedTeacherId={store.focusedTeacherId}
+              allLessons={store.allLessons}
+              teachers={store.teachers}
+              teachersById={store.teachersById}
+              groups={store.baseData?.groups ?? []}
+              subjectTeacherOverrides={store.subjectTeacherOverrides}
+              lastCreatedTeacherId={lastCreatedTeacherId}
+              onSetDefaultGroup={(group) => {
+                playConfirm();
+                store.setDefaultGroup(group);
+                setToast(`Группа по умолчанию: ${group === 'ALL' ? 'ВСЕ' : group}`);
+              }}
+              onSetDefaultViewMode={(mode) => {
+                playConfirm();
+                store.setDefaultViewMode(mode);
+                setToast(
+                  `Вид по умолчанию: ${mode === 'day' ? 'День' : 'Неделя'}`
+                );
+              }}
+              onSetHideSaturdayConflicts={(hide) => {
+                playSwitch();
+                store.setHideSaturdayConflicts(hide);
+                setToast(
+                  hide
+                    ? 'Спорные субботние очные пары скрыты'
+                    : 'Спорные субботние очные пары снова показаны'
+                );
+              }}
+              onToggleSfx={handleToggleSfx}
+              onSetReduceMotion={(enabled) => {
+                playSwitch();
+                store.setReduceMotion(enabled);
+                setToast(
+                  enabled
+                    ? 'Анимации уменьшены'
+                    : 'Полная кинетика P5R включена'
+                );
+              }}
+              onSetSubjectPinnedSubgroup={(subject, teacherId) => {
+                playConfirm();
+                store.setSubjectPinnedSubgroup(subject, teacherId);
+                setToast(
+                  teacherId
+                    ? `Преподаватель закреплён для «${subject}»`
+                    : `Закрепление для «${subject}» сброшено`
+                );
+              }}
+              onSetSubjectTeacherOverride={(subject, teacherId) => {
+                playConfirm();
+                store.setSubjectTeacherOverride(subject, teacherId);
+                setToast(
+                  teacherId
+                    ? `Преподаватель для «${subject}» переопределён`
+                    : `Переопределение для «${subject}» снято`
+                );
+              }}
+              onSetScheduleScopeMode={(mode, teacherId) => {
+                playSwitch();
+                store.setScheduleScopeMode(mode, teacherId);
+              }}
+              onAddTeacher={() => {
+                playOpen();
+                setTeacherEditorState({ open: true, editingTeacher: null });
+              }}
+              onBackToSchedule={() => handleTabChange('schedule')}
+            />
+          </div>
         )}
       </AppShell>
+
+      <P5MenuOverlay
+        open={menuOpen}
+        onClose={() => {
+          playCancel();
+          setMenuOpen(false);
+        }}
+        activeTab={activeTab}
+        selectedGroup={store.selectedGroup}
+        scheduleScopeMode={store.scheduleScopeMode}
+        focusedTeacherName={focusedTeacherName}
+        teacherCount={store.teachers.length}
+        pinnedSubjectsCount={streamStats.pinned}
+        totalStreamSubjectsCount={streamStats.total}
+        overrideCount={Object.keys(store.subjectTeacherOverrides).length}
+        overlayChangeCount={store.overlayChangeCount}
+        hideSaturdayConflicts={store.hideSaturdayConflicts}
+        sfxEnabled={sfxEnabled}
+        onToggleSfx={handleToggleSfx}
+        onSelectSchedule={() => {
+          setMenuOpen(false);
+          handleTabChange('schedule');
+        }}
+        onSelectTeachers={() => {
+          setMenuOpen(false);
+          handleTabChange('teachers');
+        }}
+        onSelectSettings={() => {
+          setMenuOpen(false);
+          handleTabChange('settings');
+        }}
+        onAddLesson={() => {
+          setMenuOpen(false);
+          setLessonEditorState({
+            open: true,
+            editingLesson: null,
+            defaultDay: store.selectedDay,
+          });
+        }}
+        onOpenBackup={() => {
+          setMenuOpen(false);
+          setBackupOpen(true);
+        }}
+      />
 
       <LessonDetailModal
         lesson={detailLesson}
@@ -412,7 +712,7 @@ export default function App() {
         }
         teachers={store.teachers}
         teachersById={store.teachersById}
-        existingLessons={store.lessons}
+        existingLessons={store.allLessons}
         onClose={() => {
           playCancel();
           setLessonEditorState((prev) => ({ ...prev, open: false }));
@@ -508,6 +808,6 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </MotionConfig>
   );
 }

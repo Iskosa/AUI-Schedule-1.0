@@ -11,7 +11,8 @@ export type GroupFilter = GroupId | 'ALL';
 export type LessonType = 'regular' | 'fixed' | 'elective' | 'advisor';
 export type DayPhase = 'MORNING' | 'LUNCHTIME' | 'AFTERNOON' | 'EVENING';
 export type ViewMode = 'day' | 'week';
-export type ActiveTab = 'schedule' | 'teachers';
+export type ActiveTab = 'schedule' | 'teachers' | 'settings';
+export type ScheduleScopeMode = 'group' | 'teacher';
 
 export interface OfficeHour {
   day: DayOfWeek;
@@ -63,6 +64,8 @@ export interface EffectiveLesson extends Lesson {
   isBase: boolean;
   isModified: boolean;
   pinnedSubgroupTeacherId: string | null;
+  teacherOverrideApplied?: boolean;
+  baseSubgroups?: Subgroup[];
 }
 
 export interface GroupInfo {
@@ -107,6 +110,13 @@ export interface OverlaySettings {
   selectedGroup: GroupFilter;
   viewMode?: ViewMode;
   selectedDay?: DayOfWeek;
+  defaultGroup?: GroupFilter;
+  defaultViewMode?: ViewMode;
+  hideSaturdayConflicts?: boolean;
+  reduceMotion?: boolean;
+  saturdayNotesCollapsed?: boolean;
+  scheduleScopeMode?: ScheduleScopeMode;
+  focusedTeacherId?: string | null;
 }
 
 export interface ScheduleOverlay {
@@ -120,6 +130,7 @@ export interface ScheduleOverlay {
   editedLessons: Record<string, LessonPatch>;
   deletedLessonIds: string[];
   pinnedSubgroups: Record<string, string>;
+  subjectTeacherOverrides?: Record<string, string>;
 }
 
 export interface ConflictItem {

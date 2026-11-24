@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
-import { CalendarDays, Database, Users, Volume2, VolumeX } from 'lucide-react';
+import { CalendarDays, Menu, Users, Volume2, VolumeX } from 'lucide-react';
 import type { ActiveTab } from '../../types/schedule';
 import { getCursorSpring, getTapPressProps } from '../../utils/p5Motion';
 import { RansomTitle } from '../common/RansomTitle';
@@ -13,7 +13,8 @@ interface AppShellProps {
   overlayChangeCount: number;
   sfxEnabled: boolean;
   onToggleSfx: () => void;
-  onOpenBackup: () => void;
+  onOpenMenu: () => void;
+  menuOpen: boolean;
   hud: ReactNode;
   children: ReactNode;
 }
@@ -26,7 +27,8 @@ export function AppShell({
   overlayChangeCount,
   sfxEnabled,
   onToggleSfx,
-  onOpenBackup,
+  onOpenMenu,
+  menuOpen,
   hud,
   children,
 }: AppShellProps) {
@@ -68,14 +70,8 @@ export function AppShell({
           />
 
           {/* Sharp crimson shard piercing the bottom-left black field */}
-          <polygon
-            points="0,680 230,900 0,900"
-            fill="#D90012"
-          />
-          <polygon
-            points="0,785 115,900 0,900"
-            fill="#050505"
-          />
+          <polygon points="0,680 230,900 0,900" fill="#D90012" />
+          <polygon points="0,785 115,900 0,900" fill="#050505" />
 
           {/* Crisp stark white comic cut-in seam along the main diagonal split */}
           <polyline
@@ -204,7 +200,7 @@ export function AppShell({
             </nav>
           </LayoutGroup>
 
-          {/* Compact Corner Utilities: SFX & Backup */}
+          {/* Compact SFX indicator + Prominent P5R MENU (ESC) button */}
           <div className="order-2 flex shrink-0 items-center gap-2 sm:order-3">
             <motion.button
               type="button"
@@ -234,15 +230,23 @@ export function AppShell({
 
             <motion.button
               type="button"
-              onClick={onOpenBackup}
-              title="Бэкап / Сброс данных"
-              aria-label="Бэкап и сброс данных"
+              onClick={onOpenMenu}
+              aria-expanded={menuOpen}
+              aria-haspopup="dialog"
+              title="Открыть меню паузы (ESC)"
               {...tapProps}
-              className="p5-skew relative flex h-8 w-8 items-center justify-center border-2 border-white bg-[#050505] text-white shadow-[2px_2px_0_#E60012] transition-colors hover:bg-white hover:text-[#050505]"
+              className="p5-skew relative flex h-8 items-center justify-center border-2 border-white bg-[#E60012] px-3 text-white shadow-[3px_3px_0_#050505] transition-colors hover:bg-white hover:text-[#050505]"
             >
-              <span className="p5-unskew block">
-                <Database className="h-3.5 w-3.5" />
+              <span className="p5-unskew inline-flex items-center gap-1.5">
+                <Menu className="h-3.5 w-3.5 shrink-0" />
+                <span className="font-display text-xs uppercase leading-none tracking-wider">
+                  MENU
+                </span>
+                <span className="hidden bg-[#050505] px-1 py-0.5 font-condensed text-[9px] font-bold leading-none text-white sm:inline-block">
+                  ESC
+                </span>
               </span>
+
               {overlayChangeCount > 0 && (
                 <span className="p5-unskew absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center border border-[#050505] bg-[#FFE600] px-1 font-condensed text-[9px] font-bold leading-none text-[#050505]">
                   {overlayChangeCount}
