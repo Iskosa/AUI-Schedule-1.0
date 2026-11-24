@@ -20,6 +20,7 @@ import type {
   GroupId,
 } from '../../types/schedule';
 import { NotesWithLinks } from '../common/NotesWithLinks';
+import { RansomTitle } from '../common/RansomTitle';
 
 interface TeacherDetailPanelProps {
   teacher: EffectiveTeacher | null;
@@ -40,8 +41,17 @@ export function TeacherDetailPanel({
 }: TeacherDetailPanelProps) {
   if (!teacher) {
     return (
-      <div className="flex h-full min-h-[300px] items-center justify-center rounded-2xl border border-dashed border-[#252e42] bg-[#121620]/60 p-6 text-center text-sm text-slate-400">
-        Выберите преподавателя из списка слева, чтобы увидеть пары, группы и Office Hours.
+      <div className="p5-confidant-bg p5-shadow flex h-full min-h-[300px] flex-col items-center justify-center gap-3 border-2 border-white p-6 text-center">
+        <div className="p5-skew border-2 border-white bg-[#E60012] px-4 py-1.5 shadow-[4px_4px_0_#0D0D0D]">
+          <span className="p5-unskew inline-flex items-center gap-2 font-display text-sm uppercase tracking-wider text-white">
+            <span className="text-[#FFE600]">★</span>
+            <span>CONFIDANT DOSSIER</span>
+            <span className="text-[#FFE600]">★</span>
+          </span>
+        </div>
+        <p className="max-w-md font-condensed text-sm font-bold uppercase tracking-wider text-neutral-200">
+          Выберите преподавателя из списка слева, чтобы увидеть пары, группы и Office Hours.
+        </p>
       </div>
     );
   }
@@ -65,223 +75,284 @@ export function TeacherDetailPanel({
     )
   );
 
-  return (
-    <div className="space-y-4 rounded-2xl border border-[#252e42] bg-[#121620] p-4 sm:p-5">
-      {onBackToList && (
-        <button
-          type="button"
-          onClick={onBackToList}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#252e42] bg-[#1a2030] px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 lg:hidden"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          К списку преподавателей
-        </button>
-      )}
+  const filledStars = Math.min(5, teacherLessons.length);
 
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#252e42] pb-4">
-        <div className="min-w-0">
+  return (
+    <div className="p5-shadow overflow-x-clip border-2 border-white border-t-[6px] border-t-[#E60012] bg-[#0D0D0D]">
+      {/* Confidant Hero Header */}
+      <div className="p5-confidant-bg space-y-3 border-b-2 border-white p-4 sm:p-5">
+        {onBackToList && (
+          <button
+            type="button"
+            onClick={onBackToList}
+            className="p5-skew p5-shadow-sm inline-block border-2 border-[#0D0D0D] bg-white px-3 py-1.5 text-[#0D0D0D] transition hover:bg-[#FFE600] lg:hidden"
+          >
+            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>К списку преподавателей</span>
+            </span>
+          </button>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="break-words text-xl font-bold text-white">
-              {teacher.name}
-            </h2>
-            {teacher.isCustom && (
-              <span className="rounded border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-300">
-                Добавлен вручную
+            <span className="p5-skew border-2 border-[#0D0D0D] bg-white px-2.5 py-0.5 text-[#0D0D0D] shadow-[3px_3px_0_#E60012]">
+              <span className="p5-unskew block font-condensed text-xs font-bold uppercase tracking-widest">
+                CONFIDANT
               </span>
-            )}
-            {teacher.isModified && (
-              <span className="rounded border border-amber-500/35 bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-300">
-                Изменён
+            </span>
+            <div
+              className="flex items-center gap-1 border-2 border-white bg-[#0D0D0D] px-2 py-0.5"
+              aria-label={`Нагрузка: ${teacherLessons.length} пар в неделю`}
+            >
+              <span className="text-sm leading-none tracking-tight">
+                {[1, 2, 3, 4, 5].map((idx) => (
+                  <span
+                    key={idx}
+                    className={
+                      idx <= filledStars ? 'text-[#FFE600]' : 'text-white/25'
+                    }
+                  >
+                    {idx <= filledStars ? '★' : '☆'}
+                  </span>
+                ))}
               </span>
-            )}
+            </div>
+            <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#0D0D0D]">
+              {teacherLessons.length} ПАР/НЕД
+            </span>
           </div>
 
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-slate-400" />
-              Кабинет: <strong className="font-mono text-white">{teacher.room || 'Не указан'}</strong>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onEdit(teacher)}
+              className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-3 py-1.5 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
+            >
+              <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                <Pencil className="h-3.5 w-3.5 text-[#FFE600]" />
+                <span>Редактировать</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(teacher)}
+              className="p5-skew p5-shadow-sm border-2 border-white bg-[#E60012] px-3 py-1.5 text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
+            >
+              <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{teacher.isCustom ? 'Удалить' : 'Скрыть'}</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <RansomTitle text={teacher.name} as="h2" size="lg" />
+
+          {(teacher.isCustom || teacher.isModified) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {teacher.isCustom && (
+                <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#0D0D0D]">
+                  Добавлен вручную
+                </span>
+              )}
+              {teacher.isModified && (
+                <span className="border-2 border-white bg-[#0D0D0D] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+                  Изменён локально
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-neutral-200">
+            <span className="inline-flex items-center gap-1.5 border border-white/40 bg-[#0D0D0D] px-2 py-1">
+              <MapPin className="h-3.5 w-3.5 text-[#E60012]" />
+              <span className="font-condensed font-bold uppercase tracking-wider text-neutral-300">
+                Кабинет:
+              </span>
+              <strong className="font-condensed text-sm font-bold uppercase text-[#FFE600]">
+                {teacher.room || 'Не указан'}
+              </strong>
             </span>
+
             {lessonRooms.length > 0 && (
-              <span className="text-slate-400">
-                Аудитории на парах:{' '}
-                <strong className="font-mono text-slate-200">
+              <span className="inline-flex items-center gap-1.5 border border-white/40 bg-[#0D0D0D] px-2 py-1">
+                <span className="font-condensed font-bold uppercase tracking-wider text-neutral-300">
+                  Аудитории:
+                </span>
+                <strong className="font-condensed text-xs font-bold uppercase text-white">
                   {lessonRooms.join(', ')}
                 </strong>
               </span>
             )}
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onEdit(teacher)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[#252e42] bg-[#1a2030] px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:border-blue-500/40 hover:bg-[#222a3f]"
-          >
-            <Pencil className="h-3.5 w-3.5 text-blue-400" />
-            Редактировать
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(teacher)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            {teacher.isCustom ? 'Удалить' : 'Скрыть'}
-          </button>
-        </div>
       </div>
 
-      {/* Courses & Groups */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-[#252e42] bg-[#1a2030]/50 p-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-            <BookOpen className="h-3.5 w-3.5" />
-            Предметы
+      {/* Confidant Dossier Body */}
+      <div className="space-y-4 p-4 sm:p-5">
+        {/* Office Hours */}
+        <div
+          className={`p5-shadow-sm border-2 bg-[#161616] p-3.5 ${
+            teacher.officeHours.length > 0
+              ? 'border-[#FFE600]'
+              : 'border-white/30'
+          }`}
+        >
+          <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+            <Clock className="h-3.5 w-3.5" />
+            <span>Office Hours ({teacher.officeHours.length})</span>
           </div>
-          {teacher.courses.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {teacher.courses.map((course, idx) => (
-                <span
-                  key={`${course}-${idx}`}
-                  className="rounded-lg border border-[#252e42] bg-[#121620] px-2.5 py-1 text-xs text-slate-200"
+          {teacher.officeHours.length > 0 ? (
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {teacher.officeHours.map((oh, idx) => (
+                <div
+                  key={`${oh.day}-${oh.startTime}-${idx}`}
+                  className="border-2 border-[#0D0D0D] bg-[#FFE600] px-3 py-1 font-condensed text-xs font-bold uppercase tracking-wide text-[#0D0D0D] shadow-[3px_3px_0_#E60012]"
                 >
-                  {course}
-                </span>
+                  <span>{DAY_LABELS_RU[oh.day]}</span>{' '}
+                  <span className="tabular-nums">
+                    {oh.startTime}–{oh.endTime}
+                  </span>
+                  {oh.room && <span className="ml-1.5">({oh.room})</span>}
+                </div>
               ))}
             </div>
           ) : (
-            <p className="mt-2 text-xs text-slate-500">Предметы не указаны</p>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-[#252e42] bg-[#1a2030]/50 p-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-            <Users className="h-3.5 w-3.5" />
-            Группы (из 4 целевых)
-          </div>
-          {taughtGroups.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {taughtGroups.map((gid) => (
-                <span
-                  key={gid}
-                  className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${GROUP_BADGE_STYLES[gid]}`}
-                >
-                  {gid}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-2 text-xs text-slate-500">
-              В расписании 4 целевых групп пар нет
+            <p className="mt-2 text-xs text-neutral-400">
+              Office Hours не указаны
             </p>
           )}
         </div>
-      </div>
 
-      {/* Office Hours */}
-      <div className="rounded-xl border border-[#252e42] bg-[#1a2030]/50 p-3.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-          <Clock className="h-3.5 w-3.5 text-amber-400" />
-          Office Hours ({teacher.officeHours.length})
-        </div>
-        {teacher.officeHours.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {teacher.officeHours.map((oh, idx) => (
-              <div
-                key={`${oh.day}-${oh.startTime}-${idx}`}
-                className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-100"
-              >
-                <span className="font-semibold">{DAY_LABELS_RU[oh.day]}</span>{' '}
-                <span className="font-mono text-amber-200">
-                  {oh.startTime}–{oh.endTime}
-                </span>
-                {oh.room && (
-                  <span className="ml-1.5 font-mono text-amber-300">({oh.room})</span>
-                )}
+        {/* Courses & Groups */}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="p5-shadow-sm border-2 border-white bg-[#161616] p-3.5">
+            <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>Предметы</span>
+            </div>
+            {teacher.courses.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {teacher.courses.map((course, idx) => (
+                  <span
+                    key={`${course}-${idx}`}
+                    className="border border-white/60 bg-[#0D0D0D] px-2.5 py-1 text-xs font-semibold text-white"
+                  >
+                    {course}
+                  </span>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p className="mt-2 text-xs text-neutral-400">
+                Предметы не указаны
+              </p>
+            )}
           </div>
-        ) : (
-          <p className="mt-2 text-xs text-slate-500">Office Hours не указаны</p>
-        )}
-      </div>
 
-      {/* Teacher Notes */}
-      {teacher.notes && <NotesWithLinks notes={teacher.notes} />}
-
-      {/* Lessons of this teacher */}
-      <div className="space-y-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-          <CalendarDays className="h-3.5 w-3.5" />
-          Пары в расписании ({teacherLessons.length})
+          <div className="p5-shadow-sm border-2 border-white bg-[#161616] p-3.5">
+            <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+              <Users className="h-3.5 w-3.5" />
+              <span>Группы (из 4 целевых)</span>
+            </div>
+            {taughtGroups.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {taughtGroups.map((gid) => (
+                  <span
+                    key={gid}
+                    className={`px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider ${GROUP_BADGE_STYLES[gid]}`}
+                  >
+                    {gid}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-neutral-400">
+                В расписании 4 целевых групп пар нет
+              </p>
+            )}
+          </div>
         </div>
 
-        {teacherLessons.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[#252e42] p-4 text-center text-xs text-slate-500">
-            У этого преподавателя нет пар среди 4 целевых групп.
+        {/* Teacher Notes */}
+        {teacher.notes && <NotesWithLinks notes={teacher.notes} />}
+
+        {/* Lessons of this teacher */}
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-white">
+            <CalendarDays className="h-3.5 w-3.5 text-[#E60012]" />
+            <span>Пары в расписании ({teacherLessons.length})</span>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {teacherLessons.map((ls) => {
-              const mySubgroup = ls.subgroups?.find(
-                (sg) => sg.teacherId === teacher.id
-              );
-              const effectiveRoom = mySubgroup?.room || ls.room;
-              const isStream = ls.teacherIds.length > 1;
 
-              return (
-                <button
-                  key={ls.id}
-                  type="button"
-                  onClick={() => onSelectLesson(ls)}
-                  className="flex w-full flex-col gap-1.5 rounded-xl border border-[#252e42] bg-[#151a26] p-3 text-left transition hover:border-blue-500/50 hover:bg-[#192030]"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-semibold text-blue-300">
-                      {DAY_LABELS_RU[ls.day]} • {ls.startTime}–{ls.endTime}
-                    </span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {isStream && (
-                        <span className="rounded border border-amber-500/35 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200">
-                          Потоковая / подгруппа
-                        </span>
-                      )}
-                      {ls.isOnline && (
-                        <span className="inline-flex items-center gap-1 rounded border border-cyan-500/35 bg-cyan-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-300">
-                          <Globe className="h-2.5 w-2.5" />
-                          ONLINE
-                        </span>
-                      )}
-                      {effectiveRoom && (
-                        <span className="inline-flex items-center gap-1 rounded bg-[#1a2030] px-1.5 py-0.5 font-mono text-[11px] text-slate-200">
-                          <MapPin className="h-2.5 w-2.5 text-slate-400" />
-                          {effectiveRoom}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+          {teacherLessons.length === 0 ? (
+            <div className="border-2 border-dashed border-white/30 bg-[#161616] p-4 text-center font-condensed text-xs font-bold uppercase tracking-wider text-neutral-400">
+              У этого преподавателя нет пар среди 4 целевых групп.
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {teacherLessons.map((ls) => {
+                const mySubgroup = ls.subgroups?.find(
+                  (sg) => sg.teacherId === teacher.id
+                );
+                const effectiveRoom = mySubgroup?.room || ls.room;
+                const isStream = ls.teacherIds.length > 1;
 
-                  <div className="text-sm font-semibold text-white">
-                    {ls.subject}
-                  </div>
-
-                  <div className="flex flex-wrap gap-1">
-                    {ls.groupIds.map((gid) => (
-                      <span
-                        key={gid}
-                        className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${GROUP_BADGE_STYLES[gid]}`}
-                      >
-                        {gid}
+                return (
+                  <button
+                    key={ls.id}
+                    type="button"
+                    onClick={() => onSelectLesson(ls)}
+                    className="group p5-shadow-sm flex w-full flex-col gap-2 border-2 border-white bg-[#161616] p-3 text-left transition hover:-translate-y-0.5 hover:bg-[#E60012]"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="p5-skew inline-block border-2 border-[#0D0D0D] bg-white px-2.5 py-0.5 text-[#0D0D0D]">
+                        <span className="p5-unskew block font-condensed text-xs font-bold uppercase tabular-nums tracking-wider">
+                          {DAY_LABELS_RU[ls.day]} • {ls.startTime}–{ls.endTime}
+                        </span>
                       </span>
-                    ))}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {isStream && (
+                          <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
+                            ПОТОК / ПОДГРУППА
+                          </span>
+                        )}
+                        {ls.isOnline && (
+                          <span className="inline-flex items-center gap-1 border-2 border-[#0D0D0D] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
+                            <Globe className="h-2.5 w-2.5" />
+                            ONLINE
+                          </span>
+                        )}
+                        {effectiveRoom && (
+                          <span className="inline-flex items-center gap-1 border border-white/60 bg-[#0D0D0D] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase text-[#FFE600]">
+                            <MapPin className="h-2.5 w-2.5" />
+                            {effectiveRoom}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="font-display text-sm uppercase tracking-wide text-white">
+                      {ls.subject}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {ls.groupIds.map((gid) => (
+                        <span
+                          key={gid}
+                          className={`px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider ${GROUP_BADGE_STYLES[gid]}`}
+                        >
+                          {gid}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

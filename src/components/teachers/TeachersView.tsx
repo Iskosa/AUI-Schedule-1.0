@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Plus, Search, X } from 'lucide-react';
 import type { EffectiveLesson, EffectiveTeacher } from '../../types/schedule';
+import {
+  getPanelMotionProps,
+  getStaggerContainerVariants,
+  getStaggerItemVariants,
+} from '../../utils/p5Motion';
+import { playSwitch } from '../../utils/p5Sound';
+import { RansomTitle } from '../common/RansomTitle';
 import { TeacherCard } from './TeacherCard';
 import { TeacherDetailPanel } from './TeacherDetailPanel';
 
@@ -29,6 +37,11 @@ export function TeachersView({
 }: TeachersViewProps) {
   const [query, setQuery] = useState('');
   const [onlyTargetGroups, setOnlyTargetGroups] = useState(false);
+
+  const reduced = useReducedMotion();
+  const panelMotion = getPanelMotionProps(reduced);
+  const containerVariants = getStaggerContainerVariants(reduced);
+  const itemVariants = getStaggerItemVariants(reduced);
 
   const lessonCountsByTeacher = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -66,63 +79,87 @@ export function TeachersView({
 
   return (
     <div className="space-y-4">
-      {/* Top Filter & Search Bar */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-[#252e42] bg-[#121620] p-3.5 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute top-2.5 left-3.5 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по имени преподавателя, предмету или кабинету..."
-            className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] py-2 pr-9 pl-10 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label="Очистить поиск"
-              className="absolute top-2 right-2.5 rounded p-0.5 text-slate-400 hover:bg-slate-800 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+      {/* Confidants Top Search & Filter Bar */}
+      <div className="p5-confidant-bg p5-shadow space-y-3 border-2 border-white border-l-[6px] border-l-[#E60012] p-3.5 sm:p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <RansomTitle text="CONFIDANTS" as="h2" size="md" />
+            <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#0D0D0D]">
+              ПРЕПОДАВАТЕЛИ • {filteredTeachers.length} / {teachers.length}
+            </span>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-xl border border-[#252e42] bg-[#0b0d12] p-1">
-            <button
-              type="button"
-              onClick={() => setOnlyTargetGroups(false)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                !onlyTargetGroups
-                  ? 'bg-[#1a2030] text-white ring-1 ring-blue-500/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Все ({teachers.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setOnlyTargetGroups(true)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                onlyTargetGroups
-                  ? 'bg-[#1a2030] text-white ring-1 ring-blue-500/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Наши 4 группы ({targetCount})
-            </button>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute top-2.5 left-3.5 h-4 w-4 text-white" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Поиск по имени преподавателя, предмету или кабинету..."
+              className="p5-input w-full py-2 pr-9 pl-10 text-sm placeholder-neutral-400"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="Очистить поиск"
+                className="absolute top-2 right-2 border border-white/40 bg-[#161616] p-1 text-white transition hover:border-[#FFE600] hover:bg-[#E60012]"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
-          <button
-            type="button"
-            onClick={onAddTeacher}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-blue-500 sm:text-sm"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Добавить преподавателя</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="inline-flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (onlyTargetGroups) playSwitch();
+                  setOnlyTargetGroups(false);
+                }}
+                className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition ${
+                  !onlyTargetGroups
+                    ? '-translate-y-0.5 border-white bg-[#E60012] text-white'
+                    : 'border-white bg-[#0D0D0D] text-white hover:border-[#FFE600] hover:text-[#FFE600]'
+                }`}
+              >
+                <span className="p5-unskew block font-condensed text-xs font-bold uppercase tracking-wider">
+                  Все ({teachers.length})
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!onlyTargetGroups) playSwitch();
+                  setOnlyTargetGroups(true);
+                }}
+                className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition ${
+                  onlyTargetGroups
+                    ? '-translate-y-0.5 border-white bg-[#E60012] text-white'
+                    : 'border-white bg-[#0D0D0D] text-white hover:border-[#FFE600] hover:text-[#FFE600]'
+                }`}
+              >
+                <span className="p5-unskew block font-condensed text-xs font-bold uppercase tracking-wider">
+                  Наши 4 группы ({targetCount})
+                </span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={onAddTeacher}
+              className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            >
+              <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+                <Plus className="h-4 w-4" />
+                <span>Добавить преподавателя</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -135,21 +172,28 @@ export function TeachersView({
           }`}
         >
           {filteredTeachers.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#252e42] bg-[#121620]/60 p-8 text-center text-sm text-slate-400">
+            <div className="p5-shadow border-2 border-dashed border-white/40 bg-[#161616] p-8 text-center font-condensed text-sm font-bold uppercase tracking-wider text-neutral-300">
               По запросу ничего не найдено.
             </div>
           ) : (
-            <div className="max-h-[70vh] space-y-2 overflow-y-auto pr-1">
+            <motion.div
+              key={onlyTargetGroups ? 'target-only' : 'all-teachers'}
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="max-h-[70vh] space-y-2.5 overflow-x-clip overflow-y-auto px-1.5 py-1"
+            >
               {filteredTeachers.map((teacher) => (
-                <TeacherCard
-                  key={teacher.id}
-                  teacher={teacher}
-                  lessonCount={lessonCountsByTeacher[teacher.id] ?? 0}
-                  isSelected={activeTeacher?.id === teacher.id}
-                  onSelect={() => onSelectTeacher(teacher.id)}
-                />
+                <motion.div key={teacher.id} variants={itemVariants}>
+                  <TeacherCard
+                    teacher={teacher}
+                    lessonCount={lessonCountsByTeacher[teacher.id] ?? 0}
+                    isSelected={activeTeacher?.id === teacher.id}
+                    onSelect={() => onSelectTeacher(teacher.id)}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
 
@@ -159,14 +203,21 @@ export function TeachersView({
             activeTeacher ? 'block' : 'hidden lg:block'
           }`}
         >
-          <TeacherDetailPanel
-            teacher={activeTeacher}
-            lessons={lessons}
-            onBackToList={() => onSelectTeacher(null)}
-            onEdit={onEditTeacher}
-            onDelete={onDeleteTeacher}
-            onSelectLesson={onSelectLesson}
-          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTeacher?.id ?? 'empty'}
+              {...panelMotion}
+            >
+              <TeacherDetailPanel
+                teacher={activeTeacher}
+                lessons={lessons}
+                onBackToList={() => onSelectTeacher(null)}
+                onEdit={onEditTeacher}
+                onDelete={onDeleteTeacher}
+                onSelectLesson={onSelectLesson}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

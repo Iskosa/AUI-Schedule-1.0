@@ -8,68 +8,107 @@ interface TeacherCardProps {
   onSelect: () => void;
 }
 
+function formatLessonCountLabel(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${count} ПАРА`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return `${count} ПАРЫ`;
+  }
+  return `${count} ПАР`;
+}
+
 export function TeacherCard({
   teacher,
   lessonCount,
   isSelected,
   onSelect,
 }: TeacherCardProps) {
+  const filledStars = Math.min(5, lessonCount);
+
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full rounded-xl border p-3.5 text-left transition ${
+      className={`p5-skew w-full border-2 text-left transition duration-150 ${
         isSelected
-          ? 'border-blue-500 bg-blue-600/15 ring-1 ring-blue-500/30'
-          : 'border-[#252e42] bg-[#151a26] hover:border-slate-500 hover:bg-[#192030]'
+          ? '-translate-y-0.5 border-[#FFE600] bg-[#E60012] text-white shadow-[5px_5px_0_#FFE600]'
+          : 'p5-shadow-sm border-white bg-[#0D0D0D] text-white hover:-translate-y-0.5 hover:border-[#FFE600] hover:bg-[#161616]'
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <h3 className="break-words text-sm font-semibold text-white">
-              {teacher.name}
-            </h3>
-            {teacher.isCustom && (
-              <span className="rounded border border-emerald-500/35 bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
-                Свой
-              </span>
+      <div className="p5-unskew space-y-2 p-3 sm:p-3.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h3 className="break-words font-display text-sm uppercase tracking-wide text-white">
+                {teacher.name}
+              </h3>
+              {teacher.isCustom && (
+                <span className="border border-[#0D0D0D] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
+                  СВОЙ
+                </span>
+              )}
+              {teacher.isModified && (
+                <span className="border border-white bg-[#161616] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#FFE600]">
+                  ИЗМ.
+                </span>
+              )}
+            </div>
+
+            {teacher.room && (
+              <div className="mt-1 inline-flex items-center gap-1 border border-white/40 bg-[#161616] px-1.5 py-0.5 font-condensed text-[11px] font-bold uppercase text-[#FFE600]">
+                <MapPin className="h-3 w-3 shrink-0" />
+                <span>{teacher.room}</span>
+              </div>
             )}
-            {teacher.isModified && (
-              <span className="rounded border border-amber-500/35 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
-                Изм.
+          </div>
+
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            {/* P5R Confidant Rank Stars */}
+            <div
+              className="flex items-center gap-1 border border-white/40 bg-[#161616] px-1.5 py-0.5"
+              aria-label={`Нагрузка: ${lessonCount} пар в неделю`}
+            >
+              <span className="inline-flex items-center text-xs leading-none tracking-tight">
+                {[1, 2, 3, 4, 5].map((idx) => (
+                  <span
+                    key={idx}
+                    className={
+                      idx <= filledStars ? 'text-[#FFE600]' : 'text-white/25'
+                    }
+                  >
+                    {idx <= filledStars ? '★' : '☆'}
+                  </span>
+                ))}
+              </span>
+              <span className="font-condensed text-[10px] font-bold uppercase tracking-wider text-white">
+                {formatLessonCountLabel(lessonCount)}
+              </span>
+              {lessonCount >= 5 && (
+                <span className="bg-[#FFE600] px-1 font-condensed text-[9px] font-bold uppercase leading-tight text-[#0D0D0D]">
+                  MAX
+                </span>
+              )}
+            </div>
+
+            {teacher.officeHours.length > 0 && (
+              <span className="inline-flex items-center gap-1 border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span>OFFICE HOURS · {teacher.officeHours.length}</span>
               </span>
             )}
           </div>
-          {teacher.room && (
-            <div className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-slate-400">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span>{teacher.room}</span>
-            </div>
-          )}
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-1 text-[11px]">
-          <span className="rounded-md bg-[#1a2030] px-2 py-0.5 font-semibold text-slate-200">
-            {lessonCount} {lessonCount === 1 ? 'пара' : lessonCount >= 2 && lessonCount <= 4 ? 'пары' : 'пар'}
-          </span>
-          {teacher.officeHours.length > 0 && (
-            <span className="inline-flex items-center gap-1 text-amber-300">
-              <Clock className="h-3 w-3" />
-              OH: {teacher.officeHours.length}
+        {teacher.courses.length > 0 && (
+          <div className="flex items-start gap-1.5 border-t border-white/15 pt-1.5 text-xs text-neutral-300">
+            <BookOpen className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#FFE600]" />
+            <span className="line-clamp-2 break-words">
+              {teacher.courses.join(' · ')}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-      {teacher.courses.length > 0 && (
-        <div className="mt-2 flex items-start gap-1.5 text-xs text-slate-400">
-          <BookOpen className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
-          <span className="line-clamp-2 break-words">
-            {teacher.courses.join(' · ')}
-          </span>
-        </div>
-      )}
     </button>
   );
 }

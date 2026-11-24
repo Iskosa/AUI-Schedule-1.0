@@ -62,10 +62,10 @@ export const GROUP_LABELS: Record<GroupId, string> = {
 };
 
 export const GROUP_BADGE_STYLES: Record<GroupId, string> = {
-  COMSE26B: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
-  COMSE26A: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-  COMSEH26: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  COMCIF26: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  COMSE26B: 'bg-[#0D0D0D] text-white border-2 border-white',
+  COMSE26A: 'bg-[#E60012] text-white border-2 border-white',
+  COMSEH26: 'bg-white text-[#0D0D0D] border-2 border-[#0D0D0D]',
+  COMCIF26: 'bg-[#FFE600] text-[#0D0D0D] border-2 border-[#0D0D0D]',
 };
 
 export const LESSON_TYPE_LABELS: Record<LessonType, string> = {
@@ -76,10 +76,10 @@ export const LESSON_TYPE_LABELS: Record<LessonType, string> = {
 };
 
 export const LESSON_TYPE_STYLES: Record<LessonType, string> = {
-  regular: 'bg-slate-700/60 text-slate-200 border-slate-600/70',
-  fixed: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  elective: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-  advisor: 'bg-yellow-400/15 text-yellow-200 border-yellow-400/30',
+  regular: 'bg-[#0D0D0D] text-white border-2 border-white',
+  fixed: 'bg-white text-[#0D0D0D] border-2 border-[#0D0D0D]',
+  elective: 'bg-[#E60012] text-white border-2 border-white',
+  advisor: 'bg-[#FFE600] text-[#0D0D0D] border-2 border-[#0D0D0D]',
 };
 
 export const DAY_PHASE_LABELS: Record<DayPhase, { label: string; style: string }> = {

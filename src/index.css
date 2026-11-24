@@ -133,3 +133,42 @@ body {
 .p5-drop-shadow-red {
   filter: drop-shadow(4px 4px 0 #E60012);
 }
+
+.p5-input {
+  border-radius: 0;
+  border: 2px solid var(--p5-white);
+  background-color: var(--p5-black);
+  color: var(--p5-white);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.p5-input:focus {
+  border-color: var(--p5-yellow);
+  box-shadow: 3px 3px 0 var(--p5-yellow);
+  outline: none;
+}
+
+.p5-confidant-bg {
+  background-color: var(--p5-black);
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.08) 1.25px, transparent 1.25px),
+    repeating-linear-gradient(
+      -24deg,
+      rgba(230, 0, 18, 0.24) 0px,
+      rgba(230, 0, 18, 0.24) 18px,
+      rgba(13, 13, 13, 0.92) 18px,
+      rgba(13, 13, 13, 0.92) 42px
+    );
+  background-size: 10px 10px, auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

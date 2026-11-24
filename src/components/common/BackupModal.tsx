@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { Download, RefreshCw, RotateCcw, Upload } from 'lucide-react';
 import type { ScheduleOverlay } from '../../types/schedule';
+import { playConfirm } from '../../utils/p5Sound';
 import { Modal } from './Modal';
 
 interface BackupModalProps {
@@ -38,6 +39,7 @@ export function BackupModal({
       const text = await file.text();
       const result = onImport(text);
       if (result.ok) {
+        playConfirm();
         setStatusMessage({
           type: 'success',
           text: `Резервная копия «${file.name}» успешно импортирована.`,
@@ -46,7 +48,10 @@ export function BackupModal({
         setStatusMessage({ type: 'error', text: result.error });
       }
     } catch {
-      setStatusMessage({ type: 'error', text: 'Ошибка чтения выбранного файла.' });
+      setStatusMessage({
+        type: 'error',
+        text: 'Ошибка чтения выбранного файла.',
+      });
     } finally {
       e.target.value = '';
     }
@@ -57,6 +62,7 @@ export function BackupModal({
     setStatusMessage(null);
     try {
       await onReloadBase();
+      playConfirm();
       setStatusMessage({
         type: 'success',
         text: 'Базовый schedule.json перезагружен; ваши локальные правки сохранены.',
@@ -75,60 +81,69 @@ export function BackupModal({
       maxWidthClass="max-w-lg"
     >
       <div className="space-y-4">
-        <div className="rounded-xl border border-[#252e42] bg-[#1a2030]/70 p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-200">
+        <div className="p5-shadow-sm border-2 border-white bg-[#161616] p-4">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-condensed text-sm font-bold uppercase tracking-wider text-white">
               Активные изменения в overlay
             </span>
-            <span className="rounded-full bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-300">
+            <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-2.5 py-0.5 font-condensed text-xs font-bold text-[#0D0D0D]">
               {changeCount}
             </span>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-400">
+          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/20 pt-3 text-xs text-neutral-300">
             <div>Добавлено пар: {overlay.addedLessons.length}</div>
             <div>Изменено пар: {Object.keys(overlay.editedLessons).length}</div>
             <div>Скрыто пар: {overlay.deletedLessonIds.length}</div>
-            <div>Закреплено подгрупп: {Object.keys(overlay.pinnedSubgroups).length}</div>
+            <div>
+              Закреплено подгрупп: {Object.keys(overlay.pinnedSubgroups).length}
+            </div>
             <div>Своих преподавателей: {overlay.customTeachers.length}</div>
-            <div>Изменено преподав.: {Object.keys(overlay.editedTeachers).length}</div>
+            <div>
+              Изменено преподав.: {Object.keys(overlay.editedTeachers).length}
+            </div>
           </div>
         </div>
 
         {statusMessage && (
           <div
-            className={`rounded-lg border px-3.5 py-2.5 text-sm ${
+            className={`p5-shadow-sm border-2 px-3.5 py-2.5 text-sm font-semibold ${
               statusMessage.type === 'success'
-                ? 'border-emerald-500/35 bg-emerald-500/10 text-emerald-200'
-                : 'border-rose-500/35 bg-rose-500/10 text-rose-200'
+                ? 'border-[#FFE600] bg-[#161616] text-[#FFE600]'
+                : 'border-white bg-[#E60012] text-white'
             }`}
           >
             {statusMessage.text}
           </div>
         )}
 
-        <div className="grid gap-2.5 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => {
               onExport();
+              playConfirm();
               setStatusMessage({
                 type: 'success',
                 text: 'Файл резервной копии JSON скачан.',
               });
             }}
-            className="flex items-center justify-center gap-2 rounded-xl border border-[#252e42] bg-[#1a2030] px-4 py-2.5 text-sm font-medium text-slate-100 transition hover:border-blue-500/40 hover:bg-[#222a3f]"
+            className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2.5 text-[#0D0D0D] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
-            <Download className="h-4 w-4 text-blue-400" />
-            Экспорт JSON
+            <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
+              <Download className="h-4 w-4" />
+              <span>Экспорт JSON</span>
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-2 rounded-xl border border-[#252e42] bg-[#1a2030] px-4 py-2.5 text-sm font-medium text-slate-100 transition hover:border-emerald-500/40 hover:bg-[#222a3f]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2.5 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
-            <Upload className="h-4 w-4 text-emerald-400" />
-            Импорт JSON
+            <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
+              <Upload className="h-4 w-4 text-[#FFE600]" />
+              <span>Импорт JSON</span>
+            </span>
           </button>
           <input
             ref={fileInputRef}
@@ -139,24 +154,30 @@ export function BackupModal({
           />
         </div>
 
-        <div className="flex flex-col gap-2.5 border-t border-[#252e42] pt-3 sm:flex-row sm:justify-between">
+        <div className="flex flex-col gap-2.5 border-t-2 border-white/20 pt-3 sm:flex-row sm:justify-between">
           <button
             type="button"
             disabled={reloading}
             onClick={() => void handleReload()}
-            className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/70 px-3.5 py-2 text-xs font-medium text-slate-200 transition hover:bg-slate-700 disabled:opacity-50"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-3.5 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600] disabled:opacity-50"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${reloading ? 'animate-spin' : ''}`} />
-            Обновить base schedule.json
+            <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-xs font-bold uppercase tracking-wider">
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${reloading ? 'animate-spin' : ''}`}
+              />
+              <span>Обновить base schedule.json</span>
+            </span>
           </button>
 
           <button
             type="button"
             onClick={onRequestReset}
-            className="flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#E60012] px-3.5 py-2 text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Сбросить к данным из Excel
+            <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-xs font-bold uppercase tracking-wider">
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Сбросить к данным из Excel</span>
+            </span>
           </button>
         </div>
       </div>

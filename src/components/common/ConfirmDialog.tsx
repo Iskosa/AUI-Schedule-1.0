@@ -25,28 +25,32 @@ export function ConfirmDialog({
   return (
     <Modal open={open} onClose={onCancel} title={title} maxWidthClass="max-w-md">
       <div className="space-y-4">
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-sm text-amber-100">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+        <div className="p5-shadow-sm flex items-start gap-3 border-2 border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#161616] p-3.5 text-sm text-white">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#FFE600]" />
           <p className="leading-relaxed">{message}</p>
         </div>
-        <div className="flex flex-wrap justify-end gap-2.5">
+        <div className="flex flex-wrap justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-slate-700 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
-            {cancelLabel}
+            <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
+              {cancelLabel}
+            </span>
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${
+            className={`p5-skew border-2 px-4 py-2 transition hover:-translate-y-0.5 ${
               danger
-                ? 'bg-rose-600 hover:bg-rose-500'
-                : 'bg-blue-600 hover:bg-blue-500'
+                ? 'border-white bg-[#E60012] text-white shadow-[4px_4px_0_#FFE600] hover:bg-white hover:text-[#0D0D0D]'
+                : 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D] shadow-[4px_4px_0_#E60012] hover:border-white hover:bg-[#E60012] hover:text-white'
             }`}
           >
-            {confirmLabel}
+            <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
+              {confirmLabel}
+            </span>
           </button>
         </div>
       </div>

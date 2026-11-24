@@ -63,54 +63,50 @@ export function LessonDetailModal({
         {/* Badges row */}
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${
-              LESSON_TYPE_STYLES[lesson.type]
-            }`}
+            className={`px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider ${LESSON_TYPE_STYLES[lesson.type]}`}
           >
             {LESSON_TYPE_LABELS[lesson.type]}
           </span>
           {lesson.isOnline && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-cyan-500/35 bg-cyan-500/15 px-2 py-0.5 text-xs font-semibold text-cyan-300">
+            <span className="inline-flex items-center gap-1 border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#0D0D0D]">
               <Globe className="h-3.5 w-3.5" />
-              Online
+              ONLINE
             </span>
           )}
           {lesson.isCustom && (
-            <span className="rounded-md border border-emerald-500/35 bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-300">
+            <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#0D0D0D]">
               Добавлена вручную
             </span>
           )}
           {lesson.isModified && (
-            <span className="rounded-md border border-amber-500/35 bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-300">
+            <span className="border-2 border-white bg-[#161616] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
               Изменена локально
             </span>
           )}
         </div>
 
         {/* Time & Groups */}
-        <div className="grid gap-3 rounded-xl border border-[#252e42] bg-[#1a2030]/60 p-3.5 sm:grid-cols-2">
+        <div className="p5-shadow-sm grid gap-3 border-2 border-white bg-[#161616] p-3.5 sm:grid-cols-2">
           <div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
               <Clock className="h-3.5 w-3.5" />
-              Время и день
+              <span>Время и день</span>
             </div>
-            <div className="mt-1 text-sm font-semibold text-slate-100">
+            <div className="mt-1 font-condensed text-base font-bold uppercase tracking-wide text-white">
               {DAY_LABELS_RU[lesson.day]}, {lesson.startTime}–{lesson.endTime}
             </div>
           </div>
 
           <div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
               <Users className="h-3.5 w-3.5" />
-              Группы
+              <span>Группы</span>
             </div>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {lesson.groupIds.map((gid) => (
                 <span
                   key={gid}
-                  className={`rounded border px-2 py-0.5 text-xs font-semibold ${
-                    GROUP_BADGE_STYLES[gid]
-                  }`}
+                  className={`px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider ${GROUP_BADGE_STYLES[gid]}`}
                 >
                   {gid}
                 </span>
@@ -123,14 +119,14 @@ export function LessonDetailModal({
         {hasSubgroups ? (
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+              <h3 className="font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
                 Потоки / подгруппы ({lesson.subgroups!.length})
               </h3>
-              <span className="text-[11px] text-slate-400">
-                Можно закрепить «мою подгруппу» в localStorage
+              <span className="text-[11px] text-neutral-300">
+                Закрепите свою подгруппу (localStorage)
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {lesson.subgroups!.map((sg, idx) => {
                 const isPinned =
                   Boolean(sg.teacherId) &&
@@ -142,10 +138,10 @@ export function LessonDetailModal({
                 return (
                   <div
                     key={`${sg.teacherId ?? sg.teacherName}-${idx}`}
-                    className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 transition ${
+                    className={`p5-shadow-sm flex flex-wrap items-center justify-between gap-2.5 border-2 px-3.5 py-2.5 transition ${
                       isPinned
-                        ? 'border-blue-500/50 bg-blue-500/10'
-                        : 'border-[#252e42] bg-[#1a2030]/50'
+                        ? 'border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#161616]'
+                        : 'border-white/70 bg-[#161616]'
                     }`}
                   >
                     <div className="min-w-0">
@@ -153,28 +149,25 @@ export function LessonDetailModal({
                         {teacherExists && sg.teacherId ? (
                           <button
                             type="button"
-                            onClick={() => {
-                              onClose();
-                              onOpenTeacher(sg.teacherId!);
-                            }}
-                            className="text-left text-sm font-semibold text-blue-300 underline decoration-blue-400/40 underline-offset-2 transition hover:text-blue-200"
+                            onClick={() => onOpenTeacher(sg.teacherId!)}
+                            className="text-left text-sm font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 transition hover:text-white"
                           >
                             {sg.teacherName}
                           </button>
                         ) : (
-                          <span className="text-sm font-semibold text-slate-100">
+                          <span className="text-sm font-bold text-white">
                             {sg.teacherName}
                           </span>
                         )}
                         {isPinned && (
-                          <span className="rounded bg-blue-600/30 px-1.5 py-0.5 text-[10px] font-bold text-blue-200">
-                            МОЯ ПОДГРУППА
+                          <span className="border border-[#0D0D0D] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
+                            ★ МОЯ ПОДГРУППА
                           </span>
                         )}
                       </div>
                       {sg.room && (
-                        <div className="mt-0.5 flex items-center gap-1 font-mono text-xs text-slate-300">
-                          <MapPin className="h-3 w-3 text-slate-400" />
+                        <div className="mt-1 inline-flex items-center gap-1 border border-white/40 bg-[#0D0D0D] px-1.5 py-0.5 font-condensed text-xs font-bold uppercase text-[#FFE600]">
+                          <MapPin className="h-3 w-3" />
                           <span>{sg.room}</span>
                         </div>
                       )}
@@ -183,24 +176,28 @@ export function LessonDetailModal({
                     {sg.teacherId && (
                       <button
                         type="button"
-                        onClick={() => onTogglePinSubgroup(lesson.id, sg.teacherId!)}
-                        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
+                        onClick={() =>
+                          onTogglePinSubgroup(lesson.id, sg.teacherId!)
+                        }
+                        className={`p5-skew border-2 px-3 py-1.5 transition hover:-translate-y-0.5 ${
                           isPinned
-                            ? 'border-blue-400/50 bg-blue-600 text-white hover:bg-blue-500'
-                            : 'border-[#252e42] bg-[#121620] text-slate-300 hover:border-blue-500/40 hover:text-white'
+                            ? 'border-white bg-[#E60012] text-white shadow-[3px_3px_0_#0D0D0D] hover:bg-white hover:text-[#0D0D0D]'
+                            : 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D] shadow-[3px_3px_0_#E60012] hover:border-white hover:bg-[#E60012] hover:text-white'
                         }`}
                       >
-                        {isPinned ? (
-                          <>
-                            <PinOff className="h-3.5 w-3.5" />
-                            <span>Открепить</span>
-                          </>
-                        ) : (
-                          <>
-                            <Pin className="h-3.5 w-3.5" />
-                            <span>Моя подгруппа</span>
-                          </>
-                        )}
+                        <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                          {isPinned ? (
+                            <>
+                              <PinOff className="h-3.5 w-3.5" />
+                              <span>Открепить</span>
+                            </>
+                          ) : (
+                            <>
+                              <Pin className="h-3.5 w-3.5" />
+                              <span>Моя подгруппа</span>
+                            </>
+                          )}
+                        </span>
                       </button>
                     )}
                   </div>
@@ -209,26 +206,23 @@ export function LessonDetailModal({
             </div>
           </div>
         ) : (
-          <div className="grid gap-3 rounded-xl border border-[#252e42] bg-[#1a2030]/60 p-3.5 sm:grid-cols-2">
+          <div className="p5-shadow-sm grid gap-3 border-2 border-white bg-[#161616] p-3.5 sm:grid-cols-2">
             <div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
                 <User className="h-3.5 w-3.5" />
-                Преподаватель
+                <span>Преподаватель</span>
               </div>
               <div className="mt-1">
                 {singleTeacher ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenTeacher(singleTeacher.id);
-                    }}
-                    className="text-left text-sm font-semibold text-blue-400 underline decoration-blue-400/40 underline-offset-2 transition hover:text-blue-300"
+                    onClick={() => onOpenTeacher(singleTeacher.id)}
+                    className="text-left text-sm font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 transition hover:text-white"
                   >
                     {singleTeacher.name}
                   </button>
                 ) : (
-                  <span className="text-sm font-medium text-slate-200">
+                  <span className="text-sm font-semibold text-white">
                     {lesson.teacherName || 'Не указан'}
                   </span>
                 )}
@@ -236,12 +230,13 @@ export function LessonDetailModal({
             </div>
 
             <div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
                 <MapPin className="h-3.5 w-3.5" />
-                Аудитория
+                <span>Аудитория</span>
               </div>
-              <div className="mt-1 font-mono text-sm font-semibold text-slate-100">
-                {lesson.room || (lesson.isOnline ? 'Online (без аудитории)' : 'Не указана')}
+              <div className="mt-1 font-condensed text-base font-bold uppercase text-white">
+                {lesson.room ||
+                  (lesson.isOnline ? 'Online (без аудитории)' : 'Не указана')}
               </div>
             </div>
           </div>
@@ -250,7 +245,7 @@ export function LessonDetailModal({
         {/* Notes & clickable links */}
         {lesson.notes && (
           <div className="space-y-1.5">
-            <h3 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+            <h3 className="font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
               Заметки и ссылки
             </h3>
             <NotesWithLinks notes={lesson.notes} />
@@ -258,23 +253,27 @@ export function LessonDetailModal({
         )}
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 border-t border-[#252e42] pt-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-white/20 pt-3">
           <button
             type="button"
             onClick={() => onDelete(lesson)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20 sm:text-sm"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#0D0D0D] px-3.5 py-2 text-white transition hover:-translate-y-0.5 hover:bg-[#E60012]"
           >
-            <Trash2 className="h-4 w-4" />
-            <span>{lesson.isBase ? 'Скрыть / удалить' : 'Удалить пару'}</span>
+            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+              <Trash2 className="h-4 w-4 text-[#FFE600]" />
+              <span>{lesson.isBase ? 'Скрыть / удалить' : 'Удалить пару'}</span>
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => onEdit(lesson)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-500 sm:text-sm"
+            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
-            <Pencil className="h-4 w-4" />
-            <span>Редактировать</span>
+            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+              <Pencil className="h-4 w-4" />
+              <span>Редактировать</span>
+            </span>
           </button>
         </div>
       </div>

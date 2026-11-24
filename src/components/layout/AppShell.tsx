@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { CalendarDays, Database, Users } from 'lucide-react';
+import { CalendarDays, Database, Users, Volume2, VolumeX } from 'lucide-react';
 import type { ActiveTab } from '../../types/schedule';
 import { RansomTitle } from '../common/RansomTitle';
 
@@ -9,6 +9,8 @@ interface AppShellProps {
   semester?: string;
   teacherCount: number;
   overlayChangeCount: number;
+  sfxEnabled: boolean;
+  onToggleSfx: () => void;
   onOpenBackup: () => void;
   hud: ReactNode;
   children: ReactNode;
@@ -20,6 +22,8 @@ export function AppShell({
   semester,
   teacherCount,
   overlayChangeCount,
+  sfxEnabled,
+  onToggleSfx,
   onOpenBackup,
   hud,
   children,
@@ -156,6 +160,31 @@ export function AppShell({
                 </span>
               </button>
             </nav>
+
+            <button
+              type="button"
+              onClick={onToggleSfx}
+              aria-pressed={sfxEnabled}
+              aria-label={
+                sfxEnabled
+                  ? 'Выключить звуки интерфейса'
+                  : 'Включить звуки интерфейса'
+              }
+              className={`p5-skew border-2 px-2.5 py-1.5 transition hover:-translate-y-0.5 ${
+                sfxEnabled
+                  ? 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D] shadow-[3px_3px_0_#E60012] hover:border-white hover:bg-[#E60012] hover:text-white'
+                  : 'border-white/80 bg-[#161616] text-neutral-300 shadow-[3px_3px_0_#0D0D0D] hover:border-[#FFE600] hover:text-[#FFE600]'
+              }`}
+            >
+              <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+                {sfxEnabled ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )}
+                <span>{sfxEnabled ? 'SFX ON' : 'SFX OFF'}</span>
+              </span>
+            </button>
 
             <button
               type="button"

@@ -1,6 +1,7 @@
-import { useEffect, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { Fragment, useEffect, type ReactNode } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
+import { getModalMotionProps } from '../../utils/p5Motion';
 
 interface ModalProps {
   open: boolean;
@@ -11,6 +12,39 @@ interface ModalProps {
   children: ReactNode;
 }
 
+function renderDialogueTitle(title: string): ReactNode {
+  const words = title.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return title;
+
+  return words.map((word, wordIdx) => {
+    const chars = Array.from(word);
+    const first = chars[0] ?? '';
+    const rest = chars.slice(1).join('');
+    const highlightFirst = wordIdx === 0;
+    const highlightSecond = wordIdx === 1;
+
+    return (
+      <Fragment key={`${word}-${wordIdx}`}>
+        {wordIdx > 0 && ' '}
+        <span className="inline-block whitespace-nowrap">
+          {highlightFirst ? (
+            <span className="mr-0.5 inline-block -rotate-3 bg-[#E60012] px-1 text-white">
+              {first}
+            </span>
+          ) : highlightSecond ? (
+            <span className="mr-0.5 inline-block rotate-2 bg-[#0D0D0D] px-1 text-[#FFE600]">
+              {first}
+            </span>
+          ) : (
+            first
+          )}
+          {rest}
+        </span>
+      </Fragment>
+    );
+  });
+}
+
 export function Modal({
   open,
   onClose,
@@ -19,6 +53,9 @@ export function Modal({
   maxWidthClass = 'max-w-2xl',
   children,
 }: ModalProps) {
+  const reduced = useReducedMotion();
+  const modalMotion = getModalMotionProps(reduced);
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -32,40 +69,64 @@ export function Modal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/85 p-3 sm:p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: reduced ? 0.08 : 0.14 }}
           onClick={onClose}
         >
+          <div
+            aria-hidden="true"
+            className="p5-halftone-red pointer-events-none absolute inset-0 opacity-60"
+          />
+
           <motion.div
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ duration: 0.18 }}
+            {...modalMotion}
             onClick={(e) => e.stopPropagation()}
-            className={`flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl border border-[#252e42] bg-[#121620] shadow-2xl sm:rounded-2xl ${maxWidthClass}`}
+            className={`relative z-10 flex max-h-[88vh] w-full flex-col ${maxWidthClass}`}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-[#252e42] px-5 py-4">
-              <div className="min-w-0">
-                <h2 className="break-words text-lg font-semibold text-slate-100">{title}</h2>
-                {subtitle && (
-                  <p className="mt-0.5 break-words text-xs text-slate-400">{subtitle}</p>
-                )}
+            {/* Protruding Nameplate + Close Button */}
+            <div className="pointer-events-none relative z-20 -mb-4 flex items-start justify-between gap-2 px-1.5 sm:-mb-5 sm:px-3">
+              <div className="pointer-events-auto min-w-0 max-w-full -rotate-1 border-[3px] border-[#0D0D0D] bg-white px-3 py-1.5 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] sm:px-4 sm:py-2">
+                <h2 className="break-words font-display text-xs uppercase leading-snug tracking-wide sm:text-base">
+                  {renderDialogueTitle(title)}
+                </h2>
               </div>
+
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Закрыть"
-                className="shrink-0 rounded-lg border border-transparent p-1.5 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100"
+                className="pointer-events-auto p5-skew shrink-0 border-[3px] border-white bg-[#E60012] p-1.5 text-white shadow-[3px_3px_0_#0D0D0D] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
               >
-                <X className="h-5 w-5" />
+                <X className="p5-unskew h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
-            <div className="overflow-y-auto px-5 py-4">{children}</div>
+
+            {/* Clipped Dialogue Box */}
+            <div className="p5-drop-shadow-red flex min-h-0 flex-1 flex-col">
+              <div className="p5-clip-modal flex min-h-0 flex-1 flex-col bg-white p-[3px]">
+                <div className="p5-clip-modal flex min-h-0 flex-1 flex-col bg-[#0D0D0D] text-white">
+                  {subtitle ? (
+                    <div className="shrink-0 border-b-2 border-white/20 bg-[#161616] px-4 pt-6 pb-2.5 sm:px-5 sm:pt-7">
+                      <p className="break-words font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+                        {subtitle}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-6 shrink-0 sm:h-7" aria-hidden="true" />
+                  )}
+
+                  <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-6 sm:px-5 sm:pt-5 sm:pb-7">
+                    {children}
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}

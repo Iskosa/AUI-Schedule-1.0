@@ -15,11 +15,13 @@ import {
 } from '../../constants/schedule';
 import type { EffectiveLesson, GroupFilter } from '../../types/schedule';
 import { extractFirstUrl, getNoteSeverity } from '../../utils/links';
+import { playOpen } from '../../utils/p5Sound';
 
 interface LessonCardProps {
   lesson: EffectiveLesson;
   selectedGroup: GroupFilter;
   compact?: boolean;
+  isCurrent?: boolean;
   onClick: () => void;
 }
 
@@ -27,6 +29,7 @@ export function LessonCard({
   lesson,
   selectedGroup,
   compact = false,
+  isCurrent = false,
   onClick,
 }: LessonCardProps) {
   const meetUrl = extractFirstUrl(lesson.notes);
@@ -42,6 +45,12 @@ export function LessonCard({
   const hasSubgroups = Boolean(lesson.subgroups && lesson.subgroups.length > 0);
   const showGroupBadges =
     selectedGroup === 'ALL' || lesson.groupIds.length > 1;
+  const isHighlighted = isCurrent || noteSeverity === 'warning';
+
+  const hasFooter =
+    Boolean(meetUrl) ||
+    noteSeverity !== 'none' ||
+    (!hasSubgroups && Boolean(lesson.notes) && !meetUrl);
 
   return (
     <div
@@ -54,176 +63,227 @@ export function LessonCard({
           onClick();
         }
       }}
-      className={`group cursor-pointer rounded-xl border text-left transition ${
-        noteSeverity === 'warning'
-          ? 'border-amber-500/40 bg-[#171821] hover:border-amber-400/70'
-          : pinnedSubgroup
-            ? 'border-blue-500/40 bg-[#151b2a] hover:border-blue-400/70'
-            : 'border-[#252e42] bg-[#151a26] hover:border-slate-500 hover:bg-[#192030]'
-      } ${compact ? 'p-3' : 'p-4'}`}
+      className={`group relative cursor-pointer text-left transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE600] md:hover:-translate-y-0.5 ${
+        compact ? 'drop-shadow-[3px_3px_0_#0D0D0D]' : 'p5-drop-shadow'
+      }`}
     >
-      {/* Top row: time + type + flags */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
-        <span className="font-mono text-xs font-semibold text-blue-300">
-          {lesson.startTime}–{lesson.endTime}
-        </span>
-
-        <div className="flex flex-wrap items-center gap-1">
-          {lesson.isOnline && (
-            <span className="inline-flex items-center gap-1 rounded border border-cyan-500/35 bg-cyan-500/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-cyan-300">
-              <Globe className="h-2.5 w-2.5" />
-              ONLINE
-            </span>
-          )}
-          <span
-            className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${
-              LESSON_TYPE_STYLES[lesson.type]
-            }`}
-          >
-            {LESSON_TYPE_LABELS[lesson.type]}
-          </span>
-          {(lesson.isCustom || lesson.isModified) && (
-            <span className="rounded border border-emerald-500/35 bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
-              {lesson.isCustom ? 'Своя' : 'Изм.'}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Subject */}
-      <h3
-        className={`mt-2 break-words font-semibold text-slate-100 group-hover:text-white ${
-          compact ? 'text-sm leading-snug' : 'text-base'
-        }`}
+      <div
+        className={`p5-clip-card p-[2px] transition-colors duration-150 sm:p-[3px] ${
+          isHighlighted ? 'bg-[#FFE600]' : 'bg-white'
+        } group-focus-visible:bg-white md:group-hover:bg-white`}
       >
-        {lesson.subject}
-      </h3>
+        <div
+          className={`p5-clip-card relative border-l-[5px] bg-[#161616] text-white transition-colors duration-150 group-focus-visible:bg-[#E60012] md:group-hover:bg-[#E60012] ${
+            isHighlighted
+              ? 'border-l-[#FFE600]'
+              : 'border-l-[#E60012] group-focus-visible:border-l-[#FFE600] md:group-hover:border-l-[#FFE600]'
+          } ${compact ? 'px-2.5 py-2.5' : 'px-4 py-3.5 sm:px-5 sm:py-4'}`}
+        >
+          <div
+            aria-hidden="true"
+            className="p5-halftone pointer-events-none absolute inset-0 opacity-25"
+          />
 
-      {/* Group badges */}
-      {showGroupBadges && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {lesson.groupIds.map((gid) => (
-            <span
-              key={gid}
-              className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${
-                GROUP_BADGE_STYLES[gid]
+          <div className="relative z-10">
+            {/* Top row: skewed time + type + flags */}
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <span
+                className={`p5-skew p5-shadow-sm inline-block border-2 border-[#0D0D0D] ${
+                  isCurrent
+                    ? 'bg-[#FFE600] text-[#0D0D0D]'
+                    : 'bg-white text-[#0D0D0D]'
+                }`}
+              >
+                <span
+                  className={`p5-unskew inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-wider tabular-nums text-[#0D0D0D] ${
+                    compact ? 'px-1.5 py-0.5 text-[11px]' : 'px-2.5 py-0.5 text-xs sm:text-sm'
+                  }`}
+                >
+                  <span>
+                    {lesson.startTime}–{lesson.endTime}
+                  </span>
+                  {isCurrent && (
+                    <span className="bg-[#E60012] px-1 py-0.5 text-[9px] leading-none text-white">
+                      NOW
+                    </span>
+                  )}
+                </span>
+              </span>
+
+              <div className="flex flex-wrap items-center gap-1">
+                {lesson.isOnline && (
+                  <span className="inline-flex items-center gap-1 border-2 border-[#0D0D0D] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
+                    <Globe className="h-2.5 w-2.5" />
+                    ONLINE
+                  </span>
+                )}
+                <span
+                  className={`px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider ${
+                    LESSON_TYPE_STYLES[lesson.type]
+                  } ${
+                    lesson.type === 'elective'
+                      ? 'group-focus-visible:border-[#FFE600] group-focus-visible:bg-[#0D0D0D] group-focus-visible:text-[#FFE600] md:group-hover:border-[#FFE600] md:group-hover:bg-[#0D0D0D] md:group-hover:text-[#FFE600]'
+                      : ''
+                  }`}
+                >
+                  {LESSON_TYPE_LABELS[lesson.type]}
+                </span>
+                {(lesson.isCustom || lesson.isModified) && (
+                  <span className="border-2 border-white bg-[#0D0D0D] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#FFE600]">
+                    {lesson.isCustom ? 'СВОЯ' : 'ИЗМ.'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Subject */}
+            <h3
+              className={`break-words uppercase tracking-wide text-white ${
+                compact
+                  ? 'mt-2 font-condensed text-[13px] font-bold leading-tight'
+                  : 'mt-2.5 font-display text-sm leading-snug sm:text-base'
               }`}
             >
-              {gid}
-            </span>
-          ))}
-        </div>
-      )}
+              {lesson.subject}
+            </h3>
 
-      {/* Teacher / Subgroup / Room */}
-      <div className="mt-2.5 space-y-1.5 text-xs text-slate-300">
-        {pinnedSubgroup ? (
-          <div className="rounded-lg border border-blue-500/35 bg-blue-500/10 px-2.5 py-1.5 text-blue-100">
-            <div className="flex items-center gap-1.5 font-semibold text-blue-300">
-              <Pin className="h-3 w-3 shrink-0" />
-              <span className="truncate">Моя подгруппа</span>
-            </div>
-            <div className="mt-0.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-xs">
-              <span className="font-medium text-white">
-                {pinnedSubgroup.teacherName}
-              </span>
-              {pinnedSubgroup.room && (
-                <span className="inline-flex items-center gap-1 font-mono text-blue-200">
-                  <MapPin className="h-3 w-3 shrink-0" />
-                  {pinnedSubgroup.room}
-                </span>
-              )}
-            </div>
-          </div>
-        ) : hasSubgroups ? (
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-300">
-              <Users className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-              <span className="font-medium">
-                {lesson.subgroups!.length} подгруппы / потока
-              </span>
-            </div>
-            {compact ? (
-              <p className="line-clamp-2 break-words text-[11px] text-slate-400">
-                {lesson.subgroups!
-                  .map((sg) =>
-                    sg.room ? `${sg.teacherName} (${sg.room})` : sg.teacherName
-                  )
-                  .join(' · ')}
-              </p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5 pt-0.5">
-                {lesson.subgroups!.map((sg, idx) => (
+            {/* Group badges */}
+            {showGroupBadges && (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {lesson.groupIds.map((gid) => (
                   <span
-                    key={`${sg.teacherId ?? sg.teacherName}-${idx}`}
-                    className="rounded-md border border-[#252e42] bg-[#1a2030] px-2 py-0.5 text-[11px] text-slate-200"
+                    key={gid}
+                    className={`px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider ${GROUP_BADGE_STYLES[gid]}`}
                   >
-                    {sg.teacherName}
-                    {sg.room ? ` · ${sg.room}` : ''}
+                    {gid}
                   </span>
                 ))}
               </div>
             )}
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            {lesson.teacherName && (
-              <span className="inline-flex min-w-0 items-center gap-1 text-slate-300">
-                <User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                <span className="break-words">{lesson.teacherName}</span>
-              </span>
+
+            {/* Teacher / Subgroup / Room */}
+            <div className="mt-2.5 space-y-1.5 text-xs text-neutral-200 md:group-hover:text-white">
+              {pinnedSubgroup ? (
+                <div className="p5-shadow-sm border-2 border-[#FFE600] border-l-4 border-l-[#E60012] bg-[#0D0D0D] px-2.5 py-1.5 text-white">
+                  <div className="flex items-center gap-1.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-[#FFE600]">
+                    <Pin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">Моя подгруппа</span>
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs">
+                    <span className="font-bold text-white">
+                      {pinnedSubgroup.teacherName}
+                    </span>
+                    {pinnedSubgroup.room && (
+                      <span className="inline-flex items-center gap-1 bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[11px] font-bold uppercase text-[#0D0D0D]">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        {pinnedSubgroup.room}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : hasSubgroups ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-white">
+                    <Users className="h-3.5 w-3.5 shrink-0 text-[#FFE600]" />
+                    <span>{lesson.subgroups!.length} подгруппы / потока</span>
+                  </div>
+                  {compact ? (
+                    <p className="line-clamp-2 break-words text-[11px] leading-snug text-neutral-200 md:group-hover:text-white">
+                      {lesson.subgroups!
+                        .map((sg) =>
+                          sg.room ? `${sg.teacherName} (${sg.room})` : sg.teacherName
+                        )
+                        .join(' · ')}
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {lesson.subgroups!.map((sg, idx) => (
+                        <span
+                          key={`${sg.teacherId ?? sg.teacherName}-${idx}`}
+                          className="border border-white/60 bg-[#0D0D0D] px-2 py-0.5 text-[11px] font-semibold text-white"
+                        >
+                          {sg.teacherName}
+                          {sg.room ? ` · ${sg.room}` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                  {lesson.teacherName && (
+                    <span className="inline-flex min-w-0 items-center gap-1 font-semibold text-white">
+                      <User className="h-3.5 w-3.5 shrink-0 text-[#E60012] transition-colors group-focus-visible:text-[#FFE600] md:group-hover:text-[#FFE600]" />
+                      <span className="break-words">{lesson.teacherName}</span>
+                    </span>
+                  )}
+                  {lesson.room && (
+                    <span className="inline-flex items-center gap-1 border border-white/50 bg-[#0D0D0D] px-1.5 py-0.5 font-condensed text-xs font-bold uppercase text-[#FFE600]">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span>{lesson.room}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Footer: Meet link & note flags */}
+            {hasFooter && (
+              <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t-2 border-white/20 pt-2">
+                {meetUrl && (
+                  <a
+                    href={meetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={meetUrl}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playOpen();
+                    }}
+                    className="p5-skew p5-shadow-sm inline-block border-2 border-[#0D0D0D] bg-[#FFE600] px-2.5 py-0.5 text-[#0D0D0D] transition hover:border-white hover:bg-[#0D0D0D] hover:text-[#FFE600]"
+                  >
+                    <span className="p5-unskew inline-flex items-center gap-1 font-condensed text-[11px] font-bold uppercase tracking-wider">
+                      <span>GOOGLE MEET</span>
+                      <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                    </span>
+                  </a>
+                )}
+
+                {noteSeverity === 'warning' && (
+                  <span className="inline-flex items-center gap-1 border-2 border-[#FFE600] bg-[#0D0D0D] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-[#FFE600]">
+                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                    <span>КОНФЛИКТ СУББОТЫ</span>
+                  </span>
+                )}
+
+                {noteSeverity === 'info' &&
+                  (lesson.notes?.includes('единственное очное') ? (
+                    <span className="inline-flex items-center gap-1 border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wide text-[#0D0D0D]">
+                      <AlertTriangle className="h-3 w-3 shrink-0" />
+                      <span className="line-clamp-1">
+                        {lesson.notes.replace(' (согл. Satur_comments)', '')}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 border-2 border-white bg-[#0D0D0D] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-white">
+                      <Info className="h-3 w-3 shrink-0 text-[#FFE600]" />
+                      <span>WEB-BASED</span>
+                    </span>
+                  ))}
+
+                {noteSeverity === 'none' &&
+                  !hasSubgroups &&
+                  lesson.notes &&
+                  !meetUrl && (
+                    <span className="line-clamp-1 text-[11px] text-neutral-300 md:group-hover:text-white">
+                      {lesson.notes}
+                    </span>
+                  )}
+              </div>
             )}
-            {lesson.room && (
-              <span className="inline-flex items-center gap-1 font-mono text-slate-300">
-                <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                <span>{lesson.room}</span>
-              </span>
-            )}
           </div>
-        )}
-      </div>
-
-      {/* Footer: Meet link & note flags */}
-      {(meetUrl || noteSeverity !== 'none' || (!hasSubgroups && lesson.notes && !meetUrl)) && (
-        <div className="mt-2.5 flex flex-wrap items-center gap-1.5 border-t border-[#252e42]/70 pt-2">
-          {meetUrl && (
-            <a
-              href={meetUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 rounded-md border border-blue-500/40 bg-blue-500/15 px-2 py-0.5 text-[11px] font-semibold text-blue-300 transition hover:bg-blue-500/25"
-            >
-              <span>Google Meet</span>
-              <ExternalLink className="h-2.5 w-2.5" />
-            </a>
-          )}
-
-          {noteSeverity === 'warning' && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/35 bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-300">
-              <AlertTriangle className="h-3 w-3 shrink-0" />
-              <span>Конфликт субботы</span>
-            </span>
-          )}
-
-          {noteSeverity === 'info' && (
-            <span className="inline-flex items-center gap-1 rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] text-sky-300">
-              <Info className="h-3 w-3 shrink-0" />
-              <span className="line-clamp-1">
-                {lesson.notes?.includes('единственное очное')
-                  ? lesson.notes.replace(' (согл. Satur_comments)', '')
-                  : 'Web-based'}
-              </span>
-            </span>
-          )}
-
-          {noteSeverity === 'none' && !hasSubgroups && lesson.notes && !meetUrl && (
-            <span className="line-clamp-1 text-[11px] text-slate-400">
-              {lesson.notes}
-            </span>
-          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

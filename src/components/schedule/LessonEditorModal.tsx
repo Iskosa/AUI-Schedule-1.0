@@ -29,7 +29,10 @@ interface LessonEditorModalProps {
   teachersById: Record<string, EffectiveTeacher>;
   existingLessons: EffectiveLesson[];
   onClose: () => void;
-  onSave: (draft: LessonDraftInput, editingLesson: EffectiveLesson | null) => void;
+  onSave: (
+    draft: LessonDraftInput,
+    editingLesson: EffectiveLesson | null
+  ) => void;
 }
 
 const LESSON_TYPES: LessonType[] = ['regular', 'fixed', 'elective', 'advisor'];
@@ -53,7 +56,9 @@ export function LessonEditorModal({
   const [groupIds, setGroupIds] = useState<GroupId[]>(['COMSE26B']);
   const [teacherIds, setTeacherIds] = useState<string[]>([]);
   const [room, setRoom] = useState('');
-  const [subgroupRooms, setSubgroupRooms] = useState<Record<string, string>>({});
+  const [subgroupRooms, setSubgroupRooms] = useState<Record<string, string>>(
+    {}
+  );
   const [isOnline, setIsOnline] = useState(false);
   const [notes, setNotes] = useState('');
   const [teacherQuery, setTeacherQuery] = useState('');
@@ -120,7 +125,16 @@ export function LessonEditorModal({
         teachersById,
         editingLesson?.id
       ),
-    [day, startTime, endTime, groupIds, teacherIds, existingLessons, teachersById, editingLesson]
+    [
+      day,
+      startTime,
+      endTime,
+      groupIds,
+      teacherIds,
+      existingLessons,
+      teachersById,
+      editingLesson,
+    ]
   );
 
   const toggleGroup = (gid: GroupId) => {
@@ -178,7 +192,6 @@ export function LessonEditorModal({
       },
       editingLesson
     );
-    onClose();
   };
 
   return (
@@ -191,14 +204,14 @@ export function LessonEditorModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {formError && (
-          <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-200">
+          <div className="p5-shadow-sm border-2 border-white bg-[#E60012] px-3.5 py-2.5 text-sm font-bold text-white">
             {formError}
           </div>
         )}
 
         {/* Subject */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+          <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
             Предмет *
           </label>
           <input
@@ -206,13 +219,13 @@ export function LessonEditorModal({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Например, Programming language (Java)"
-            className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            className="p5-input w-full px-3.5 py-2.5 text-sm placeholder-neutral-500"
           />
         </div>
 
         {/* Groups */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+          <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
             Группы *
           </label>
           <div className="flex flex-wrap gap-2">
@@ -223,14 +236,16 @@ export function LessonEditorModal({
                   key={gid}
                   type="button"
                   onClick={() => toggleGroup(gid)}
-                  className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
+                  className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition ${
                     selected
-                      ? `${GROUP_BADGE_STYLES[gid]} ring-1 ring-white/25`
-                      : 'border-[#252e42] bg-[#1a2030] text-slate-400 hover:text-slate-200'
+                      ? `-translate-y-0.5 ${GROUP_BADGE_STYLES[gid]} ring-2 ring-[#FFE600]`
+                      : 'border-white/50 bg-[#161616] text-neutral-300 hover:border-[#FFE600] hover:text-[#FFE600]'
                   }`}
                 >
-                  {selected && <Check className="h-3 w-3" />}
-                  <span>{gid}</span>
+                  <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                    {selected && <Check className="h-3 w-3" />}
+                    <span>{gid}</span>
+                  </span>
                 </button>
               );
             })}
@@ -240,16 +255,16 @@ export function LessonEditorModal({
         {/* Day + Time */}
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+            <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
               День недели
             </label>
             <select
               value={day}
               onChange={(e) => setDay(e.target.value as DayOfWeek)}
-              className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="p5-input w-full px-3 py-2.5 text-sm"
             >
               {DAYS.map((d) => (
-                <option key={d} value={d}>
+                <option key={d} value={d} className="bg-[#0D0D0D] text-white">
                   {DAY_LABELS_RU[d]}
                 </option>
               ))}
@@ -257,33 +272,35 @@ export function LessonEditorModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+            <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
               Начало
             </label>
             <input
               type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="p5-input w-full px-3 py-2 text-sm [color-scheme:dark]"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+            <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
               Окончание
             </label>
             <input
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="p5-input w-full px-3 py-2 text-sm [color-scheme:dark]"
             />
           </div>
         </div>
 
         {/* Quick Time Presets */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] text-slate-400">Слоты AIU:</span>
+          <span className="font-condensed text-[11px] font-bold uppercase tracking-wider text-[#FFE600]">
+            Слоты AIU:
+          </span>
           {TIME_PRESETS.map((preset) => (
             <button
               key={preset.label}
@@ -292,10 +309,10 @@ export function LessonEditorModal({
                 setStartTime(preset.startTime);
                 setEndTime(preset.endTime);
               }}
-              className={`rounded-lg border px-2 py-1 text-[11px] transition ${
+              className={`rounded-none border-2 px-2 py-1 font-condensed text-[11px] font-bold uppercase transition ${
                 startTime === preset.startTime && endTime === preset.endTime
-                  ? 'border-blue-500 bg-blue-600/20 text-blue-200'
-                  : 'border-[#252e42] bg-[#1a2030] text-slate-300 hover:border-slate-500'
+                  ? 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D]'
+                  : 'border-white/40 bg-[#161616] text-neutral-200 hover:border-[#FFE600] hover:text-[#FFE600]'
               }`}
             >
               {preset.label}
@@ -303,19 +320,24 @@ export function LessonEditorModal({
           ))}
         </div>
 
-        {/* Conflict Detector Box */}
+        {/* Conflict Detector Comic Banner */}
         {conflicts.length > 0 && (
-          <div className="rounded-xl border border-amber-500/45 bg-amber-500/10 p-3 text-xs text-amber-100">
-            <div className="flex items-center gap-2 font-semibold text-amber-300">
+          <div className="border-[3px] border-[#FFE600] bg-[#E60012] p-3.5 text-xs text-white shadow-[4px_4px_0_#FFE600]">
+            <div className="inline-flex items-center gap-1.5 border border-[#FFE600] bg-[#0D0D0D] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
               <AlertTriangle className="h-4 w-4 shrink-0" />
-              <span>Обнаружены накладки по времени ({conflicts.length}):</span>
+              <span>ВНИМАНИЕ! НАКЛАДКИ ПО ВРЕМЕНИ ({conflicts.length})</span>
             </div>
-            <ul className="mt-1.5 space-y-1 pl-6 text-amber-200">
+            <ul className="mt-2 space-y-1 pl-5 text-white">
               {conflicts.map((c, idx) => (
-                <li key={`${c.kind}-${c.entityId}-${c.lessonId}-${idx}`} className="list-disc">
+                <li
+                  key={`${c.kind}-${c.entityId}-${c.lessonId}-${idx}`}
+                  className="list-disc"
+                >
                   {c.kind === 'group' ? 'Группа' : 'Преподаватель'}{' '}
-                  <span className="font-semibold">{c.entityName}</span> занята на паре «
-                  {c.lessonSubject}» ({c.startTime}–{c.endTime})
+                  <span className="font-bold text-[#FFE600]">
+                    {c.entityName}
+                  </span>{' '}
+                  занята на паре «{c.lessonSubject}» ({c.startTime}–{c.endTime})
                 </li>
               ))}
             </ul>
@@ -325,16 +347,16 @@ export function LessonEditorModal({
         {/* Type + Online */}
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+            <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
               Тип занятия
             </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as LessonType)}
-              className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="p5-input w-full px-3 py-2.5 text-sm"
             >
               {LESSON_TYPES.map((t) => (
-                <option key={t} value={t}>
+                <option key={t} value={t} className="bg-[#0D0D0D] text-white">
                   {LESSON_TYPE_LABELS[t]}
                 </option>
               ))}
@@ -342,12 +364,12 @@ export function LessonEditorModal({
           </div>
 
           <div className="flex items-end">
-            <label className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-[#252e42] bg-[#0b0d12] px-3.5 py-2.5 text-sm text-slate-200 transition hover:border-slate-600">
+            <label className="flex w-full cursor-pointer items-center gap-2.5 border-2 border-white bg-[#161616] px-3.5 py-2.5 text-sm font-semibold text-white transition hover:border-[#FFE600]">
               <input
                 type="checkbox"
                 checked={isOnline}
                 onChange={(e) => setIsOnline(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded-none accent-[#E60012]"
               />
               <span>Онлайн-занятие (Online / Web-based)</span>
             </label>
@@ -355,12 +377,12 @@ export function LessonEditorModal({
         </div>
 
         {/* Teachers multi-select */}
-        <div className="space-y-2 rounded-xl border border-[#252e42] bg-[#1a2030]/40 p-3">
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-semibold text-slate-300">
+        <div className="space-y-2.5 border-2 border-white/70 bg-[#161616] p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label className="font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
               Преподаватели ({teacherIds.length})
             </label>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-neutral-300">
               Выберите 1 или нескольких (для потоковых пар)
             </span>
           </div>
@@ -373,9 +395,9 @@ export function LessonEditorModal({
                 return (
                   <div
                     key={tid}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-2.5 py-1.5 text-xs"
+                    className="flex flex-wrap items-center justify-between gap-2 border-2 border-[#FFE600] bg-[#0D0D0D] px-2.5 py-1.5 text-xs"
                   >
-                    <span className="font-medium text-blue-100">{label}</span>
+                    <span className="font-bold text-white">{label}</span>
                     <div className="flex items-center gap-2">
                       {teacherIds.length > 1 && (
                         <input
@@ -388,14 +410,14 @@ export function LessonEditorModal({
                             }))
                           }
                           placeholder="Ауд. подгруппы"
-                          className="w-28 rounded border border-[#252e42] bg-[#0b0d12] px-2 py-1 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                          className="p5-input w-28 px-2 py-1 text-xs placeholder-neutral-500"
                         />
                       )}
                       <button
                         type="button"
                         onClick={() => toggleTeacher(tid)}
                         aria-label={`Убрать ${label}`}
-                        className="rounded p-0.5 text-slate-300 hover:bg-slate-800 hover:text-white"
+                        className="border border-white/40 bg-[#161616] p-1 text-white transition hover:bg-[#E60012]"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -407,19 +429,19 @@ export function LessonEditorModal({
           )}
 
           <div className="relative">
-            <Search className="pointer-events-none absolute top-2.5 left-3 h-3.5 w-3.5 text-slate-500" />
+            <Search className="pointer-events-none absolute top-2.5 left-3 h-3.5 w-3.5 text-neutral-300" />
             <input
               type="text"
               value={teacherQuery}
               onChange={(e) => setTeacherQuery(e.target.value)}
               placeholder="Поиск преподавателя..."
-              className="w-full rounded-lg border border-[#252e42] bg-[#0b0d12] py-2 pr-3 pl-8 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+              className="p5-input w-full py-2 pr-3 pl-8 text-xs placeholder-neutral-500"
             />
           </div>
 
-          <div className="max-h-36 overflow-y-auto rounded-lg border border-[#252e42] bg-[#0b0d12] p-1">
+          <div className="max-h-36 overflow-y-auto border-2 border-white/60 bg-[#0D0D0D] p-1">
             {filteredTeachers.length === 0 ? (
-              <div className="p-2 text-center text-xs text-slate-500">
+              <div className="p-2 text-center text-xs text-neutral-400">
                 Преподаватели не найдены
               </div>
             ) : (
@@ -430,21 +452,21 @@ export function LessonEditorModal({
                     key={t.id}
                     type="button"
                     onClick={() => toggleTeacher(t.id)}
-                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition ${
+                    className={`flex w-full items-center justify-between px-2.5 py-1.5 text-left text-xs transition ${
                       selected
-                        ? 'bg-blue-600/20 text-blue-200'
-                        : 'text-slate-300 hover:bg-[#1a2030]'
+                        ? 'bg-[#E60012] font-bold text-white'
+                        : 'text-neutral-200 hover:bg-[#161616] hover:text-[#FFE600]'
                     }`}
                   >
-                    <span className="truncate font-medium">
+                    <span className="truncate">
                       {t.name}
                       {t.isCustom && (
-                        <span className="ml-1.5 text-[10px] text-emerald-400">
+                        <span className="ml-1.5 text-[10px] text-[#FFE600]">
                           (свой)
                         </span>
                       )}
                     </span>
-                    <span className="ml-2 shrink-0 text-[11px] text-slate-400">
+                    <span className="ml-2 shrink-0 font-condensed text-[11px] font-bold uppercase">
                       {selected ? 'Выбран' : <Plus className="h-3.5 w-3.5" />}
                     </span>
                   </button>
@@ -457,7 +479,7 @@ export function LessonEditorModal({
         {/* Single / Fallback Room */}
         {teacherIds.length <= 1 && (
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+            <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
               Аудитория
             </label>
             <input
@@ -465,14 +487,14 @@ export function LessonEditorModal({
               value={room}
               onChange={(e) => setRoom(e.target.value)}
               placeholder="Например, B101, BIGLAB, LAB4(211)"
-              className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+              className="p5-input w-full px-3.5 py-2.5 text-sm placeholder-neutral-500"
             />
           </div>
         )}
 
         {/* Notes */}
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+          <label className="mb-1.5 block font-condensed text-xs font-bold uppercase tracking-wider text-neutral-200">
             Заметки / ссылка Google Meet
           </label>
           <textarea
@@ -480,23 +502,27 @@ export function LessonEditorModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Например, Meet: https://meet.google.com/..."
-            className="w-full rounded-xl border border-[#252e42] bg-[#0b0d12] px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            className="p5-input w-full px-3.5 py-2 text-sm placeholder-neutral-500"
           />
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2.5 border-t border-[#252e42] pt-3">
+        <div className="flex flex-wrap justify-end gap-3 border-t-2 border-white/20 pt-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-700 bg-slate-800/70 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
-            Отмена
+            <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
+              Отмена
+            </span>
           </button>
           <button
             type="submit"
-            className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-500"
+            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-5 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
-            {editingLesson ? 'Сохранить изменения' : 'Добавить пару'}
+            <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
+              {editingLesson ? 'Сохранить изменения' : 'Добавить пару'}
+            </span>
           </button>
         </div>
       </form>

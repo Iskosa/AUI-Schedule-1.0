@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { BackupModal } from './components/common/BackupModal';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
@@ -23,7 +24,19 @@ import type {
   DayOfWeek,
   EffectiveLesson,
   EffectiveTeacher,
+  GroupFilter,
+  ViewMode,
 } from './types/schedule';
+import { getPanelMotionProps } from './utils/p5Motion';
+import {
+  isSfxEnabled,
+  playCancel,
+  playConfirm,
+  playOpen,
+  playSwitch,
+  toggleSfx,
+} from './utils/p5Sound';
+import { computeLiveHudState } from './utils/time';
 
 type ConfirmState =
   | { kind: 'deleteLesson'; lesson: EffectiveLesson }
@@ -34,9 +47,14 @@ type ConfirmState =
 export default function App() {
   const store = useScheduleStore();
   const now = useLiveClock(1000);
+  const reduced = useReducedMotion();
+  const panelMotion = getPanelMotionProps(reduced);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('schedule');
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(
+    null
+  );
+  const [sfxEnabled, setSfxEnabled] = useState<boolean>(() => isSfxEnabled());
 
   const [detailLessonId, setDetailLessonId] = useState<string | null>(null);
   const [lessonEditorState, setLessonEditorState] = useState<{
@@ -67,13 +85,63 @@ export default function App() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
+  const currentLessonIds = useMemo(
+    () =>
+      new Set(
+        computeLiveHudState(now, store.lessons, 'ALL').currentLessons.map(
+          (ls) => ls.id
+        )
+      ),
+    [now, store.lessons]
+  );
+
   const detailLesson = detailLessonId
     ? store.lessons.find((ls) => ls.id === detailLessonId) ?? null
     : null;
 
+  const handleToggleSfx = () => {
+    setSfxEnabled(toggleSfx());
+  };
+
+  const handleTabChange = (tab: ActiveTab) => {
+    if (tab !== activeTab) playSwitch();
+    setActiveTab(tab);
+  };
+
+  const handleSelectGroup = (group: GroupFilter) => {
+    if (group !== store.selectedGroup) playSwitch();
+    store.setSelectedGroup(group);
+  };
+
+  const handleChangeViewMode = (mode: ViewMode) => {
+    if (mode !== store.viewMode) playSwitch();
+    store.setViewMode(mode);
+  };
+
+  const handleSelectDay = (day: DayOfWeek) => {
+    if (day !== store.selectedDay) playSwitch();
+    store.setSelectedDay(day);
+  };
+
+  const handleSelectTeacher = (teacherId: string | null) => {
+    if (teacherId) {
+      playSwitch();
+    } else {
+      playCancel();
+    }
+    setSelectedTeacherId(teacherId);
+  };
+
   const handleOpenTeacher = (teacherId: string) => {
+    playSwitch();
+    setDetailLessonId(null);
     setSelectedTeacherId(teacherId);
     setActiveTab('teachers');
+  };
+
+  const handleOpenLessonDetail = (lesson: EffectiveLesson) => {
+    playOpen();
+    setDetailLessonId(lesson.id);
   };
 
   const handleSaveLesson = (
@@ -87,6 +155,8 @@ export default function App() {
       store.addLesson(draft);
       setToast('Новая пара добавлена');
     }
+    setLessonEditorState((prev) => ({ ...prev, open: false }));
+    playConfirm();
   };
 
   const handleSaveTeacher = (
@@ -101,6 +171,8 @@ export default function App() {
       setSelectedTeacherId(created.id);
       setToast('Преподаватель добавлен');
     }
+    setTeacherEditorState((prev) => ({ ...prev, open: false }));
+    playConfirm();
   };
 
   const handleConfirmAction = () => {
@@ -131,6 +203,7 @@ export default function App() {
       setBackupOpen(false);
       setToast('Локальные правки сброшены к данным из Excel');
     }
+    playConfirm();
     setConfirmState(null);
   };
 
@@ -154,7 +227,9 @@ export default function App() {
       <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] p-6">
         <div className="max-w-md space-y-3 border-2 border-[#E60012] bg-[#161616] p-6 text-center shadow-[5px_5px_0_#E60012]">
           <AlertCircle className="mx-auto h-8 w-8 text-[#E60012]" />
-          <h1 className="font-display text-base uppercase text-white">Ошибка загрузки данных</h1>
+          <h1 className="font-display text-base uppercase text-white">
+            Ошибка загрузки данных
+          </h1>
           <p className="text-sm text-neutral-200">{store.error}</p>
           <button
             type="button"
@@ -171,103 +246,139 @@ export default function App() {
     );
   }
 
+  const scheduleContentKey = `${store.selectedGroup}-${store.viewMode}-${
+    store.viewMode === 'day' ? store.selectedDay : 'week'
+  }`;
+
   return (
     <>
       <AppShell
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         semester={store.baseData?.meta.semester}
         teacherCount={store.teachers.length}
         overlayChangeCount={store.overlayChangeCount}
-        onOpenBackup={() => setBackupOpen(true)}
+        sfxEnabled={sfxEnabled}
+        onToggleSfx={handleToggleSfx}
+        onOpenBackup={() => {
+          playOpen();
+          setBackupOpen(true);
+        }}
         hud={
           <LiveHudBar
             now={now}
             lessons={store.lessons}
             selectedGroup={store.selectedGroup}
-            onSelectLesson={(ls) => setDetailLessonId(ls.id)}
+            onSelectLesson={handleOpenLessonDetail}
           />
         }
       >
-        {activeTab === 'schedule' ? (
-          <div className="space-y-4">
-            <GroupSwitcher
-              selectedGroup={store.selectedGroup}
-              onSelectGroup={store.setSelectedGroup}
-              groups={store.baseData?.groups ?? []}
-              teachers={store.teachers}
-              onOpenTeacher={handleOpenTeacher}
-            />
+        <AnimatePresence mode="wait">
+          {activeTab === 'schedule' ? (
+            <motion.div
+              key="tab-schedule"
+              {...panelMotion}
+              className="space-y-4"
+            >
+              <GroupSwitcher
+                selectedGroup={store.selectedGroup}
+                onSelectGroup={handleSelectGroup}
+                groups={store.baseData?.groups ?? []}
+                teachers={store.teachers}
+                onOpenTeacher={handleOpenTeacher}
+              />
 
-            <ScheduleToolbar
-              viewMode={store.viewMode}
-              onChangeViewMode={store.setViewMode}
-              selectedDay={store.selectedDay}
-              onSelectDay={store.setSelectedDay}
-              lessons={store.lessons}
-              selectedGroup={store.selectedGroup}
-              onAddLesson={() =>
-                setLessonEditorState({
-                  open: true,
-                  editingLesson: null,
-                  defaultDay: store.selectedDay,
-                })
-              }
-            />
-
-            {store.viewMode === 'day' ? (
-              <DayView
+              <ScheduleToolbar
+                viewMode={store.viewMode}
+                onChangeViewMode={handleChangeViewMode}
                 selectedDay={store.selectedDay}
+                onSelectDay={handleSelectDay}
                 lessons={store.lessons}
                 selectedGroup={store.selectedGroup}
-                saturdayNotes={store.baseData?.meta.saturdayNotes ?? []}
-                onSelectLesson={(ls) => setDetailLessonId(ls.id)}
-                onAddLessonForDay={(day) =>
+                onAddLesson={() => {
+                  playOpen();
                   setLessonEditorState({
                     open: true,
                     editingLesson: null,
-                    defaultDay: day,
-                  })
-                }
-              />
-            ) : (
-              <WeekView
-                lessons={store.lessons}
-                selectedGroup={store.selectedGroup}
-                onSelectLesson={(ls) => setDetailLessonId(ls.id)}
-                onFocusDay={(day) => {
-                  store.setSelectedDay(day);
-                  store.setViewMode('day');
+                    defaultDay: store.selectedDay,
+                  });
                 }}
               />
-            )}
-          </div>
-        ) : (
-          <TeachersView
-            teachers={store.teachers}
-            lessons={store.lessons}
-            targetGroupTeacherIds={store.targetGroupTeacherIds}
-            selectedTeacherId={selectedTeacherId}
-            onSelectTeacher={setSelectedTeacherId}
-            onAddTeacher={() =>
-              setTeacherEditorState({ open: true, editingTeacher: null })
-            }
-            onEditTeacher={(teacher) =>
-              setTeacherEditorState({ open: true, editingTeacher: teacher })
-            }
-            onDeleteTeacher={(teacher) =>
-              setConfirmState({ kind: 'deleteTeacher', teacher })
-            }
-            onSelectLesson={(ls) => setDetailLessonId(ls.id)}
-          />
-        )}
+
+              <AnimatePresence mode="wait">
+                <motion.div key={scheduleContentKey} {...panelMotion}>
+                  {store.viewMode === 'day' ? (
+                    <DayView
+                      selectedDay={store.selectedDay}
+                      lessons={store.lessons}
+                      selectedGroup={store.selectedGroup}
+                      saturdayNotes={store.baseData?.meta.saturdayNotes ?? []}
+                      currentLessonIds={currentLessonIds}
+                      onSelectLesson={handleOpenLessonDetail}
+                      onAddLessonForDay={(day) => {
+                        playOpen();
+                        setLessonEditorState({
+                          open: true,
+                          editingLesson: null,
+                          defaultDay: day,
+                        });
+                      }}
+                    />
+                  ) : (
+                    <WeekView
+                      lessons={store.lessons}
+                      selectedGroup={store.selectedGroup}
+                      currentLessonIds={currentLessonIds}
+                      onSelectLesson={handleOpenLessonDetail}
+                      onFocusDay={(day) => {
+                        playSwitch();
+                        store.setSelectedDay(day);
+                        store.setViewMode('day');
+                      }}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          ) : (
+            <motion.div key="tab-teachers" {...panelMotion}>
+              <TeachersView
+                teachers={store.teachers}
+                lessons={store.lessons}
+                targetGroupTeacherIds={store.targetGroupTeacherIds}
+                selectedTeacherId={selectedTeacherId}
+                onSelectTeacher={handleSelectTeacher}
+                onAddTeacher={() => {
+                  playOpen();
+                  setTeacherEditorState({ open: true, editingTeacher: null });
+                }}
+                onEditTeacher={(teacher) => {
+                  playOpen();
+                  setTeacherEditorState({
+                    open: true,
+                    editingTeacher: teacher,
+                  });
+                }}
+                onDeleteTeacher={(teacher) => {
+                  playOpen();
+                  setConfirmState({ kind: 'deleteTeacher', teacher });
+                }}
+                onSelectLesson={handleOpenLessonDetail}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </AppShell>
 
       <LessonDetailModal
         lesson={detailLesson}
         teachersById={store.teachersById}
-        onClose={() => setDetailLessonId(null)}
+        onClose={() => {
+          playCancel();
+          setDetailLessonId(null);
+        }}
         onEdit={(lesson) => {
+          playOpen();
           setDetailLessonId(null);
           setLessonEditorState({
             open: true,
@@ -275,9 +386,13 @@ export default function App() {
             defaultDay: lesson.day,
           });
         }}
-        onDelete={(lesson) => setConfirmState({ kind: 'deleteLesson', lesson })}
+        onDelete={(lesson) => {
+          playOpen();
+          setConfirmState({ kind: 'deleteLesson', lesson });
+        }}
         onTogglePinSubgroup={(lessonId, teacherId) => {
           store.togglePinSubgroup(lessonId, teacherId);
+          playConfirm();
           setToast('Настройка подгруппы обновлена');
         }}
         onOpenTeacher={handleOpenTeacher}
@@ -293,24 +408,29 @@ export default function App() {
         teachers={store.teachers}
         teachersById={store.teachersById}
         existingLessons={store.lessons}
-        onClose={() =>
-          setLessonEditorState((prev) => ({ ...prev, open: false }))
-        }
+        onClose={() => {
+          playCancel();
+          setLessonEditorState((prev) => ({ ...prev, open: false }));
+        }}
         onSave={handleSaveLesson}
       />
 
       <TeacherEditorModal
         open={teacherEditorState.open}
         editingTeacher={teacherEditorState.editingTeacher}
-        onClose={() =>
-          setTeacherEditorState((prev) => ({ ...prev, open: false }))
-        }
+        onClose={() => {
+          playCancel();
+          setTeacherEditorState((prev) => ({ ...prev, open: false }));
+        }}
         onSave={handleSaveTeacher}
       />
 
       <BackupModal
         open={backupOpen}
-        onClose={() => setBackupOpen(false)}
+        onClose={() => {
+          playCancel();
+          setBackupOpen(false);
+        }}
         overlay={store.overlay}
         changeCount={store.overlayChangeCount}
         onExport={store.exportBackup}
@@ -319,7 +439,10 @@ export default function App() {
           if (res.ok) setToast('Резервная копия импортирована');
           return res;
         }}
-        onRequestReset={() => setConfirmState({ kind: 'resetExcel' })}
+        onRequestReset={() => {
+          playOpen();
+          setConfirmState({ kind: 'resetExcel' });
+        }}
         onReloadBase={store.reloadBaseData}
       />
 
@@ -348,26 +471,38 @@ export default function App() {
         confirmLabel={
           confirmState?.kind === 'resetExcel'
             ? 'Сбросить всё'
-            : confirmState?.kind === 'deleteTeacher' && !confirmState.teacher.isCustom
+            : confirmState?.kind === 'deleteTeacher' &&
+                !confirmState.teacher.isCustom
               ? 'Скрыть'
-              : confirmState?.kind === 'deleteLesson' && confirmState.lesson.isBase
+              : confirmState?.kind === 'deleteLesson' &&
+                  confirmState.lesson.isBase
                 ? 'Скрыть'
                 : 'Удалить'
         }
         onConfirm={handleConfirmAction}
-        onCancel={() => setConfirmState(null)}
+        onCancel={() => {
+          playCancel();
+          setConfirmState(null);
+        }}
       />
 
-      {toast && (
-        <div
-          role="status"
-          className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#0D0D0D] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
-        >
-          <span className="p5-unskew block font-condensed uppercase tracking-wide">
-            {toast}
-          </span>
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            key="p5-toast"
+            role="status"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+            transition={{ duration: reduced ? 0.08 : 0.16 }}
+            className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#0D0D0D] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
+          >
+            <span className="p5-unskew block font-condensed uppercase tracking-wide">
+              {toast}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
