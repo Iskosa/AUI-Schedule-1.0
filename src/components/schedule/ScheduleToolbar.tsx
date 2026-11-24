@@ -1,6 +1,13 @@
+import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
 import { Calendar, Columns3, Plus } from 'lucide-react';
 import { DAY_SHORT_EN, DAY_SHORT_RU, DAYS } from '../../constants/schedule';
-import type { DayOfWeek, EffectiveLesson, GroupFilter, ViewMode } from '../../types/schedule';
+import type {
+  DayOfWeek,
+  EffectiveLesson,
+  GroupFilter,
+  ViewMode,
+} from '../../types/schedule';
+import { getCursorSpring } from '../../utils/p5Motion';
 import { filterLessonsByGroup } from '../../utils/time';
 
 interface ScheduleToolbarProps {
@@ -22,99 +29,164 @@ export function ScheduleToolbar({
   selectedGroup,
   onAddLesson,
 }: ScheduleToolbarProps) {
+  const reduced = useReducedMotion();
+  const cursorSpring = getCursorSpring(reduced);
+  const tapProps = reduced
+    ? {}
+    : {
+        whileTap: { x: 2, y: 2 },
+        transition: { type: 'spring' as const, stiffness: 800, damping: 30 },
+      };
+
   const groupLessons = filterLessonsByGroup(lessons, selectedGroup);
 
   return (
-    <div className="p5-shadow flex flex-col gap-3 border-2 border-white bg-[#161616] p-3.5 sm:p-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-      <div className="flex flex-wrap items-center gap-3">
-        <div
-          role="group"
-          aria-label="Режим отображения расписания"
-          className="inline-flex flex-wrap items-center gap-2"
-        >
-          <button
-            type="button"
-            onClick={() => onChangeViewMode('day')}
-            className={`p5-skew border-2 px-3 py-1.5 transition ${
-              viewMode === 'day'
-                ? '-translate-y-0.5 border-white bg-[#E60012] text-white shadow-[4px_4px_0_#0D0D0D]'
-                : 'border-white/80 bg-[#0D0D0D] text-neutral-200 shadow-[3px_3px_0_#0D0D0D] hover:border-[#FFE600] hover:text-[#FFE600]'
-            }`}
+    <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-white/10 pb-2.5">
+      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+        {/* View Mode Switcher */}
+        <LayoutGroup id="p5-viewmode">
+          <div
+            role="group"
+            aria-label="Режим отображения расписания"
+            className="inline-flex items-center gap-1.5"
           >
-            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>День</span>
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onChangeViewMode('week')}
-            className={`p5-skew border-2 px-3 py-1.5 transition ${
-              viewMode === 'week'
-                ? '-translate-y-0.5 border-white bg-[#E60012] text-white shadow-[4px_4px_0_#0D0D0D]'
-                : 'border-white/80 bg-[#0D0D0D] text-neutral-200 shadow-[3px_3px_0_#0D0D0D] hover:border-[#FFE600] hover:text-[#FFE600]'
-            }`}
-          >
-            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-              <Columns3 className="h-3.5 w-3.5" />
-              <span>Неделя</span>
-            </span>
-          </button>
-        </div>
-
-        {viewMode === 'day' && (
-          <div className="flex flex-wrap items-center gap-2">
-            {DAYS.map((day) => {
-              const count = groupLessons.filter((ls) => ls.day === day).length;
-              const active = selectedDay === day;
-              return (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => onSelectDay(day)}
-                  className={`p5-skew border-2 px-2.5 py-1.5 transition ${
-                    active
-                      ? '-translate-y-0.5 border-[#E60012] bg-white text-[#0D0D0D] shadow-[4px_4px_0_#E60012]'
-                      : 'border-white/75 bg-[#0D0D0D] text-white shadow-[3px_3px_0_#0D0D0D] hover:-translate-y-0.5 hover:border-[#FFE600]'
-                  }`}
+            <motion.button
+              type="button"
+              onClick={() => onChangeViewMode('day')}
+              {...tapProps}
+              className={`relative px-3 py-1.5 transition-colors ${
+                viewMode === 'day'
+                  ? 'text-white'
+                  : 'text-neutral-300 hover:text-white'
+              }`}
+            >
+              {viewMode === 'day' ? (
+                <motion.div
+                  layoutId="p5-viewmode-cursor"
+                  aria-hidden="true"
+                  transition={cursorSpring}
+                  className="pointer-events-none absolute inset-0 z-0"
                 >
-                  <span className="p5-unskew inline-flex items-center gap-1.5">
-                    <span className="flex flex-col items-start leading-none">
-                      <span className="font-condensed text-[9px] font-bold uppercase tracking-widest opacity-85">
-                        {DAY_SHORT_EN[day]}
-                      </span>
-                      <span className="font-condensed text-xs font-bold uppercase sm:text-sm">
-                        {DAY_SHORT_RU[day]}
-                      </span>
-                    </span>
-                    <span
-                      className={`px-1.5 py-0.5 font-condensed text-[11px] font-bold leading-none ${
-                        active
-                          ? 'bg-[#E60012] text-white'
-                          : 'border border-white/40 bg-[#161616] text-[#FFE600]'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+                  <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                </motion.div>
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#141414]/80"
+                />
+              )}
+              <span className="relative z-10 inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>День</span>
+              </span>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              onClick={() => onChangeViewMode('week')}
+              {...tapProps}
+              className={`relative px-3 py-1.5 transition-colors ${
+                viewMode === 'week'
+                  ? 'text-white'
+                  : 'text-neutral-300 hover:text-white'
+              }`}
+            >
+              {viewMode === 'week' ? (
+                <motion.div
+                  layoutId="p5-viewmode-cursor"
+                  aria-hidden="true"
+                  transition={cursorSpring}
+                  className="pointer-events-none absolute inset-0 z-0"
+                >
+                  <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                </motion.div>
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#141414]/80"
+                />
+              )}
+              <span className="relative z-10 inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+                <Columns3 className="h-3.5 w-3.5" />
+                <span>Неделя</span>
+              </span>
+            </motion.button>
           </div>
+        </LayoutGroup>
+
+        {/* MON-SAT Day Selector with flying crimson cursor */}
+        {viewMode === 'day' && (
+          <LayoutGroup id="p5-days">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {DAYS.map((day) => {
+                const count = groupLessons.filter((ls) => ls.day === day).length;
+                const active = selectedDay === day;
+                return (
+                  <motion.button
+                    key={day}
+                    type="button"
+                    onClick={() => onSelectDay(day)}
+                    {...tapProps}
+                    className={`relative px-2.5 py-1 transition-colors ${
+                      active
+                        ? 'text-white'
+                        : 'text-neutral-300 hover:text-white'
+                    }`}
+                  >
+                    {active ? (
+                      <motion.div
+                        layoutId="p5-day-cursor"
+                        aria-hidden="true"
+                        transition={cursorSpring}
+                        className="pointer-events-none absolute inset-0 z-0"
+                      >
+                        <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                      </motion.div>
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/15 bg-[#141414]/75"
+                      />
+                    )}
+                    <span className="relative z-10 inline-flex items-center gap-1.5">
+                      <span className="flex flex-col items-start leading-none">
+                        <span className="font-condensed text-[9px] font-bold uppercase tracking-widest opacity-80">
+                          {DAY_SHORT_EN[day]}
+                        </span>
+                        <span className="font-condensed text-xs font-bold uppercase sm:text-sm">
+                          {DAY_SHORT_RU[day]}
+                        </span>
+                      </span>
+                      <span
+                        className={`px-1 py-0.5 font-condensed text-[10px] font-bold leading-none ${
+                          active
+                            ? 'bg-[#0B0B0B] text-[#FFE600]'
+                            : 'bg-white/10 text-neutral-300'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </LayoutGroup>
         )}
       </div>
 
-      <button
+      {/* Add Lesson Button */}
+      <motion.button
         type="button"
         onClick={onAddLesson}
-        className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white hover:shadow-[4px_4px_0_#0D0D0D]"
+        {...tapProps}
+        className="p5-skew border border-[#0B0B0B] bg-[#FFE600] px-3.5 py-1.5 text-[#0B0B0B] shadow-[3px_3px_0_#E60012] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white hover:shadow-[3px_3px_0_#000000]"
       >
         <span className="p5-unskew inline-flex items-center justify-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           <span>Добавить пару</span>
         </span>
-      </button>
+      </motion.button>
     </div>
   );
 }

@@ -1,7 +1,11 @@
 import { Fragment, useEffect, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { getModalMotionProps } from '../../utils/p5Motion';
+import {
+  getModalMotionProps,
+  getModalTitleMotionProps,
+  getTapPressProps,
+} from '../../utils/p5Motion';
 
 interface ModalProps {
   open: boolean;
@@ -32,7 +36,7 @@ function renderDialogueTitle(title: string): ReactNode {
               {first}
             </span>
           ) : highlightSecond ? (
-            <span className="mr-0.5 inline-block rotate-2 bg-[#0D0D0D] px-1 text-[#FFE600]">
+            <span className="mr-0.5 inline-block rotate-2 bg-[#0B0B0B] px-1 text-[#FFE600]">
               {first}
             </span>
           ) : (
@@ -55,6 +59,8 @@ export function Modal({
 }: ModalProps) {
   const reduced = useReducedMotion();
   const modalMotion = getModalMotionProps(reduced);
+  const modalTitleMotion = getModalTitleMotionProps(reduced);
+  const tapProps = getTapPressProps(reduced);
 
   useEffect(() => {
     if (!open) return;
@@ -69,7 +75,7 @@ export function Modal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D0D]/85 p-3 sm:p-5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B0B0B]/85 p-3 sm:p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -78,7 +84,7 @@ export function Modal({
         >
           <div
             aria-hidden="true"
-            className="p5-halftone-red pointer-events-none absolute inset-0 opacity-60"
+            className="p5-halftone-red pointer-events-none absolute inset-0 opacity-45"
           />
 
           <motion.div
@@ -89,30 +95,36 @@ export function Modal({
             onClick={(e) => e.stopPropagation()}
             className={`relative z-10 flex max-h-[88vh] w-full flex-col ${maxWidthClass}`}
           >
-            {/* Protruding Nameplate + Close Button */}
+            {/* Protruding Nameplate (slams in 60ms after box) + Close Button */}
             <div className="pointer-events-none relative z-20 -mb-4 flex items-start justify-between gap-2 px-1.5 sm:-mb-5 sm:px-3">
-              <div className="pointer-events-auto min-w-0 max-w-full -rotate-1 border-[3px] border-[#0D0D0D] bg-white px-3 py-1.5 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] sm:px-4 sm:py-2">
+              <motion.div
+                {...modalTitleMotion}
+                className={`pointer-events-auto min-w-0 max-w-full border-[3px] border-[#0B0B0B] bg-white px-3 py-1.5 text-[#0B0B0B] shadow-[4px_4px_0_#E60012] sm:px-4 sm:py-2 ${
+                  reduced ? '-rotate-2' : ''
+                }`}
+              >
                 <h2 className="break-words font-display text-xs uppercase leading-snug tracking-wide sm:text-base">
                   {renderDialogueTitle(title)}
                 </h2>
-              </div>
+              </motion.div>
 
-              <button
+              <motion.button
                 type="button"
                 onClick={onClose}
                 aria-label="Закрыть"
-                className="pointer-events-auto p5-skew shrink-0 border-[3px] border-white bg-[#E60012] p-1.5 text-white shadow-[3px_3px_0_#0D0D0D] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
+                {...tapProps}
+                className="pointer-events-auto p5-skew shrink-0 border-[3px] border-white bg-[#E60012] p-1.5 text-white shadow-[3px_3px_0_#0B0B0B] transition-colors hover:bg-white hover:text-[#0B0B0B]"
               >
                 <X className="p5-unskew h-4 w-4 sm:h-5 sm:w-5" />
-              </button>
+              </motion.button>
             </div>
 
             {/* Clipped Dialogue Box */}
             <div className="p5-drop-shadow-red flex min-h-0 flex-1 flex-col">
               <div className="p5-clip-modal flex min-h-0 flex-1 flex-col bg-white p-[3px]">
-                <div className="p5-clip-modal flex min-h-0 flex-1 flex-col bg-[#0D0D0D] text-white">
+                <div className="p5-clip-modal flex min-h-0 flex-1 flex-col bg-[#0B0B0B] text-white">
                   {subtitle ? (
-                    <div className="shrink-0 border-b-2 border-white/20 bg-[#161616] px-4 pt-6 pb-2.5 sm:px-5 sm:pt-7">
+                    <div className="shrink-0 border-b border-white/15 bg-[#141414] px-4 pt-6 pb-2.5 sm:px-5 sm:pt-7">
                       <p className="break-words font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
                         {subtitle}
                       </p>

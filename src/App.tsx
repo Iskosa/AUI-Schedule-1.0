@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { BackupModal } from './components/common/BackupModal';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
+import { P5TransitionSlash } from './components/common/P5TransitionSlash';
 import { AppShell } from './components/layout/AppShell';
 import { LiveHudBar } from './components/layout/LiveHudBar';
 import { DayView } from './components/schedule/DayView';
@@ -27,7 +28,6 @@ import type {
   GroupFilter,
   ViewMode,
 } from './types/schedule';
-import { getPanelMotionProps } from './utils/p5Motion';
 import {
   isSfxEnabled,
   playCancel,
@@ -48,9 +48,9 @@ export default function App() {
   const store = useScheduleStore();
   const now = useLiveClock(1000);
   const reduced = useReducedMotion();
-  const panelMotion = getPanelMotionProps(reduced);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('schedule');
+  const [slashId, setSlashId] = useState(0);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(
     null
   );
@@ -99,17 +99,27 @@ export default function App() {
     ? store.lessons.find((ls) => ls.id === detailLessonId) ?? null
     : null;
 
+  const triggerSlash = () => {
+    setSlashId((n) => n + 1);
+  };
+
   const handleToggleSfx = () => {
     setSfxEnabled(toggleSfx());
   };
 
   const handleTabChange = (tab: ActiveTab) => {
-    if (tab !== activeTab) playSwitch();
+    if (tab !== activeTab) {
+      playSwitch();
+      triggerSlash();
+    }
     setActiveTab(tab);
   };
 
   const handleSelectGroup = (group: GroupFilter) => {
-    if (group !== store.selectedGroup) playSwitch();
+    if (group !== store.selectedGroup) {
+      playSwitch();
+      triggerSlash();
+    }
     store.setSelectedGroup(group);
   };
 
@@ -134,6 +144,9 @@ export default function App() {
 
   const handleOpenTeacher = (teacherId: string) => {
     playSwitch();
+    if (activeTab !== 'teachers') {
+      triggerSlash();
+    }
     setDetailLessonId(null);
     setSelectedTeacherId(teacherId);
     setActiveTab('teachers');
@@ -209,8 +222,8 @@ export default function App() {
 
   if (store.loading && !store.baseData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] p-6 text-white">
-        <div className="p5-skew border-2 border-white bg-[#161616] px-6 py-4 shadow-[5px_5px_0_#E60012]">
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] p-6 text-white">
+        <div className="p5-skew border-2 border-white bg-[#141414] px-6 py-4 shadow-[5px_5px_0_#E60012]">
           <div className="p5-unskew flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-[#E60012]" />
             <span className="font-condensed text-sm font-bold uppercase tracking-wider">
@@ -224,8 +237,8 @@ export default function App() {
 
   if (store.error && !store.baseData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] p-6">
-        <div className="max-w-md space-y-3 border-2 border-[#E60012] bg-[#161616] p-6 text-center shadow-[5px_5px_0_#E60012]">
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] p-6">
+        <div className="max-w-md space-y-3 border-2 border-[#E60012] bg-[#141414] p-6 text-center shadow-[5px_5px_0_#E60012]">
           <AlertCircle className="mx-auto h-8 w-8 text-[#E60012]" />
           <h1 className="font-display text-base uppercase text-white">
             Ошибка загрузки данных
@@ -234,7 +247,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => void store.reloadBaseData()}
-            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#0D0D0D] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
+            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#0B0B0B] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0B0B0B]"
           >
             <span className="p5-unskew inline-flex items-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
               <RefreshCw className="h-4 w-4" />
@@ -252,6 +265,8 @@ export default function App() {
 
   return (
     <>
+      <P5TransitionSlash slashId={slashId} />
+
       <AppShell
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -269,105 +284,99 @@ export default function App() {
             now={now}
             lessons={store.lessons}
             selectedGroup={store.selectedGroup}
+            selectedDay={store.selectedDay}
+            viewMode={store.viewMode}
             onSelectLesson={handleOpenLessonDetail}
           />
         }
       >
-        <AnimatePresence mode="wait">
-          {activeTab === 'schedule' ? (
-            <motion.div
-              key="tab-schedule"
-              {...panelMotion}
-              className="space-y-4"
-            >
-              <GroupSwitcher
-                selectedGroup={store.selectedGroup}
-                onSelectGroup={handleSelectGroup}
-                groups={store.baseData?.groups ?? []}
-                teachers={store.teachers}
-                onOpenTeacher={handleOpenTeacher}
-              />
+        {activeTab === 'schedule' ? (
+          <div key="tab-schedule" className="space-y-3">
+            <GroupSwitcher
+              selectedGroup={store.selectedGroup}
+              onSelectGroup={handleSelectGroup}
+              groups={store.baseData?.groups ?? []}
+              teachers={store.teachers}
+              onOpenTeacher={handleOpenTeacher}
+            />
 
-              <ScheduleToolbar
-                viewMode={store.viewMode}
-                onChangeViewMode={handleChangeViewMode}
-                selectedDay={store.selectedDay}
-                onSelectDay={handleSelectDay}
-                lessons={store.lessons}
-                selectedGroup={store.selectedGroup}
-                onAddLesson={() => {
-                  playOpen();
-                  setLessonEditorState({
-                    open: true,
-                    editingLesson: null,
-                    defaultDay: store.selectedDay,
-                  });
-                }}
-              />
+            <ScheduleToolbar
+              viewMode={store.viewMode}
+              onChangeViewMode={handleChangeViewMode}
+              selectedDay={store.selectedDay}
+              onSelectDay={handleSelectDay}
+              lessons={store.lessons}
+              selectedGroup={store.selectedGroup}
+              onAddLesson={() => {
+                playOpen();
+                setLessonEditorState({
+                  open: true,
+                  editingLesson: null,
+                  defaultDay: store.selectedDay,
+                });
+              }}
+            />
 
-              <AnimatePresence mode="wait">
-                <motion.div key={scheduleContentKey} {...panelMotion}>
-                  {store.viewMode === 'day' ? (
-                    <DayView
-                      selectedDay={store.selectedDay}
-                      lessons={store.lessons}
-                      selectedGroup={store.selectedGroup}
-                      saturdayNotes={store.baseData?.meta.saturdayNotes ?? []}
-                      currentLessonIds={currentLessonIds}
-                      onSelectLesson={handleOpenLessonDetail}
-                      onAddLessonForDay={(day) => {
-                        playOpen();
-                        setLessonEditorState({
-                          open: true,
-                          editingLesson: null,
-                          defaultDay: day,
-                        });
-                      }}
-                    />
-                  ) : (
-                    <WeekView
-                      lessons={store.lessons}
-                      selectedGroup={store.selectedGroup}
-                      currentLessonIds={currentLessonIds}
-                      onSelectLesson={handleOpenLessonDetail}
-                      onFocusDay={(day) => {
-                        playSwitch();
-                        store.setSelectedDay(day);
-                        store.setViewMode('day');
-                      }}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-          ) : (
-            <motion.div key="tab-teachers" {...panelMotion}>
-              <TeachersView
-                teachers={store.teachers}
-                lessons={store.lessons}
-                targetGroupTeacherIds={store.targetGroupTeacherIds}
-                selectedTeacherId={selectedTeacherId}
-                onSelectTeacher={handleSelectTeacher}
-                onAddTeacher={() => {
-                  playOpen();
-                  setTeacherEditorState({ open: true, editingTeacher: null });
-                }}
-                onEditTeacher={(teacher) => {
-                  playOpen();
-                  setTeacherEditorState({
-                    open: true,
-                    editingTeacher: teacher,
-                  });
-                }}
-                onDeleteTeacher={(teacher) => {
-                  playOpen();
-                  setConfirmState({ kind: 'deleteTeacher', teacher });
-                }}
-                onSelectLesson={handleOpenLessonDetail}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            <div key={scheduleContentKey}>
+              {store.viewMode === 'day' ? (
+                <DayView
+                  selectedDay={store.selectedDay}
+                  lessons={store.lessons}
+                  selectedGroup={store.selectedGroup}
+                  saturdayNotes={store.baseData?.meta.saturdayNotes ?? []}
+                  currentLessonIds={currentLessonIds}
+                  onSelectLesson={handleOpenLessonDetail}
+                  onAddLessonForDay={(day) => {
+                    playOpen();
+                    setLessonEditorState({
+                      open: true,
+                      editingLesson: null,
+                      defaultDay: day,
+                    });
+                  }}
+                />
+              ) : (
+                <WeekView
+                  lessons={store.lessons}
+                  selectedGroup={store.selectedGroup}
+                  currentLessonIds={currentLessonIds}
+                  onSelectLesson={handleOpenLessonDetail}
+                  onFocusDay={(day) => {
+                    playSwitch();
+                    store.setSelectedDay(day);
+                    store.setViewMode('day');
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div key="tab-teachers">
+            <TeachersView
+              teachers={store.teachers}
+              lessons={store.lessons}
+              targetGroupTeacherIds={store.targetGroupTeacherIds}
+              selectedTeacherId={selectedTeacherId}
+              onSelectTeacher={handleSelectTeacher}
+              onAddTeacher={() => {
+                playOpen();
+                setTeacherEditorState({ open: true, editingTeacher: null });
+              }}
+              onEditTeacher={(teacher) => {
+                playOpen();
+                setTeacherEditorState({
+                  open: true,
+                  editingTeacher: teacher,
+                });
+              }}
+              onDeleteTeacher={(teacher) => {
+                playOpen();
+                setConfirmState({ kind: 'deleteTeacher', teacher });
+              }}
+              onSelectLesson={handleOpenLessonDetail}
+            />
+          </div>
+        )}
       </AppShell>
 
       <LessonDetailModal
@@ -403,7 +412,7 @@ export default function App() {
         editingLesson={lessonEditorState.editingLesson}
         defaultDay={lessonEditorState.defaultDay}
         defaultGroup={
-          store.selectedGroup === 'ALL' ? 'COMSE26B' : store.selectedGroup
+          store.selectedGroup === 'ALL' ? 'COMSE26A' : store.selectedGroup
         }
         teachers={store.teachers}
         teachersById={store.teachersById}
@@ -495,7 +504,7 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
             transition={{ duration: reduced ? 0.08 : 0.16 }}
-            className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#0D0D0D] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
+            className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#0B0B0B] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
           >
             <span className="p5-unskew block font-condensed uppercase tracking-wide">
               {toast}

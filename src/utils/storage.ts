@@ -13,7 +13,7 @@ export function createEmptyOverlay(): ScheduleOverlay {
     version: 1,
     updatedAt: new Date().toISOString(),
     settings: {
-      selectedGroup: 'COMSE26B',
+      selectedGroup: 'COMSE26A',
     },
     customTeachers: [],
     editedTeachers: {},
@@ -34,7 +34,7 @@ function sanitizeGroupFilter(val: unknown): GroupFilter {
   if (typeof val === 'string' && TARGET_GROUPS.includes(val as never)) {
     return val as GroupFilter;
   }
-  return 'COMSE26B';
+  return 'COMSE26A';
 }
 
 function sanitizeViewMode(val: unknown): ViewMode | undefined {

@@ -1,14 +1,14 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, Plus } from 'lucide-react';
-import { DAY_LABELS_RU, DAY_SHORT_EN } from '../../constants/schedule';
+import { DAY_LABELS_RU } from '../../constants/schedule';
 import type {
   DayOfWeek,
   EffectiveLesson,
   GroupFilter,
 } from '../../types/schedule';
 import {
+  getCardSlamItemVariants,
   getStaggerContainerVariants,
-  getStaggerItemVariants,
 } from '../../utils/p5Motion';
 import { filterLessonsByGroup } from '../../utils/time';
 import { LessonCard } from './LessonCard';
@@ -34,48 +34,22 @@ export function DayView({
 }: DayViewProps) {
   const reduced = useReducedMotion();
   const containerVariants = getStaggerContainerVariants(reduced);
-  const itemVariants = getStaggerItemVariants(reduced);
+  const itemVariants = getCardSlamItemVariants(reduced);
 
   const dayLessons = filterLessonsByGroup(lessons, selectedGroup).filter(
     (ls) => ls.day === selectedDay
   );
 
-  const countLabel =
-    dayLessons.length === 1
-      ? 'ПАРА'
-      : dayLessons.length >= 2 && dayLessons.length <= 4
-        ? 'ПАРЫ'
-        : 'ПАР';
-
   return (
-    <div className="space-y-4">
-      {/* P5R Day Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#E60012] px-2.5 py-1 text-white">
-            <span className="p5-unskew block font-display text-xs uppercase tracking-wider sm:text-sm">
-              {DAY_SHORT_EN[selectedDay]}
-            </span>
-          </div>
-          <div className="p5-skew border-2 border-[#0D0D0D] bg-white px-3.5 py-1 text-[#0D0D0D] shadow-[4px_4px_0_#E60012]">
-            <h2 className="p5-unskew font-display text-base uppercase tracking-wide sm:text-lg">
-              {DAY_LABELS_RU[selectedDay]}
-            </h2>
-          </div>
-          <span className="border-2 border-[#FFE600] bg-[#0D0D0D] px-2.5 py-1 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
-            {dayLessons.length} {countLabel}
-          </span>
-        </div>
-      </div>
-
+    <div className="space-y-3">
       {selectedDay === 'SATURDAY' && saturdayNotes.length > 0 && (
-        <div className="p5-shadow-sm flex items-start gap-2.5 border-2 border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#0D0D0D] px-4 py-3 text-xs text-white">
+        <div className="flex items-start gap-2.5 border border-[#FFE600]/50 border-l-4 border-l-[#E60012] bg-[#141414] px-3 py-2 text-xs text-white">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#FFE600]" />
-          <div className="space-y-1">
-            <div className="font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+          <div className="space-y-0.5">
+            <div className="font-condensed text-[11px] font-bold uppercase tracking-wider text-[#FFE600]">
               Примечания по субботе (Satur_comments)
             </div>
-            <p className="leading-relaxed text-neutral-200">
+            <p className="leading-snug text-neutral-300">
               {saturdayNotes.slice(0, 2).join(' · ')}
             </p>
           </div>
@@ -83,14 +57,14 @@ export function DayView({
       )}
 
       {dayLessons.length === 0 ? (
-        <div className="p5-halftone p5-shadow flex flex-col items-center justify-center border-2 border-dashed border-white/40 bg-[#161616] px-6 py-10 text-center">
+        <div className="p5-halftone flex flex-col items-center justify-center border border-dashed border-white/25 bg-[#141414] px-6 py-10 text-center">
           <p className="font-condensed text-sm font-bold uppercase tracking-wider text-neutral-300">
             На {DAY_LABELS_RU[selectedDay].toLowerCase()} пар не запланировано.
           </p>
           <button
             type="button"
             onClick={() => onAddLessonForDay(selectedDay)}
-            className="p5-skew mt-4 border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            className="p5-skew mt-4 border border-[#0B0B0B] bg-[#FFE600] px-4 py-2 text-[#0B0B0B] shadow-[3px_3px_0_#E60012] transition hover:border-white hover:bg-[#E60012] hover:text-white"
           >
             <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
               <Plus className="h-4 w-4" />
@@ -103,7 +77,7 @@ export function DayView({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid gap-4 md:grid-cols-2"
+          className="grid gap-3.5 md:grid-cols-2"
         >
           {dayLessons.map((lesson) => (
             <motion.div key={lesson.id} variants={itemVariants}>

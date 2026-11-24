@@ -48,22 +48,22 @@ export const DAY_SHORT_EN: Record<DayOfWeek, string> = {
 };
 
 export const TARGET_GROUPS: GroupId[] = [
-  'COMSE26B',
   'COMSE26A',
+  'COMSE26B',
   'COMSEH26',
   'COMCIF26',
 ];
 
 export const GROUP_LABELS: Record<GroupId, string> = {
-  COMSE26B: 'COMSE-26B',
   COMSE26A: 'COMSE-26A',
+  COMSE26B: 'COMSE-26B',
   COMSEH26: 'COMSEH-26',
   COMCIF26: 'COMCIF-26',
 };
 
 export const GROUP_BADGE_STYLES: Record<GroupId, string> = {
-  COMSE26B: 'bg-[#0D0D0D] text-white border-2 border-white',
   COMSE26A: 'bg-[#E60012] text-white border-2 border-white',
+  COMSE26B: 'bg-[#0D0D0D] text-white border-2 border-white',
   COMSEH26: 'bg-white text-[#0D0D0D] border-2 border-[#0D0D0D]',
   COMCIF26: 'bg-[#FFE600] text-[#0D0D0D] border-2 border-[#0D0D0D]',
 };
@@ -85,19 +85,19 @@ export const LESSON_TYPE_STYLES: Record<LessonType, string> = {
 export const DAY_PHASE_LABELS: Record<DayPhase, { label: string; style: string }> = {
   MORNING: {
     label: 'MORNING',
-    style: 'bg-white text-[#0D0D0D] border-2 border-[#0D0D0D] shadow-[3px_3px_0_#E60012]',
+    style: 'bg-white text-[#0D0D0D] border border-white',
   },
   LUNCHTIME: {
     label: 'LUNCHTIME',
-    style: 'bg-[#FFE600] text-[#0D0D0D] border-2 border-[#0D0D0D] shadow-[3px_3px_0_#E60012]',
+    style: 'bg-[#FFE600] text-[#0D0D0D] border border-[#FFE600]',
   },
   AFTERNOON: {
     label: 'AFTERNOON',
-    style: 'bg-[#E60012] text-white border-2 border-white shadow-[3px_3px_0_#0D0D0D]',
+    style: 'bg-[#E60012] text-white border border-white/80',
   },
   EVENING: {
     label: 'EVENING',
-    style: 'bg-[#0D0D0D] text-[#FFE600] border-2 border-[#FFE600] shadow-[3px_3px_0_#E60012]',
+    style: 'bg-[#0B0B0B] text-[#FFE600] border border-[#FFE600]/80',
   },
 };
 

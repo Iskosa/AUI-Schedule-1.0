@@ -53,7 +53,7 @@ export function LessonEditorModal({
   const [startTime, setStartTime] = useState('08:00');
   const [endTime, setEndTime] = useState('09:25');
   const [type, setType] = useState<LessonType>('regular');
-  const [groupIds, setGroupIds] = useState<GroupId[]>(['COMSE26B']);
+  const [groupIds, setGroupIds] = useState<GroupId[]>(['COMSE26A']);
   const [teacherIds, setTeacherIds] = useState<string[]>([]);
   const [room, setRoom] = useState('');
   const [subgroupRooms, setSubgroupRooms] = useState<Record<string, string>>(
@@ -91,7 +91,7 @@ export function LessonEditorModal({
       setStartTime('08:00');
       setEndTime('09:25');
       setType('regular');
-      setGroupIds(defaultGroup ? [defaultGroup] : ['COMSE26B']);
+      setGroupIds(defaultGroup ? [defaultGroup] : ['COMSE26A']);
       setTeacherIds([]);
       setRoom('');
       setSubgroupRooms({});

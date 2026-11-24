@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
 import { Plus, Search, X } from 'lucide-react';
 import type { EffectiveLesson, EffectiveTeacher } from '../../types/schedule';
 import {
+  getCardSlamItemVariants,
+  getCursorSpring,
   getPanelMotionProps,
   getStaggerContainerVariants,
-  getStaggerItemVariants,
+  getTapPressProps,
 } from '../../utils/p5Motion';
 import { playSwitch } from '../../utils/p5Sound';
 import { RansomTitle } from '../common/RansomTitle';
@@ -37,11 +39,14 @@ export function TeachersView({
 }: TeachersViewProps) {
   const [query, setQuery] = useState('');
   const [onlyTargetGroups, setOnlyTargetGroups] = useState(false);
+  const [hoveredTeacherId, setHoveredTeacherId] = useState<string | null>(null);
 
   const reduced = useReducedMotion();
+  const cursorSpring = getCursorSpring(reduced);
+  const tapProps = getTapPressProps(reduced);
   const panelMotion = getPanelMotionProps(reduced);
   const containerVariants = getStaggerContainerVariants(reduced);
-  const itemVariants = getStaggerItemVariants(reduced);
+  const itemVariants = getCardSlamItemVariants(reduced);
 
   const lessonCountsByTeacher = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -78,87 +83,122 @@ export function TeachersView({
     teachers.find((t) => t.id === selectedTeacherId) ?? null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Confidants Top Search & Filter Bar */}
-      <div className="p5-confidant-bg p5-shadow space-y-3 border-2 border-white border-l-[6px] border-l-[#E60012] p-3.5 sm:p-4">
+      <div className="space-y-2.5 border border-white/15 border-l-4 border-l-[#E60012] bg-[#141414] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2.5">
-            <RansomTitle text="CONFIDANTS" as="h2" size="md" />
-            <span className="border-2 border-[#0D0D0D] bg-[#FFE600] px-2 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#0D0D0D]">
-              ПРЕПОДАВАТЕЛИ • {filteredTeachers.length} / {teachers.length}
+            <RansomTitle text="CONFIDANTS" as="h2" size="sm" />
+            <span className="bg-[#FFE600] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-[#0B0B0B]">
+              {filteredTeachers.length} / {teachers.length}
             </span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute top-2.5 left-3.5 h-4 w-4 text-white" />
+            <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-neutral-400" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Поиск по имени преподавателя, предмету или кабинету..."
-              className="p5-input w-full py-2 pr-9 pl-10 text-sm placeholder-neutral-400"
+              className="p5-input w-full py-1.5 pr-9 pl-9 text-sm placeholder-neutral-500"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
                 aria-label="Очистить поиск"
-                className="absolute top-2 right-2 border border-white/40 bg-[#161616] p-1 text-white transition hover:border-[#FFE600] hover:bg-[#E60012]"
+                className="absolute top-1.5 right-1.5 border border-white/30 bg-[#141414] p-1 text-white transition hover:border-[#FFE600] hover:bg-[#E60012]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="inline-flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (onlyTargetGroups) playSwitch();
-                  setOnlyTargetGroups(false);
-                }}
-                className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition ${
-                  !onlyTargetGroups
-                    ? '-translate-y-0.5 border-white bg-[#E60012] text-white'
-                    : 'border-white bg-[#0D0D0D] text-white hover:border-[#FFE600] hover:text-[#FFE600]'
-                }`}
-              >
-                <span className="p5-unskew block font-condensed text-xs font-bold uppercase tracking-wider">
-                  Все ({teachers.length})
-                </span>
-              </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <LayoutGroup id="p5-teacher-filters">
+              <div className="inline-flex flex-wrap items-center gap-1.5">
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    if (onlyTargetGroups) playSwitch();
+                    setOnlyTargetGroups(false);
+                  }}
+                  {...tapProps}
+                  className={`relative px-3 py-1.5 transition-colors ${
+                    !onlyTargetGroups
+                      ? 'text-white'
+                      : 'text-neutral-300 hover:text-white'
+                  }`}
+                >
+                  {!onlyTargetGroups ? (
+                    <motion.div
+                      layoutId="p5-teacher-filter-cursor"
+                      aria-hidden="true"
+                      transition={cursorSpring}
+                      className="pointer-events-none absolute inset-0 z-0"
+                    >
+                      <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                    </motion.div>
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#0B0B0B]"
+                    />
+                  )}
+                  <span className="relative z-10 block font-condensed text-xs font-bold uppercase tracking-wider">
+                    Все ({teachers.length})
+                  </span>
+                </motion.button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (!onlyTargetGroups) playSwitch();
-                  setOnlyTargetGroups(true);
-                }}
-                className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition ${
-                  onlyTargetGroups
-                    ? '-translate-y-0.5 border-white bg-[#E60012] text-white'
-                    : 'border-white bg-[#0D0D0D] text-white hover:border-[#FFE600] hover:text-[#FFE600]'
-                }`}
-              >
-                <span className="p5-unskew block font-condensed text-xs font-bold uppercase tracking-wider">
-                  Наши 4 группы ({targetCount})
-                </span>
-              </button>
-            </div>
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    if (!onlyTargetGroups) playSwitch();
+                    setOnlyTargetGroups(true);
+                  }}
+                  {...tapProps}
+                  className={`relative px-3 py-1.5 transition-colors ${
+                    onlyTargetGroups
+                      ? 'text-white'
+                      : 'text-neutral-300 hover:text-white'
+                  }`}
+                >
+                  {onlyTargetGroups ? (
+                    <motion.div
+                      layoutId="p5-teacher-filter-cursor"
+                      aria-hidden="true"
+                      transition={cursorSpring}
+                      className="pointer-events-none absolute inset-0 z-0"
+                    >
+                      <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                    </motion.div>
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#0B0B0B]"
+                    />
+                  )}
+                  <span className="relative z-10 block font-condensed text-xs font-bold uppercase tracking-wider">
+                    Наши 4 группы ({targetCount})
+                  </span>
+                </motion.button>
+              </div>
+            </LayoutGroup>
 
-            <button
+            <motion.button
               type="button"
               onClick={onAddTeacher}
-              className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+              {...tapProps}
+              className="p5-skew border border-[#0B0B0B] bg-[#FFE600] px-3.5 py-1.5 text-[#0B0B0B] shadow-[3px_3px_0_#E60012] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white hover:shadow-[3px_3px_0_#000000]"
             >
               <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5" />
                 <span>Добавить преподавателя</span>
               </span>
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -167,33 +207,38 @@ export function TeachersView({
       <div className="grid gap-4 lg:grid-cols-12">
         {/* List column */}
         <div
-          className={`space-y-2.5 lg:col-span-5 ${
+          className={`space-y-2 lg:col-span-5 ${
             activeTeacher ? 'hidden lg:block' : 'block'
           }`}
         >
           {filteredTeachers.length === 0 ? (
-            <div className="p5-shadow border-2 border-dashed border-white/40 bg-[#161616] p-8 text-center font-condensed text-sm font-bold uppercase tracking-wider text-neutral-300">
+            <div className="border border-dashed border-white/25 bg-[#141414] p-8 text-center font-condensed text-sm font-bold uppercase tracking-wider text-neutral-400">
               По запросу ничего не найдено.
             </div>
           ) : (
-            <motion.div
-              key={onlyTargetGroups ? 'target-only' : 'all-teachers'}
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="max-h-[70vh] space-y-2.5 overflow-x-clip overflow-y-auto px-1.5 py-1"
-            >
-              {filteredTeachers.map((teacher) => (
-                <motion.div key={teacher.id} variants={itemVariants}>
-                  <TeacherCard
-                    teacher={teacher}
-                    lessonCount={lessonCountsByTeacher[teacher.id] ?? 0}
-                    isSelected={activeTeacher?.id === teacher.id}
-                    onSelect={() => onSelectTeacher(teacher.id)}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
+            <LayoutGroup id="p5-confidants-list">
+              <motion.div
+                key={onlyTargetGroups ? 'target-only' : 'all-teachers'}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                onMouseLeave={() => setHoveredTeacherId(null)}
+                className="max-h-[70vh] space-y-2 overflow-x-clip overflow-y-auto px-2.5 py-2"
+              >
+                {filteredTeachers.map((teacher) => (
+                  <motion.div key={teacher.id} variants={itemVariants}>
+                    <TeacherCard
+                      teacher={teacher}
+                      lessonCount={lessonCountsByTeacher[teacher.id] ?? 0}
+                      isSelected={activeTeacher?.id === teacher.id}
+                      isHovered={hoveredTeacherId === teacher.id}
+                      onHoverStart={() => setHoveredTeacherId(teacher.id)}
+                      onSelect={() => onSelectTeacher(teacher.id)}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </LayoutGroup>
           )}
         </div>
 
@@ -203,21 +248,19 @@ export function TeachersView({
             activeTeacher ? 'block' : 'hidden lg:block'
           }`}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTeacher?.id ?? 'empty'}
-              {...panelMotion}
-            >
-              <TeacherDetailPanel
-                teacher={activeTeacher}
-                lessons={lessons}
-                onBackToList={() => onSelectTeacher(null)}
-                onEdit={onEditTeacher}
-                onDelete={onDeleteTeacher}
-                onSelectLesson={onSelectLesson}
-              />
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={activeTeacher?.id ?? 'empty'}
+            {...panelMotion}
+          >
+            <TeacherDetailPanel
+              teacher={activeTeacher}
+              lessons={lessons}
+              onBackToList={() => onSelectTeacher(null)}
+              onEdit={onEditTeacher}
+              onDelete={onDeleteTeacher}
+              onSelectLesson={onSelectLesson}
+            />
+          </motion.div>
         </div>
       </div>
     </div>

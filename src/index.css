@@ -9,8 +9,8 @@
 :root {
   --p5-red: #E60012;
   --p5-red-dark: #B0000E;
-  --p5-black: #0D0D0D;
-  --p5-surface: #161616;
+  --p5-black: #0B0B0B;
+  --p5-surface: #141414;
   --p5-white: #FFFFFF;
   --p5-yellow: #FFE600;
   --p5-skew-angle: -6deg;
@@ -75,6 +75,17 @@ body {
   );
 }
 
+.p5-clip-card-subtle {
+  clip-path: polygon(
+    0 2px,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% calc(100% - 2px),
+    8px 100%,
+    0 calc(100% - 8px)
+  );
+}
+
 .p5-clip-banner {
   clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
 }
@@ -101,8 +112,8 @@ body {
 }
 
 .p5-halftone {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.25px, transparent 1.25px);
-  background-size: 10px 10px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 12px 12px;
 }
 
 .p5-halftone-red {
@@ -162,7 +173,25 @@ body {
   background-size: 10px 10px, auto;
 }
 
+@keyframes p5-star-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.p5-star-spin {
+  animation: p5-star-spin 56s linear infinite;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .p5-star-spin {
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {
