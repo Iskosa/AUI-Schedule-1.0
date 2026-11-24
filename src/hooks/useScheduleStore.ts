@@ -106,6 +106,7 @@ export function useScheduleStore() {
 
   const selectedGroup: GroupFilter = overlay.settings.selectedGroup;
   const pinnedGroup: GroupId | null = overlay.settings.pinnedGroup ?? null;
+  const groupPicked = Boolean(overlay.settings.groupPicked);
   const setupDismissed = Boolean(overlay.settings.setupDismissed);
   const defaultGroup: GroupFilter =
     pinnedGroup ??
@@ -146,6 +147,7 @@ export function useScheduleStore() {
         settings: {
           ...prev.settings,
           selectedGroup: group,
+          groupPicked: true,
           scheduleScopeMode: 'group',
         },
       }));
@@ -162,6 +164,7 @@ export function useScheduleStore() {
           pinnedGroup: group === 'ALL' ? null : group,
           defaultGroup: group,
           selectedGroup: group,
+          groupPicked: true,
           scheduleScopeMode: 'group',
         },
       }));
@@ -180,11 +183,46 @@ export function useScheduleStore() {
           ...(group !== null
             ? {
                 selectedGroup: group,
+                groupPicked: true,
                 scheduleScopeMode: 'group' as const,
               }
             : {}),
         },
       }));
+    },
+    [updateOverlay]
+  );
+
+  const completeGroupSelection = useCallback(
+    (group: GroupFilter) => {
+      updateOverlay((prev) => {
+        if (group === 'ALL') {
+          return {
+            ...prev,
+            settings: {
+              ...prev.settings,
+              selectedGroup: 'ALL',
+              defaultGroup: 'ALL',
+              pinnedGroup: null,
+              groupPicked: true,
+              setupDismissed: true,
+              scheduleScopeMode: 'group',
+            },
+          };
+        }
+
+        return {
+          ...prev,
+          settings: {
+            ...prev.settings,
+            selectedGroup: group,
+            defaultGroup: group,
+            pinnedGroup: group,
+            groupPicked: true,
+            scheduleScopeMode: 'group',
+          },
+        };
+      });
     },
     [updateOverlay]
   );
@@ -678,6 +716,7 @@ export function useScheduleStore() {
     targetGroupTeacherIds: merged.targetGroupTeacherIds,
     selectedGroup,
     pinnedGroup,
+    groupPicked,
     setupDismissed,
     defaultGroup,
     defaultViewMode,
@@ -691,6 +730,7 @@ export function useScheduleStore() {
     subjectTeacherOverrides,
     setSelectedGroup,
     pinGroup,
+    completeGroupSelection,
     setSetupDismissed,
     setDefaultGroup,
     setViewMode,

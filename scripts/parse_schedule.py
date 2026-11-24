@@ -1571,6 +1571,33 @@ def print_report(payload: dict[str, Any], diag: dict[str, Any]) -> None:
         print(f"   - [{dc['sheet']} {dc['cell']}] {dc['kind']}: {dc['details']}")
 
 
+def semantic_schedule_snapshot(data: dict[str, Any]) -> dict[str, Any]:
+    """Return comparable schedule payload excluding volatile meta.generatedAt."""
+    meta = dict(data.get("meta") or {})
+    meta.pop("generatedAt", None)
+    return {
+        "meta": meta,
+        "groups": data.get("groups"),
+        "teachers": data.get("teachers"),
+        "lessons": data.get("lessons"),
+    }
+
+
+def has_semantic_changes(output_path: Path, new_payload: dict[str, Any]) -> bool:
+    """Return True if output_path does not exist or meaningful schedule data changed."""
+    if not output_path.exists():
+        return True
+    try:
+        existing = json.loads(output_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return True
+    if not isinstance(existing, dict):
+        return True
+    return semantic_schedule_snapshot(existing) != semantic_schedule_snapshot(
+        new_payload
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Parse AIU Google Sheet (.xlsx) into public/data/schedule.json"
@@ -1611,11 +1638,14 @@ def main() -> int:
 
     payload, diag = build_schedule_data(args.input)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    if not has_semantic_changes(args.output, payload):
+        print("No schedule changes detected")
+    else:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
     if not args.no_report:
         print_report(payload, diag)

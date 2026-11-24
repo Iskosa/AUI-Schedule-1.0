@@ -18,6 +18,7 @@ export function createEmptyOverlay(): ScheduleOverlay {
       selectedGroup: 'ALL',
       defaultGroup: 'ALL',
       pinnedGroup: null,
+      groupPicked: false,
       setupDismissed: false,
       hideSaturdayConflicts: false,
       reduceMotion: false,
@@ -128,6 +129,10 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
     typeof settingsRaw.setupDismissed === 'boolean'
       ? settingsRaw.setupDismissed
       : Boolean(pinnedGroup && Object.keys(pinnedSubgroups).length > 0);
+  const groupPicked =
+    typeof settingsRaw.groupPicked === 'boolean'
+      ? settingsRaw.groupPicked
+      : true;
 
   return {
     version: 1,
@@ -142,6 +147,7 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
       defaultGroup,
       defaultViewMode: sanitizeViewMode(settingsRaw.defaultViewMode),
       pinnedGroup,
+      groupPicked,
       setupDismissed,
       hideSaturdayConflicts: Boolean(settingsRaw.hideSaturdayConflicts),
       reduceMotion: Boolean(settingsRaw.reduceMotion),

@@ -81,6 +81,11 @@ const QuickSetupModal = lazy(() =>
     default: mod.QuickSetupModal,
   }))
 );
+const WelcomeGroupModal = lazy(() =>
+  import('./components/schedule/WelcomeGroupModal').then((mod) => ({
+    default: mod.WelcomeGroupModal,
+  }))
+);
 
 type ConfirmState =
   | { kind: 'deleteLesson'; lesson: EffectiveLesson }
@@ -165,6 +170,8 @@ export default function App() {
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [toast, setToast] = useState<string | null>(null);
 
+  const welcomeOpen = !store.groupPicked;
+  const welcomeActivated = useActivated(welcomeOpen);
   const menuActivated = useActivated(menuOpen);
   const lessonEditorActivated = useActivated(lessonEditorState.open);
   const teacherEditorActivated = useActivated(teacherEditorState.open);
@@ -449,7 +456,8 @@ export default function App() {
       if (isEditable) return;
 
       const hasOpenModal = Boolean(
-        detailLessonId ||
+        welcomeOpen ||
+          detailLessonId ||
           lessonEditorState.open ||
           teacherEditorState.open ||
           backupOpen ||
@@ -519,6 +527,7 @@ export default function App() {
     store.viewMode,
     teacherEditorState.open,
     triggerSlash,
+    welcomeOpen,
   ]);
 
   if (store.loading && !store.baseData) {
@@ -597,7 +606,8 @@ export default function App() {
       >
         {activeTab === 'schedule' ? (
           <div key="tab-schedule" className="space-y-4">
-            {!store.setupDismissed &&
+            {store.groupPicked &&
+              !store.setupDismissed &&
               (!store.pinnedGroup || streamStats.pinned < streamStats.total) && (
                 <GroupOnboardingBanner
                   groups={store.baseData?.groups ?? []}
@@ -976,6 +986,25 @@ export default function App() {
               playConfirm();
               store.setSetupDismissed(true);
               setQuickSetupOpen(false);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {welcomeActivated && (
+        <Suspense fallback={null}>
+          <WelcomeGroupModal
+            open={welcomeOpen}
+            groups={store.baseData?.groups ?? []}
+            allLessons={store.allLessons}
+            onSelectGroup={(group) => {
+              playConfirm();
+              store.completeGroupSelection(group);
+              setToast(
+                group === 'ALL'
+                  ? 'Показаны все 4 группы'
+                  : `Группа ${group} выбрана и закреплена`
+              );
             }}
           />
         </Suspense>

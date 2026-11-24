@@ -113,6 +113,7 @@ export interface OverlaySettings {
   defaultGroup?: GroupFilter;
   defaultViewMode?: ViewMode;
   pinnedGroup?: GroupId | null;
+  groupPicked?: boolean;
   setupDismissed?: boolean;
   hideSaturdayConflicts?: boolean;
   reduceMotion?: boolean;
