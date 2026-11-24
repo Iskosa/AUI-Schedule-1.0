@@ -136,10 +136,14 @@ export default function App() {
 
   if (store.loading && !store.baseData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0b0d12] p-6 text-slate-300">
-        <div className="flex items-center gap-3 rounded-2xl border border-[#252e42] bg-[#121620] px-6 py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-          <span className="text-sm font-medium">Загрузка расписания...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] p-6 text-white">
+        <div className="p5-skew border-2 border-white bg-[#161616] px-6 py-4 shadow-[5px_5px_0_#E60012]">
+          <div className="p5-unskew flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin text-[#E60012]" />
+            <span className="font-condensed text-sm font-bold uppercase tracking-wider">
+              Загрузка расписания...
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -147,18 +151,20 @@ export default function App() {
 
   if (store.error && !store.baseData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0b0d12] p-6">
-        <div className="max-w-md space-y-3 rounded-2xl border border-rose-500/40 bg-[#121620] p-6 text-center">
-          <AlertCircle className="mx-auto h-8 w-8 text-rose-400" />
-          <h1 className="text-base font-bold text-white">Ошибка загрузки данных</h1>
-          <p className="text-sm text-slate-300">{store.error}</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#0D0D0D] p-6">
+        <div className="max-w-md space-y-3 border-2 border-[#E60012] bg-[#161616] p-6 text-center shadow-[5px_5px_0_#E60012]">
+          <AlertCircle className="mx-auto h-8 w-8 text-[#E60012]" />
+          <h1 className="font-display text-base uppercase text-white">Ошибка загрузки данных</h1>
+          <p className="text-sm text-neutral-200">{store.error}</p>
           <button
             type="button"
             onClick={() => void store.reloadBaseData()}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#0D0D0D] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
           >
-            <RefreshCw className="h-4 w-4" />
-            Повторить
+            <span className="p5-unskew inline-flex items-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
+              <RefreshCw className="h-4 w-4" />
+              <span>Повторить</span>
+            </span>
           </button>
         </div>
       </div>
@@ -355,9 +361,11 @@ export default function App() {
       {toast && (
         <div
           role="status"
-          className="fixed right-4 bottom-4 z-50 rounded-xl border border-blue-500/40 bg-[#1a2030] px-4 py-2.5 text-sm font-medium text-white shadow-xl"
+          className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#0D0D0D] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
         >
-          {toast}
+          <span className="p5-unskew block font-condensed uppercase tracking-wide">
+            {toast}
+          </span>
         </div>
       )}
     </>

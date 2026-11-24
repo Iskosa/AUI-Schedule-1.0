@@ -38,6 +38,15 @@ export const DAY_SHORT_RU: Record<DayOfWeek, string> = {
   SATURDAY: 'Сб',
 };
 
+export const DAY_SHORT_EN: Record<DayOfWeek, string> = {
+  MONDAY: 'MON',
+  TUESDAY: 'TUE',
+  WEDNESDAY: 'WED',
+  THURSDAY: 'THU',
+  FRIDAY: 'FRI',
+  SATURDAY: 'SAT',
+};
+
 export const TARGET_GROUPS: GroupId[] = [
   'COMSE26B',
   'COMSE26A',
@@ -76,19 +85,19 @@ export const LESSON_TYPE_STYLES: Record<LessonType, string> = {
 export const DAY_PHASE_LABELS: Record<DayPhase, { label: string; style: string }> = {
   MORNING: {
     label: 'MORNING',
-    style: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+    style: 'bg-white text-[#0D0D0D] border-2 border-[#0D0D0D] shadow-[3px_3px_0_#E60012]',
   },
   LUNCHTIME: {
     label: 'LUNCHTIME',
-    style: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    style: 'bg-[#FFE600] text-[#0D0D0D] border-2 border-[#0D0D0D] shadow-[3px_3px_0_#E60012]',
   },
   AFTERNOON: {
     label: 'AFTERNOON',
-    style: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
+    style: 'bg-[#E60012] text-white border-2 border-white shadow-[3px_3px_0_#0D0D0D]',
   },
   EVENING: {
     label: 'EVENING',
-    style: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+    style: 'bg-[#0D0D0D] text-[#FFE600] border-2 border-[#FFE600] shadow-[3px_3px_0_#E60012]',
   },
 };
 

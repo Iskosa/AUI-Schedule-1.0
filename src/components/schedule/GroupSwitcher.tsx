@@ -31,9 +31,9 @@ export function GroupSwitcher({
   return (
     <section
       aria-label="Выбор группы"
-      className="space-y-2.5 rounded-2xl border border-[#252e42] bg-[#121620] p-3.5 sm:p-4"
+      className="p5-shadow p5-halftone space-y-3 border-2 border-white border-l-[6px] border-l-[#E60012] bg-[#161616] p-3.5 sm:p-4"
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2.5 px-0.5">
         {TARGET_GROUPS.map((gid) => {
           const active = selectedGroup === gid;
           return (
@@ -41,13 +41,15 @@ export function GroupSwitcher({
               key={gid}
               type="button"
               onClick={() => onSelectGroup(gid)}
-              className={`rounded-xl border px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
+              className={`p5-skew border-2 border-white px-3.5 py-2 transition ${
                 active
-                  ? 'border-blue-500 bg-blue-600 text-white shadow-sm shadow-blue-950/50'
-                  : 'border-[#252e42] bg-[#1a2030] text-slate-300 hover:border-slate-600 hover:text-white'
+                  ? '-translate-y-1 bg-[#E60012] text-white shadow-[5px_5px_0_#0D0D0D]'
+                  : 'bg-[#0D0D0D] text-white shadow-[4px_4px_0_#0D0D0D] hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]'
               }`}
             >
-              {gid}
+              <span className="p5-unskew inline-flex items-center font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+                {gid}
+              </span>
             </button>
           );
         })}
@@ -55,46 +57,50 @@ export function GroupSwitcher({
         <button
           type="button"
           onClick={() => onSelectGroup('ALL')}
-          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
+          className={`p5-skew border-2 border-white px-3.5 py-2 transition ${
             selectedGroup === 'ALL'
-              ? 'border-blue-500 bg-blue-600 text-white shadow-sm shadow-blue-950/50'
-              : 'border-[#252e42] bg-[#1a2030] text-slate-300 hover:border-slate-600 hover:text-white'
+              ? '-translate-y-1 bg-[#E60012] text-white shadow-[5px_5px_0_#0D0D0D]'
+              : 'bg-[#0D0D0D] text-white shadow-[4px_4px_0_#0D0D0D] hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]'
           }`}
         >
-          <Users className="h-3.5 w-3.5" />
-          <span>Все 4 группы</span>
+          <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+            <Users className="h-3.5 w-3.5" />
+            <span>Все 4 группы</span>
+          </span>
         </button>
       </div>
 
       {activeGroupInfo && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#252e42]/70 pt-2.5 text-xs text-slate-400">
-          <span className="font-medium text-slate-200">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t-2 border-white/20 pt-2.5 text-xs text-neutral-200">
+          <span className="bg-white px-2 py-0.5 font-condensed font-bold uppercase tracking-wider text-[#0D0D0D]">
             {GROUP_LABELS[activeGroupInfo.id]}
           </span>
-          <span>Нагрузка по плану: {activeGroupInfo.weeklyHours} ч/нед</span>
+          <span className="font-semibold">
+            Нагрузка по плану: {activeGroupInfo.weeklyHours} ч/нед
+          </span>
           {activeGroupInfo.earliest && activeGroupInfo.latest && (
-            <span>
+            <span className="font-semibold">
               Обычное окно: {activeGroupInfo.earliest}–{activeGroupInfo.latest}
             </span>
           )}
           {activeGroupInfo.advisor && (
-            <span className="flex items-center gap-1">
-              <UserCheck className="h-3.5 w-3.5 text-amber-400" />
+            <span className="flex flex-wrap items-center gap-1.5">
+              <UserCheck className="h-3.5 w-3.5 text-[#FFE600]" />
               <span>Эдвайзер:</span>
               {advisorTeacher ? (
                 <button
                   type="button"
                   onClick={() => onOpenTeacher(advisorTeacher.id)}
-                  className="font-medium text-blue-400 underline decoration-blue-400/40 underline-offset-2 transition hover:text-blue-300"
+                  className="font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 transition hover:text-white"
                 >
                   {activeGroupInfo.advisor}
                 </button>
               ) : (
-                <span className="text-slate-200">{activeGroupInfo.advisor}</span>
+                <span className="font-bold text-white">{activeGroupInfo.advisor}</span>
               )}
               {activeGroupInfo.advisorRoom && (
-                <span className="inline-flex items-center gap-0.5 text-slate-400">
-                  (<MapPin className="h-3 w-3" />
+                <span className="inline-flex items-center gap-0.5 text-neutral-300">
+                  (<MapPin className="h-3 w-3 text-[#E60012]" />
                   {activeGroupInfo.advisorRoom})
                 </span>
               )}
