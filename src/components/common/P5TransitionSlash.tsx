@@ -24,7 +24,7 @@ export function P5TransitionSlash({ slashId }: P5TransitionSlashProps) {
         key={activeId}
         initial={{ x: '-125%' }}
         animate={{ x: '125%' }}
-        transition={{ duration: 0.25, ease: [0.22, 0.95, 0.25, 1] }}
+        transition={{ duration: 0.24, ease: [0.2, 0.95, 0.25, 1] }}
         onAnimationComplete={() =>
           setCompletedId((prev) => Math.max(prev, activeId))
         }
@@ -33,7 +33,7 @@ export function P5TransitionSlash({ slashId }: P5TransitionSlashProps) {
       >
         {/* Trailing deep black ink band */}
         <div
-          className="absolute inset-0 bg-[#0B0B0B]"
+          className="absolute inset-0 bg-[#050505]"
           style={{
             clipPath: 'polygon(18% 0%, 96% 0%, 78% 100%, 0% 100%)',
           }}
@@ -47,7 +47,7 @@ export function P5TransitionSlash({ slashId }: P5TransitionSlashProps) {
         />
         {/* Inner black tear accent */}
         <div
-          className="absolute inset-0 bg-[#0B0B0B]"
+          className="absolute inset-0 bg-[#050505]"
           style={{
             clipPath: 'polygon(43% 0%, 51% 0%, 30% 100%, 22% 100%)',
           }}
@@ -61,7 +61,7 @@ export function P5TransitionSlash({ slashId }: P5TransitionSlashProps) {
         />
         {/* Thin white trailing highlight */}
         <div
-          className="absolute inset-0 bg-white/85"
+          className="absolute inset-0 bg-white/90"
           style={{
             clipPath: 'polygon(28% 0%, 30.5% 0%, 11.5% 100%, 9% 100%)',
           }}

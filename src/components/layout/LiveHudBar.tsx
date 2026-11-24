@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Pin } from 'lucide-react';
+import { Globe, MapPin, Pin, User } from 'lucide-react';
 import { DAY_PHASE_LABELS, DAY_SHORT_RU } from '../../constants/schedule';
 import type {
   DayOfWeek,
@@ -25,35 +25,52 @@ interface LiveHudBarProps {
   onSelectLesson: (lesson: EffectiveLesson) => void;
 }
 
-interface LessonDisplayMeta {
-  text: string;
+interface HeroLessonMeta {
+  roomText: string | null;
+  teacherText: string | null;
   isPinnedSubgroup: boolean;
+  subgroupCount: number;
 }
 
-function getLessonDisplayMeta(lesson: EffectiveLesson): LessonDisplayMeta {
+function formatSubgroupCount(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${count} ПОДГРУППА ▸`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return `${count} ПОДГРУППЫ ▸`;
+  }
+  return `${count} ПОДГРУПП ▸`;
+}
+
+function getHeroLessonMeta(lesson: EffectiveLesson): HeroLessonMeta {
   if (lesson.pinnedSubgroupTeacherId && lesson.subgroups) {
     const pinned = lesson.subgroups.find(
       (sg) => sg.teacherId === lesson.pinnedSubgroupTeacherId
     );
     if (pinned) {
       return {
-        text: `${pinned.teacherName}${pinned.room ? ` · ${pinned.room}` : ''}`,
+        roomText: pinned.room || null,
+        teacherText: pinned.teacherName || null,
         isPinnedSubgroup: true,
+        subgroupCount: lesson.subgroups.length,
       };
     }
   }
-  const parts: string[] = [];
-  if (lesson.isOnline) {
-    parts.push('Online');
-  } else if (lesson.room) {
-    parts.push(lesson.room);
+
+  if (lesson.subgroups && lesson.subgroups.length > 0) {
+    return {
+      roomText: null,
+      teacherText: null,
+      isPinnedSubgroup: false,
+      subgroupCount: lesson.subgroups.length,
+    };
   }
-  if (lesson.teacherName) {
-    parts.push(lesson.teacherName);
-  }
+
   return {
-    text: parts.join(' · '),
+    roomText: lesson.isOnline ? null : lesson.room,
+    teacherText: lesson.teacherName,
     isPinnedSubgroup: false,
+    subgroupCount: 0,
   };
 }
 
@@ -82,163 +99,231 @@ export function LiveHudBar({
       : hud.todayDay;
 
   const currentPrimary = hud.currentLessons[0] ?? null;
-  const currentMeta = currentPrimary ? getLessonDisplayMeta(currentPrimary) : null;
+  const currentMeta = currentPrimary ? getHeroLessonMeta(currentPrimary) : null;
 
   const nextPrimary = hud.nextSlot?.lessons[0] ?? null;
-  const nextMeta = nextPrimary ? getLessonDisplayMeta(nextPrimary) : null;
+  const nextMeta = nextPrimary ? getHeroLessonMeta(nextPrimary) : null;
 
   const nextWhenLabel = hud.nextSlot
     ? hud.nextSlot.isToday
-      ? hud.nextSlot.startTime
+      ? `СЕГОДНЯ ${hud.nextSlot.startTime}`
       : hud.nextSlot.dayOffset === 1
-        ? `Завтра ${hud.nextSlot.startTime}`
-        : `${DAY_SHORT_RU[hud.nextSlot.day]} ${hud.nextSlot.startTime}`
+        ? `ЗАВТРА ${hud.nextSlot.startTime}`
+        : `${DAY_SHORT_RU[hud.nextSlot.day].toUpperCase()} ${hud.nextSlot.startTime}`
     : '';
+
+  const activePrimary = currentPrimary ?? nextPrimary;
+  const activeMeta = currentPrimary ? currentMeta : nextMeta;
+  const isLiveNow = Boolean(currentPrimary);
+  const extraLessonsCount = isLiveNow
+    ? Math.max(0, hud.currentLessons.length - 1)
+    : Math.max(0, (hud.nextSlot?.lessons.length ?? 0) - 1);
+  const timerSeconds = isLiveNow
+    ? hud.currentEndsInSeconds
+    : hud.nextSlot?.startsInSeconds ?? null;
 
   return (
     <section
       aria-label="Живой статус расписания"
-      className="flex flex-col gap-2 border border-white/15 border-l-4 border-l-[#E60012] bg-[#141414]/90 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-2"
+      className="grid grid-cols-1 items-center gap-5 pt-2 lg:grid-cols-12 lg:gap-6"
     >
-      {/* Left: Date Flip Block, Weekday, Clock & Day Phase */}
-      <div className="flex shrink-0 flex-wrap items-center gap-2.5 sm:gap-3">
-        <div style={{ perspective: 500 }}>
-          <motion.div
-            key={flipKey}
-            {...hudFlipMotion}
-            style={{ transformOrigin: '50% 0%' }}
-            className="flex items-center gap-2"
-          >
-            <div className="p5-skew border border-white/80 bg-[#0B0B0B] px-2 py-0.5 shadow-[2px_2px_0_#E60012]">
-              <span className="p5-unskew block font-display text-lg leading-none tracking-tight text-white sm:text-xl">
-                {dayNum}
-                <span className="mx-0.5 text-[#E60012]">/</span>
-                {monthNum}
-              </span>
+      {/* Left Zone: Iconic P5R Calendar Polygon + Protruding Weekday & Phase */}
+      <div className="lg:col-span-5" style={{ perspective: 600 }}>
+        <motion.div
+          key={flipKey}
+          {...hudFlipMotion}
+          style={{ transformOrigin: '50% 0%' }}
+          className="flex items-center"
+        >
+          {/* Giant tilted date polygon with thick pure white border */}
+          <div className="relative z-10 shrink-0 -rotate-[5deg] filter-[drop-shadow(6px_6px_0_#050505)]">
+            <div className="p5-clip-calendar bg-white p-[4px]">
+              <div className="p5-clip-calendar bg-[#050505] px-4 py-2 sm:px-5 sm:py-2.5">
+                <span className="block font-display text-[44px] leading-[0.88] tracking-tight text-white tabular-nums sm:text-[56px]">
+                  {dayNum}
+                  <span className="mx-0.5 text-[#E60012]">/</span>
+                  {monthNum}
+                </span>
+              </div>
             </div>
+          </div>
 
-            <div className="flex items-center gap-1.5">
-              <span
-                className={`font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm ${
-                  hud.isSunday ? 'text-[#E60012]' : 'text-white'
-                }`}
-              >
-                {formatRussianWeekday(now)}
-              </span>
+          {/* Protruding tilted metadata stack overlapping the calendar polygon */}
+          <div className="relative z-20 -ml-2.5 flex min-w-0 flex-col items-start gap-1.5 sm:-ml-4">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <div className="-rotate-3 border-2 border-[#050505] bg-white px-3 py-1 text-[#050505] shadow-[4px_4px_0_#050505]">
+                <span
+                  className={`block font-display text-sm uppercase leading-none tracking-wider sm:text-base ${
+                    hud.isSunday ? 'text-[#E60012]' : 'text-[#050505]'
+                  }`}
+                >
+                  {formatRussianWeekday(now)}
+                </span>
+              </div>
+
               {viewMode === 'day' &&
                 selectedDay &&
                 selectedDay !== hud.todayDay && (
-                  <span className="bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase leading-none text-[#0B0B0B]">
+                  <span className="-rotate-2 border-2 border-white bg-[#E60012] px-2 py-1 font-condensed text-[11px] font-bold uppercase leading-none text-white shadow-[3px_3px_0_#050505]">
                     → {DAY_SHORT_RU[selectedDay].toUpperCase()}
                   </span>
                 )}
             </div>
-          </motion.div>
-        </div>
 
-        <span
-          aria-hidden="true"
-          className="hidden h-4 w-px bg-white/15 sm:block"
-        />
+            <div className="flex flex-wrap items-center gap-2 pl-2 sm:pl-3">
+              <span
+                className={`p5-skew inline-block rotate-2 px-2.5 py-0.5 shadow-[3px_3px_0_#050505] ${phaseMeta.style}`}
+              >
+                <span className="p5-unskew block font-condensed text-[11px] font-bold uppercase leading-none tracking-widest">
+                  {phaseMeta.label}
+                </span>
+              </span>
 
-        <div className="flex items-center gap-2">
-          <span className="font-condensed text-sm font-bold tabular-nums tracking-wider text-neutral-200 sm:text-base">
-            {formatClock(now)}
-          </span>
-          <span className={`p5-skew inline-block px-2 py-0.5 ${phaseMeta.style}`}>
-            <span className="p5-unskew block font-condensed text-[10px] font-bold uppercase leading-none tracking-widest">
-              {phaseMeta.label}
-            </span>
-          </span>
-        </div>
+              <span className="border-2 border-white bg-[#050505] px-2 py-0.5 font-condensed text-xs font-bold tabular-nums tracking-widest text-white shadow-[3px_3px_0_#050505] sm:text-sm">
+                {formatClock(now)}
+              </span>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Right: Single clean Current / Next Lesson status + Countdown */}
-      <div className="min-w-0 flex-1">
-        {currentPrimary && currentMeta ? (
-          <div className="flex min-w-0 items-center justify-between gap-2 sm:justify-end">
-            <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end">
-              <span className="p5-skew shrink-0 bg-[#E60012] px-2 py-0.5 text-white">
-                <span className="p5-unskew block font-condensed text-[10px] font-bold uppercase leading-none tracking-wider">
-                  СЕЙЧАС
-                </span>
-              </span>
-
-              <button
-                type="button"
-                onClick={() => onSelectLesson(currentPrimary)}
-                className="group flex min-w-0 items-center gap-1.5 text-left transition-colors hover:text-[#FFE600]"
-              >
-                {currentMeta.isPinnedSubgroup && (
-                  <Pin className="h-3 w-3 shrink-0 text-[#FFE600]" />
-                )}
-                <span className="truncate text-xs font-bold text-white group-hover:text-[#FFE600] sm:text-sm">
-                  {currentPrimary.subject}
-                </span>
-                {currentMeta.text && (
-                  <span className="hidden truncate text-xs text-neutral-400 md:inline">
-                    · {currentMeta.text}
-                  </span>
-                )}
-                {hud.currentLessons.length > 1 && (
-                  <span className="shrink-0 font-condensed text-[11px] font-bold text-[#FFE600]">
-                    +{hud.currentLessons.length - 1}
-                  </span>
-                )}
-              </button>
+      {/* Right Zone: Asymmetric Skewed Next / Current Lesson Hero Card */}
+      <div className="min-w-0 pt-2 lg:col-span-7 lg:pt-0">
+        {activePrimary && activeMeta ? (
+          <motion.button
+            type="button"
+            onClick={() => onSelectLesson(activePrimary)}
+            whileHover={reduced ? undefined : { y: -3, scale: 1.01 }}
+            whileTap={reduced ? undefined : { x: 4, y: 4, scale: 0.99 }}
+            transition={{ type: 'spring', stiffness: 750, damping: 28 }}
+            className={`group relative block w-full cursor-pointer border-2 bg-[#060606] px-4 pt-1 pb-3.5 pl-5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE600] sm:px-5 sm:pb-4 sm:pl-6 ${
+              isLiveNow
+                ? 'border-[#FFE600] shadow-[6px_6px_0_#E60012,8px_8px_0_#050505] hover:shadow-[7px_7px_0_#FFE600,9px_9px_0_#050505]'
+                : 'border-white shadow-[6px_6px_0_#050505] hover:border-white hover:shadow-[7px_7px_0_#E60012,9px_9px_0_#050505]'
+            }`}
+          >
+            {/* Clipped background corner & hover crimson wedge */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 overflow-hidden"
+            >
+              <span
+                className={`absolute inset-y-0 left-0 w-1.5 ${
+                  isLiveNow ? 'bg-[#FFE600]' : 'bg-[#E60012]'
+                }`}
+              />
+              {!reduced && (
+                <span
+                  style={{ clipPath: 'polygon(0 0, 100% 0, 40% 100%, 0 100%)' }}
+                  className="absolute inset-y-0 left-0 w-4 -translate-x-full bg-[#E60012] transition-transform duration-100 ease-out md:group-hover:translate-x-0"
+                />
+              )}
             </div>
 
-            {hud.currentEndsInSeconds !== null && (
-              <span className="shrink-0 border border-[#FFE600]/60 bg-[#0B0B0B] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tabular-nums text-[#FFE600]">
-                ДО КОНЦА {formatCountdown(hud.currentEndsInSeconds)}
-              </span>
-            )}
-          </div>
-        ) : hud.nextSlot && nextPrimary && nextMeta ? (
-          <div className="flex min-w-0 items-center justify-between gap-2 sm:justify-end">
-            <div className="flex min-w-0 flex-1 items-center gap-2 sm:justify-end">
-              <span className="p5-skew shrink-0 bg-white px-2 py-0.5 text-[#0B0B0B]">
-                <span className="p5-unskew block font-condensed text-[10px] font-bold uppercase leading-none tracking-wider">
-                  СЛЕДУЮЩАЯ
-                </span>
-              </span>
-
-              <button
-                type="button"
-                onClick={() => onSelectLesson(nextPrimary)}
-                className="group flex min-w-0 items-center gap-1.5 text-left transition-colors hover:text-[#FFE600]"
-              >
-                {nextMeta.isPinnedSubgroup && (
-                  <Pin className="h-3 w-3 shrink-0 text-[#FFE600]" />
-                )}
-                <span className="truncate text-xs font-bold text-white group-hover:text-[#FFE600] sm:text-sm">
-                  {nextPrimary.subject}
-                </span>
-                <span className="shrink-0 font-condensed text-[11px] font-semibold text-neutral-400">
-                  · {nextWhenLabel}
-                </span>
-                {nextMeta.text && (
-                  <span className="hidden max-w-[200px] truncate text-xs text-neutral-400 lg:inline">
-                    · {nextMeta.text}
+            {/* Protruding top label tag */}
+            <div className="relative z-10 -mt-4 mb-2 flex flex-wrap items-center gap-2">
+              {isLiveNow ? (
+                <span className="p5-skew inline-block border-2 border-white bg-[#E60012] px-3 py-0.5 text-white shadow-[3px_3px_0_#050505]">
+                  <span className="p5-unskew block font-display text-xs uppercase leading-tight tracking-wider">
+                    СЕЙЧАС ИДЁТ
                   </span>
-                )}
-                {hud.nextSlot.lessons.length > 1 && (
-                  <span className="shrink-0 font-condensed text-[11px] font-bold text-[#FFE600]">
-                    +{hud.nextSlot.lessons.length - 1}
+                </span>
+              ) : (
+                <>
+                  <span className="p5-skew inline-block border-2 border-[#050505] bg-white px-3 py-0.5 text-[#050505] shadow-[3px_3px_0_#050505]">
+                    <span className="p5-unskew block font-display text-xs uppercase leading-tight tracking-wider">
+                      СЛЕДУЮЩАЯ ПАРА
+                    </span>
                   </span>
-                )}
-              </button>
+                  {nextWhenLabel && (
+                    <span className="p5-skew inline-block border-2 border-white bg-[#E60012] px-2.5 py-0.5 text-white shadow-[3px_3px_0_#050505]">
+                      <span className="p5-unskew block font-condensed text-xs font-bold uppercase leading-tight tracking-wider">
+                        {nextWhenLabel}
+                      </span>
+                    </span>
+                  )}
+                </>
+              )}
             </div>
 
-            <span className="shrink-0 bg-[#FFE600] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tabular-nums text-[#0B0B0B]">
-              ЧЕРЕЗ {formatCountdown(hud.nextSlot.startsInSeconds)}
-            </span>
-          </div>
+            {/* Main Subject + Meta + Giant Yellow Countdown */}
+            <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 space-y-1.5">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <h2 className="break-words font-display text-base uppercase leading-tight tracking-wide text-white transition-colors group-hover:text-[#FFE600] sm:text-xl">
+                    {activePrimary.subject}
+                  </h2>
+                  {extraLessonsCount > 0 && (
+                    <span className="shrink-0 border border-white bg-[#E60012] px-1.5 py-0.5 font-condensed text-[11px] font-bold leading-none text-white">
+                      +{extraLessonsCount}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
+                  {activeMeta.isPinnedSubgroup ? (
+                    <span className="inline-flex flex-wrap items-center gap-1.5 font-condensed font-bold uppercase tracking-wide text-[#FFE600]">
+                      <Pin className="h-3.5 w-3.5 shrink-0" />
+                      <span>{activeMeta.teacherText}</span>
+                      {activeMeta.roomText && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>{activeMeta.roomText}</span>
+                        </>
+                      )}
+                    </span>
+                  ) : (
+                    <>
+                      {activePrimary.isOnline && (
+                        <span className="inline-flex items-center gap-1 border border-[#050505] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[11px] font-bold uppercase leading-none tracking-wider text-[#050505]">
+                          <Globe className="h-3 w-3" />
+                          <span>ONLINE</span>
+                        </span>
+                      )}
+                      {activeMeta.roomText && (
+                        <span className="inline-flex items-center gap-1 font-condensed font-bold uppercase tracking-wide text-white">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-[#E60012]" />
+                          <span>{activeMeta.roomText}</span>
+                        </span>
+                      )}
+                      {activeMeta.teacherText ? (
+                        <span className="inline-flex min-w-0 items-center gap-1 font-medium text-neutral-200">
+                          <User className="h-3.5 w-3.5 shrink-0 text-[#E60012]" />
+                          <span className="break-words">{activeMeta.teacherText}</span>
+                        </span>
+                      ) : (
+                        activeMeta.subgroupCount > 0 && (
+                          <span className="inline-flex items-center whitespace-nowrap border border-white/80 bg-[#E60012] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-white">
+                            {formatSubgroupCount(activeMeta.subgroupCount)}
+                          </span>
+                        )
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {timerSeconds !== null && (
+                <div className="p5-skew shrink-0 self-start border-2 border-[#050505] bg-[#FFE600] px-3.5 py-1.5 text-[#050505] shadow-[4px_4px_0_#E60012] sm:self-center">
+                  <div className="p5-unskew flex flex-col items-start sm:items-end">
+                    <span className="font-condensed text-[10px] font-bold uppercase leading-none tracking-widest text-[#050505]">
+                      {isLiveNow ? 'ДО КОНЦА' : 'ЧЕРЕЗ'}
+                    </span>
+                    <span className="mt-0.5 whitespace-nowrap font-display text-lg leading-none tabular-nums text-[#050505] sm:text-2xl">
+                      {formatCountdown(timerSeconds)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.button>
         ) : (
-          <div className="text-left font-condensed text-xs font-semibold uppercase tracking-wider text-neutral-400 sm:text-right">
-            {hud.isSunday
-              ? 'Воскресенье — выходной день'
-              : 'Запланированных пар не найдено'}
+          <div className="border-2 border-white bg-[#060606] px-4 py-3 shadow-[5px_5px_0_#050505]">
+            <p className="font-display text-sm uppercase tracking-wider text-white">
+              {hud.isSunday
+                ? 'Воскресенье — выходной день'
+                : 'Запланированных пар не найдено'}
+            </p>
           </div>
         )}
       </div>

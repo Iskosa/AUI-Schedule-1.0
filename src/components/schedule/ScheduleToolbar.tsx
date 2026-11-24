@@ -1,32 +1,33 @@
 import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
-import { Calendar, Columns3, Plus } from 'lucide-react';
-import { DAY_SHORT_EN, DAY_SHORT_RU, DAYS } from '../../constants/schedule';
+import { Calendar, Columns3, MapPin, Plus, UserCheck } from 'lucide-react';
 import type {
-  DayOfWeek,
-  EffectiveLesson,
+  EffectiveTeacher,
   GroupFilter,
+  GroupInfo,
   ViewMode,
 } from '../../types/schedule';
 import { getCursorSpring } from '../../utils/p5Motion';
-import { filterLessonsByGroup } from '../../utils/time';
+import { GroupSwitcher } from './GroupSwitcher';
 
 interface ScheduleToolbarProps {
+  selectedGroup: GroupFilter;
+  onSelectGroup: (group: GroupFilter) => void;
+  groups: GroupInfo[];
+  teachers: EffectiveTeacher[];
+  onOpenTeacher: (teacherId: string) => void;
   viewMode: ViewMode;
   onChangeViewMode: (mode: ViewMode) => void;
-  selectedDay: DayOfWeek;
-  onSelectDay: (day: DayOfWeek) => void;
-  lessons: EffectiveLesson[];
-  selectedGroup: GroupFilter;
   onAddLesson: () => void;
 }
 
 export function ScheduleToolbar({
+  selectedGroup,
+  onSelectGroup,
+  groups,
+  teachers,
+  onOpenTeacher,
   viewMode,
   onChangeViewMode,
-  selectedDay,
-  onSelectDay,
-  lessons,
-  selectedGroup,
   onAddLesson,
 }: ScheduleToolbarProps) {
   const reduced = useReducedMotion();
@@ -38,12 +39,61 @@ export function ScheduleToolbar({
         transition: { type: 'spring' as const, stiffness: 800, damping: 30 },
       };
 
-  const groupLessons = filterLessonsByGroup(lessons, selectedGroup);
+  const activeGroupInfo =
+    selectedGroup === 'ALL'
+      ? null
+      : groups.find((g) => g.id === selectedGroup) ?? null;
+
+  const advisorTeacher = activeGroupInfo?.advisor
+    ? teachers.find(
+        (t) =>
+          t.name.trim().toLowerCase() ===
+          activeGroupInfo.advisor?.trim().toLowerCase()
+      )
+    : null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-white/10 pb-2.5">
-      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-        {/* View Mode Switcher */}
+    <section
+      aria-label="Панель управления расписанием"
+      className="flex flex-wrap items-center justify-between gap-2.5"
+    >
+      {/* Left: Groups */}
+      <GroupSwitcher
+        selectedGroup={selectedGroup}
+        onSelectGroup={onSelectGroup}
+      />
+
+      {/* Right: Advisor Indicator + View Mode Switcher + Add Lesson CTA */}
+      <div className="flex flex-wrap items-center gap-2">
+        {activeGroupInfo?.advisor && (
+          <div className="p5-skew border-2 border-white bg-[#060606] px-2.5 py-1 shadow-[3px_3px_0_#050505]">
+            <div className="p5-unskew flex items-center gap-1.5 text-xs">
+              <UserCheck className="h-3.5 w-3.5 shrink-0 text-[#E60012]" />
+              {advisorTeacher ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenTeacher(advisorTeacher.id)}
+                  title={`Эдвайзер группы ${activeGroupInfo.id}`}
+                  className="font-condensed font-bold tracking-wide text-white underline decoration-[#E60012] decoration-2 underline-offset-4 transition-colors hover:text-[#FFE600]"
+                >
+                  {activeGroupInfo.advisor}
+                </button>
+              ) : (
+                <span className="font-condensed font-bold tracking-wide text-white">
+                  {activeGroupInfo.advisor}
+                </span>
+              )}
+              {activeGroupInfo.advisorRoom && (
+                <span className="inline-flex items-center gap-0.5 font-condensed text-[11px] font-bold uppercase text-neutral-300">
+                  <MapPin className="h-3 w-3 text-[#E60012]" />
+                  {activeGroupInfo.advisorRoom}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Day / Week View Mode Switcher */}
         <LayoutGroup id="p5-viewmode">
           <div
             role="group"
@@ -55,9 +105,7 @@ export function ScheduleToolbar({
               onClick={() => onChangeViewMode('day')}
               {...tapProps}
               className={`relative px-3 py-1.5 transition-colors ${
-                viewMode === 'day'
-                  ? 'text-white'
-                  : 'text-neutral-300 hover:text-white'
+                viewMode === 'day' ? 'text-[#050505]' : 'text-white'
               }`}
             >
               {viewMode === 'day' ? (
@@ -67,12 +115,12 @@ export function ScheduleToolbar({
                   transition={cursorSpring}
                   className="pointer-events-none absolute inset-0 z-0"
                 >
-                  <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                  <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-[#050505] bg-white shadow-[4px_4px_0_#050505]" />
                 </motion.div>
               ) : (
                 <div
                   aria-hidden="true"
-                  className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#141414]/80"
+                  className="p5-skew pointer-events-none absolute inset-0 z-0 border-2 border-white bg-[#060606] shadow-[3px_3px_0_#050505]"
                 />
               )}
               <span className="relative z-10 inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
@@ -86,9 +134,7 @@ export function ScheduleToolbar({
               onClick={() => onChangeViewMode('week')}
               {...tapProps}
               className={`relative px-3 py-1.5 transition-colors ${
-                viewMode === 'week'
-                  ? 'text-white'
-                  : 'text-neutral-300 hover:text-white'
+                viewMode === 'week' ? 'text-[#050505]' : 'text-white'
               }`}
             >
               {viewMode === 'week' ? (
@@ -98,12 +144,12 @@ export function ScheduleToolbar({
                   transition={cursorSpring}
                   className="pointer-events-none absolute inset-0 z-0"
                 >
-                  <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                  <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-[#050505] bg-white shadow-[4px_4px_0_#050505]" />
                 </motion.div>
               ) : (
                 <div
                   aria-hidden="true"
-                  className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#141414]/80"
+                  className="p5-skew pointer-events-none absolute inset-0 z-0 border-2 border-white bg-[#060606] shadow-[3px_3px_0_#050505]"
                 />
               )}
               <span className="relative z-10 inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
@@ -114,79 +160,19 @@ export function ScheduleToolbar({
           </div>
         </LayoutGroup>
 
-        {/* MON-SAT Day Selector with flying crimson cursor */}
-        {viewMode === 'day' && (
-          <LayoutGroup id="p5-days">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {DAYS.map((day) => {
-                const count = groupLessons.filter((ls) => ls.day === day).length;
-                const active = selectedDay === day;
-                return (
-                  <motion.button
-                    key={day}
-                    type="button"
-                    onClick={() => onSelectDay(day)}
-                    {...tapProps}
-                    className={`relative px-2.5 py-1 transition-colors ${
-                      active
-                        ? 'text-white'
-                        : 'text-neutral-300 hover:text-white'
-                    }`}
-                  >
-                    {active ? (
-                      <motion.div
-                        layoutId="p5-day-cursor"
-                        aria-hidden="true"
-                        transition={cursorSpring}
-                        className="pointer-events-none absolute inset-0 z-0"
-                      >
-                        <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
-                      </motion.div>
-                    ) : (
-                      <div
-                        aria-hidden="true"
-                        className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/15 bg-[#141414]/75"
-                      />
-                    )}
-                    <span className="relative z-10 inline-flex items-center gap-1.5">
-                      <span className="flex flex-col items-start leading-none">
-                        <span className="font-condensed text-[9px] font-bold uppercase tracking-widest opacity-80">
-                          {DAY_SHORT_EN[day]}
-                        </span>
-                        <span className="font-condensed text-xs font-bold uppercase sm:text-sm">
-                          {DAY_SHORT_RU[day]}
-                        </span>
-                      </span>
-                      <span
-                        className={`px-1 py-0.5 font-condensed text-[10px] font-bold leading-none ${
-                          active
-                            ? 'bg-[#0B0B0B] text-[#FFE600]'
-                            : 'bg-white/10 text-neutral-300'
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </LayoutGroup>
-        )}
+        {/* Add Lesson CTA */}
+        <motion.button
+          type="button"
+          onClick={onAddLesson}
+          {...tapProps}
+          className="p5-skew border-2 border-[#050505] bg-white px-3.5 py-1.5 text-[#050505] shadow-[4px_4px_0_#050505] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white"
+        >
+          <span className="p5-unskew inline-flex items-center justify-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+            <Plus className="h-3.5 w-3.5" />
+            <span>Пара</span>
+          </span>
+        </motion.button>
       </div>
-
-      {/* Add Lesson Button */}
-      <motion.button
-        type="button"
-        onClick={onAddLesson}
-        {...tapProps}
-        className="p5-skew border border-[#0B0B0B] bg-[#FFE600] px-3.5 py-1.5 text-[#0B0B0B] shadow-[3px_3px_0_#E60012] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white hover:shadow-[3px_3px_0_#000000]"
-      >
-        <span className="p5-unskew inline-flex items-center justify-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-          <Plus className="h-3.5 w-3.5" />
-          <span>Добавить пару</span>
-        </span>
-      </motion.button>
-    </div>
+    </section>
   );
 }

@@ -85,11 +85,11 @@ export function TeachersView({
   return (
     <div className="space-y-3">
       {/* Confidants Top Search & Filter Bar */}
-      <div className="space-y-2.5 border border-white/15 border-l-4 border-l-[#E60012] bg-[#141414] p-3">
+      <div className="space-y-2.5 border-2 border-white border-l-[6px] border-l-[#E60012] bg-[#060606] p-3 shadow-[5px_5px_0_#050505]">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2.5">
             <RansomTitle text="CONFIDANTS" as="h2" size="sm" />
-            <span className="bg-[#FFE600] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-[#0B0B0B]">
+            <span className="bg-[#FFE600] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase tracking-wider text-[#050505]">
               {filteredTeachers.length} / {teachers.length}
             </span>
           </div>
@@ -110,7 +110,7 @@ export function TeachersView({
                 type="button"
                 onClick={() => setQuery('')}
                 aria-label="Очистить поиск"
-                className="absolute top-1.5 right-1.5 border border-white/30 bg-[#141414] p-1 text-white transition hover:border-[#FFE600] hover:bg-[#E60012]"
+                className="absolute top-1.5 right-1.5 border border-white/60 bg-[#050505] p-1 text-white transition hover:border-[#FFE600] hover:bg-[#E60012]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -212,7 +212,7 @@ export function TeachersView({
           }`}
         >
           {filteredTeachers.length === 0 ? (
-            <div className="border border-dashed border-white/25 bg-[#141414] p-8 text-center font-condensed text-sm font-bold uppercase tracking-wider text-neutral-400">
+            <div className="border-2 border-dashed border-white/70 bg-[#060606] p-8 text-center font-condensed text-sm font-bold uppercase tracking-wider text-neutral-300 shadow-[4px_4px_0_#050505]">
               По запросу ничего не найдено.
             </div>
           ) : (

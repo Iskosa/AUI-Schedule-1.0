@@ -44,10 +44,10 @@ export function TeacherCard({
       {...tapProps}
       className="relative w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE600]"
     >
-      {/* Base clean dark card backing */}
+      {/* Base clean black card backing */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 border border-white/15 bg-[#141414] shadow-[3px_3px_0_#000000]"
+        className="pointer-events-none absolute inset-0 z-0 border-2 border-white bg-[#060606] shadow-[4px_4px_0_#050505]"
       />
 
       {/* Running crimson Confidant hover stripe */}

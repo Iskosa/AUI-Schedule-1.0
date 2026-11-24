@@ -5,7 +5,7 @@ export const P5_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 export function getCursorSpring(reduced: boolean | null) {
   return reduced
     ? { duration: 0.01 }
-    : { type: 'spring' as const, stiffness: 680, damping: 30, mass: 0.6 };
+    : { type: 'spring' as const, stiffness: 700, damping: 30, mass: 0.55 };
 }
 
 export function getStaggerContainerVariants(reduced: boolean | null): Variants {
@@ -13,7 +13,7 @@ export function getStaggerContainerVariants(reduced: boolean | null): Variants {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: reduced ? 0 : 0.035,
+        staggerChildren: reduced ? 0 : 0.04,
       },
     },
   };
@@ -31,7 +31,7 @@ export function getCardSlamItemVariants(reduced: boolean | null): Variants {
   }
 
   return {
-    hidden: { x: -48, y: 8, skewX: -12, scale: 0.94, opacity: 0 },
+    hidden: { x: -56, y: 16, skewX: -12, scale: 0.94, opacity: 0 },
     visible: {
       x: 0,
       y: 0,
@@ -40,7 +40,7 @@ export function getCardSlamItemVariants(reduced: boolean | null): Variants {
       opacity: 1,
       transition: {
         type: 'spring',
-        stiffness: 520,
+        stiffness: 560,
         damping: 26,
       },
     },

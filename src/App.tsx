@@ -7,7 +7,6 @@ import { P5TransitionSlash } from './components/common/P5TransitionSlash';
 import { AppShell } from './components/layout/AppShell';
 import { LiveHudBar } from './components/layout/LiveHudBar';
 import { DayView } from './components/schedule/DayView';
-import { GroupSwitcher } from './components/schedule/GroupSwitcher';
 import { LessonDetailModal } from './components/schedule/LessonDetailModal';
 import { LessonEditorModal } from './components/schedule/LessonEditorModal';
 import { ScheduleToolbar } from './components/schedule/ScheduleToolbar';
@@ -36,7 +35,7 @@ import {
   playSwitch,
   toggleSfx,
 } from './utils/p5Sound';
-import { computeLiveHudState } from './utils/time';
+import { computeLiveHudState, getWeekdayOrSunday } from './utils/time';
 
 type ConfirmState =
   | { kind: 'deleteLesson'; lesson: EffectiveLesson }
@@ -222,8 +221,8 @@ export default function App() {
 
   if (store.loading && !store.baseData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] p-6 text-white">
-        <div className="p5-skew border-2 border-white bg-[#141414] px-6 py-4 shadow-[5px_5px_0_#E60012]">
+      <div className="flex min-h-screen items-center justify-center bg-[#050505] p-6 text-white">
+        <div className="p5-skew border-2 border-white bg-[#060606] px-6 py-4 shadow-[5px_5px_0_#E60012]">
           <div className="p5-unskew flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-[#E60012]" />
             <span className="font-condensed text-sm font-bold uppercase tracking-wider">
@@ -237,8 +236,8 @@ export default function App() {
 
   if (store.error && !store.baseData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B0B0B] p-6">
-        <div className="max-w-md space-y-3 border-2 border-[#E60012] bg-[#141414] p-6 text-center shadow-[5px_5px_0_#E60012]">
+      <div className="flex min-h-screen items-center justify-center bg-[#050505] p-6">
+        <div className="max-w-md space-y-3 border-2 border-[#E60012] bg-[#060606] p-6 text-center shadow-[5px_5px_0_#E60012]">
           <AlertCircle className="mx-auto h-8 w-8 text-[#E60012]" />
           <h1 className="font-display text-base uppercase text-white">
             Ошибка загрузки данных
@@ -247,7 +246,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => void store.reloadBaseData()}
-            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#0B0B0B] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0B0B0B]"
+            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#050505] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#050505]"
           >
             <span className="p5-unskew inline-flex items-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
               <RefreshCw className="h-4 w-4" />
@@ -259,6 +258,7 @@ export default function App() {
     );
   }
 
+  const todayDay = getWeekdayOrSunday(now);
   const scheduleContentKey = `${store.selectedGroup}-${store.viewMode}-${
     store.viewMode === 'day' ? store.selectedDay : 'week'
   }`;
@@ -291,22 +291,15 @@ export default function App() {
         }
       >
         {activeTab === 'schedule' ? (
-          <div key="tab-schedule" className="space-y-3">
-            <GroupSwitcher
+          <div key="tab-schedule" className="space-y-4">
+            <ScheduleToolbar
               selectedGroup={store.selectedGroup}
               onSelectGroup={handleSelectGroup}
               groups={store.baseData?.groups ?? []}
               teachers={store.teachers}
               onOpenTeacher={handleOpenTeacher}
-            />
-
-            <ScheduleToolbar
               viewMode={store.viewMode}
               onChangeViewMode={handleChangeViewMode}
-              selectedDay={store.selectedDay}
-              onSelectDay={handleSelectDay}
-              lessons={store.lessons}
-              selectedGroup={store.selectedGroup}
               onAddLesson={() => {
                 playOpen();
                 setLessonEditorState({
@@ -321,6 +314,8 @@ export default function App() {
               {store.viewMode === 'day' ? (
                 <DayView
                   selectedDay={store.selectedDay}
+                  todayDay={todayDay}
+                  onSelectDay={handleSelectDay}
                   lessons={store.lessons}
                   selectedGroup={store.selectedGroup}
                   saturdayNotes={store.baseData?.meta.saturdayNotes ?? []}
@@ -339,6 +334,7 @@ export default function App() {
                 <WeekView
                   lessons={store.lessons}
                   selectedGroup={store.selectedGroup}
+                  todayDay={todayDay}
                   currentLessonIds={currentLessonIds}
                   onSelectLesson={handleOpenLessonDetail}
                   onFocusDay={(day) => {
@@ -504,7 +500,7 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
             transition={{ duration: reduced ? 0.08 : 0.16 }}
-            className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#0B0B0B] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
+            className="p5-skew fixed right-4 bottom-4 z-50 border-2 border-white bg-[#060606] px-4 py-2.5 text-sm font-bold text-[#FFE600] shadow-[5px_5px_0_#E60012]"
           >
             <span className="p5-unskew block font-condensed uppercase tracking-wide">
               {toast}

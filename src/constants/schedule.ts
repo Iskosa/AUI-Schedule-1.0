@@ -85,19 +85,19 @@ export const LESSON_TYPE_STYLES: Record<LessonType, string> = {
 export const DAY_PHASE_LABELS: Record<DayPhase, { label: string; style: string }> = {
   MORNING: {
     label: 'MORNING',
-    style: 'bg-white text-[#0D0D0D] border border-white',
+    style: 'bg-white text-[#050505] border-2 border-[#050505]',
   },
   LUNCHTIME: {
     label: 'LUNCHTIME',
-    style: 'bg-[#FFE600] text-[#0D0D0D] border border-[#FFE600]',
+    style: 'bg-[#D90012] text-white border-2 border-white',
   },
   AFTERNOON: {
     label: 'AFTERNOON',
-    style: 'bg-[#E60012] text-white border border-white/80',
+    style: 'bg-[#E60012] text-white border-2 border-white',
   },
   EVENING: {
     label: 'EVENING',
-    style: 'bg-[#0B0B0B] text-[#FFE600] border border-[#FFE600]/80',
+    style: 'bg-[#050505] text-white border-2 border-white',
   },
 };
 
