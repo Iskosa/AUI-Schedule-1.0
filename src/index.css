@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --bg-app: #0b0d12;
+  --bg-surface: #121620;
+  --bg-elevated: #1a2030;
+  --border-subtle: #252e42;
+  --accent-primary: #3b82f6;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
+  --accent-violet: #a855f7;
+}
+
+html,
+body {
+  background-color: var(--bg-app);
+  color: #f1f5f9;
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2c354b #0b0d12;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0b0d12;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #2c354b;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #3d4966;
+}
