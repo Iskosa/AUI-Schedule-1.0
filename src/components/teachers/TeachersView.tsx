@@ -1,7 +1,13 @@
 import { useMemo, useState } from 'react';
 import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { Plus, Search, X } from 'lucide-react';
-import type { EffectiveLesson, EffectiveTeacher } from '../../types/schedule';
+import { TARGET_GROUPS } from '../../constants/schedule';
+import type {
+  EffectiveLesson,
+  EffectiveTeacher,
+  GroupId,
+  GroupInfo,
+} from '../../types/schedule';
 import {
   getCardSlamItemVariants,
   getCursorSpring,
@@ -14,31 +20,49 @@ import { RansomTitle } from '../common/RansomTitle';
 import { TeacherCard } from './TeacherCard';
 import { TeacherDetailPanel } from './TeacherDetailPanel';
 
+type TeacherGroupScope = 'all' | 'target4' | GroupId;
+
 interface TeachersViewProps {
   teachers: EffectiveTeacher[];
   lessons: EffectiveLesson[];
+  allLessons: EffectiveLesson[];
+  groups: GroupInfo[];
+  teachersById: Record<string, EffectiveTeacher>;
+  subjectTeacherOverrides: Record<string, string>;
   targetGroupTeacherIds: Set<string>;
+  pinnedGroup: GroupId | null;
+  pinnedTeacherIds: Set<string>;
   selectedTeacherId: string | null;
   onSelectTeacher: (teacherId: string | null) => void;
   onAddTeacher: () => void;
   onEditTeacher: (teacher: EffectiveTeacher) => void;
   onDeleteTeacher: (teacher: EffectiveTeacher) => void;
   onSelectLesson: (lesson: EffectiveLesson) => void;
+  onSetSubjectPinnedSubgroup: (subject: string, teacherId: string | null) => void;
+  onShowTeacherSchedule: (teacherId: string) => void;
 }
 
 export function TeachersView({
   teachers,
   lessons,
+  allLessons,
+  groups,
+  teachersById,
+  subjectTeacherOverrides,
   targetGroupTeacherIds,
+  pinnedGroup,
+  pinnedTeacherIds,
   selectedTeacherId,
   onSelectTeacher,
   onAddTeacher,
   onEditTeacher,
   onDeleteTeacher,
   onSelectLesson,
+  onSetSubjectPinnedSubgroup,
+  onShowTeacherSchedule,
 }: TeachersViewProps) {
   const [query, setQuery] = useState('');
-  const [onlyTargetGroups, setOnlyTargetGroups] = useState(false);
+  const [groupScope, setGroupScope] = useState<TeacherGroupScope>('all');
   const [hoveredTeacherId, setHoveredTeacherId] = useState<string | null>(null);
 
   const reduced = useReducedMotion();
@@ -63,10 +87,49 @@ export function TeachersView({
     [teachers, targetGroupTeacherIds]
   );
 
+  const teacherIdsByGroup = useMemo(() => {
+    const map: Record<GroupId, Set<string>> = {
+      COMSE26A: new Set(),
+      COMSE26B: new Set(),
+      COMSEH26: new Set(),
+      COMCIF26: new Set(),
+    };
+    for (const ls of allLessons) {
+      for (const gid of ls.groupIds) {
+        const set = map[gid];
+        if (!set) continue;
+        for (const tid of ls.teacherIds) {
+          set.add(tid);
+        }
+        for (const sg of ls.baseSubgroups ?? ls.subgroups ?? []) {
+          if (sg.teacherId) set.add(sg.teacherId);
+        }
+      }
+    }
+    for (const g of groups) {
+      if (!g.advisor || !map[g.id]) continue;
+      const advisorName = g.advisor.trim().toLowerCase();
+      const advisor = teachers.find(
+        (t) => t.name.trim().toLowerCase() === advisorName
+      );
+      if (advisor) {
+        map[g.id].add(advisor.id);
+      }
+    }
+    return map;
+  }, [allLessons, groups, teachers]);
+
   const filteredTeachers = useMemo(() => {
     const q = query.trim().toLowerCase();
     return teachers.filter((t) => {
-      if (onlyTargetGroups && !targetGroupTeacherIds.has(t.id)) {
+      if (groupScope === 'target4' && !targetGroupTeacherIds.has(t.id)) {
+        return false;
+      }
+      if (
+        groupScope !== 'all' &&
+        groupScope !== 'target4' &&
+        !teacherIdsByGroup[groupScope]?.has(t.id)
+      ) {
         return false;
       }
       if (!q) return true;
@@ -77,7 +140,7 @@ export function TeachersView({
         (t.notes && t.notes.toLowerCase().includes(q))
       );
     });
-  }, [teachers, query, onlyTargetGroups, targetGroupTeacherIds]);
+  }, [teachers, query, groupScope, targetGroupTeacherIds, teacherIdsByGroup]);
 
   const activeTeacher =
     teachers.find((t) => t.id === selectedTeacherId) ?? null;
@@ -123,17 +186,17 @@ export function TeachersView({
                 <m.button
                   type="button"
                   onClick={() => {
-                    if (onlyTargetGroups) playSwitch();
-                    setOnlyTargetGroups(false);
+                    if (groupScope !== 'all') playSwitch();
+                    setGroupScope('all');
                   }}
                   {...tapProps}
-                  className={`relative px-3 py-1.5 transition-colors ${
-                    !onlyTargetGroups
+                  className={`relative px-2.5 py-1.5 transition-colors ${
+                    groupScope === 'all'
                       ? 'text-white'
                       : 'text-neutral-300 hover:text-white'
                   }`}
                 >
-                  {!onlyTargetGroups ? (
+                  {groupScope === 'all' ? (
                     <m.div
                       layoutId="p5-teacher-filter-cursor"
                       aria-hidden="true"
@@ -156,17 +219,17 @@ export function TeachersView({
                 <m.button
                   type="button"
                   onClick={() => {
-                    if (!onlyTargetGroups) playSwitch();
-                    setOnlyTargetGroups(true);
+                    if (groupScope !== 'target4') playSwitch();
+                    setGroupScope('target4');
                   }}
                   {...tapProps}
-                  className={`relative px-3 py-1.5 transition-colors ${
-                    onlyTargetGroups
+                  className={`relative px-2.5 py-1.5 transition-colors ${
+                    groupScope === 'target4'
                       ? 'text-white'
                       : 'text-neutral-300 hover:text-white'
                   }`}
                 >
-                  {onlyTargetGroups ? (
+                  {groupScope === 'target4' ? (
                     <m.div
                       layoutId="p5-teacher-filter-cursor"
                       aria-hidden="true"
@@ -182,9 +245,54 @@ export function TeachersView({
                     />
                   )}
                   <span className="relative z-10 block font-condensed text-xs font-bold uppercase tracking-wider">
-                    Наши 4 группы ({targetCount})
+                    4 группы ({targetCount})
                   </span>
                 </m.button>
+
+                {TARGET_GROUPS.map((gid) => {
+                  const active = groupScope === gid;
+                  const isPinned = pinnedGroup === gid;
+                  return (
+                    <m.button
+                      key={gid}
+                      type="button"
+                      onClick={() => {
+                        if (groupScope !== gid) playSwitch();
+                        setGroupScope(gid);
+                      }}
+                      {...tapProps}
+                      className={`relative px-2.5 py-1.5 transition-colors ${
+                        active
+                          ? 'text-white'
+                          : 'text-neutral-300 hover:text-white'
+                      }`}
+                    >
+                      {active ? (
+                        <m.div
+                          layoutId="p5-teacher-filter-cursor"
+                          aria-hidden="true"
+                          transition={cursorSpring}
+                          className="pointer-events-none absolute inset-0 z-0"
+                        >
+                          <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
+                        </m.div>
+                      ) : (
+                        <div
+                          aria-hidden="true"
+                          className="p5-skew pointer-events-none absolute inset-0 z-0 border border-white/20 bg-[#0B0B0B]"
+                        />
+                      )}
+                      <span className="relative z-10 inline-flex items-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider">
+                        <span>{gid}</span>
+                        {isPinned && (
+                          <span className="text-[10px] leading-none text-[#FFE600]">
+                            ★
+                          </span>
+                        )}
+                      </span>
+                    </m.button>
+                  );
+                })}
               </div>
             </LayoutGroup>
 
@@ -218,7 +326,7 @@ export function TeachersView({
           ) : (
             <LayoutGroup id="p5-confidants-list">
               <m.div
-                key={onlyTargetGroups ? 'target-only' : 'all-teachers'}
+                key={groupScope}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -232,6 +340,7 @@ export function TeachersView({
                       lessonCount={lessonCountsByTeacher[teacher.id] ?? 0}
                       isSelected={activeTeacher?.id === teacher.id}
                       isHovered={hoveredTeacherId === teacher.id}
+                      isPinned={pinnedTeacherIds.has(teacher.id)}
                       onHoverStart={() => setHoveredTeacherId(teacher.id)}
                       onSelect={() => onSelectTeacher(teacher.id)}
                     />
@@ -255,10 +364,15 @@ export function TeachersView({
             <TeacherDetailPanel
               teacher={activeTeacher}
               lessons={lessons}
+              allLessons={allLessons}
+              teachersById={teachersById}
+              subjectTeacherOverrides={subjectTeacherOverrides}
               onBackToList={() => onSelectTeacher(null)}
               onEdit={onEditTeacher}
               onDelete={onDeleteTeacher}
               onSelectLesson={onSelectLesson}
+              onSetSubjectPinnedSubgroup={onSetSubjectPinnedSubgroup}
+              onShowTeacherSchedule={onShowTeacherSchedule}
             />
           </m.div>
         </div>

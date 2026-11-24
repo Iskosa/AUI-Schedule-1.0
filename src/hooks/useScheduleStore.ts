@@ -105,8 +105,13 @@ export function useScheduleStore() {
   );
 
   const selectedGroup: GroupFilter = overlay.settings.selectedGroup;
+  const pinnedGroup: GroupId | null = overlay.settings.pinnedGroup ?? null;
+  const setupDismissed = Boolean(overlay.settings.setupDismissed);
   const defaultGroup: GroupFilter =
-    overlay.settings.defaultGroup ?? overlay.settings.selectedGroup ?? 'COMSE26A';
+    pinnedGroup ??
+    overlay.settings.defaultGroup ??
+    overlay.settings.selectedGroup ??
+    'ALL';
   const defaultViewMode: ViewMode | undefined = overlay.settings.defaultViewMode;
   const viewMode: ViewMode =
     overlay.settings.viewMode ?? defaultViewMode ?? (isMobile ? 'day' : 'week');
@@ -154,9 +159,43 @@ export function useScheduleStore() {
         ...prev,
         settings: {
           ...prev.settings,
+          pinnedGroup: group === 'ALL' ? null : group,
           defaultGroup: group,
           selectedGroup: group,
           scheduleScopeMode: 'group',
+        },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const pinGroup = useCallback(
+    (group: GroupId | null) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          pinnedGroup: group,
+          defaultGroup: group ?? 'ALL',
+          ...(group !== null
+            ? {
+                selectedGroup: group,
+                scheduleScopeMode: 'group' as const,
+              }
+            : {}),
+        },
+      }));
+    },
+    [updateOverlay]
+  );
+
+  const setSetupDismissed = useCallback(
+    (dismissed: boolean) => {
+      updateOverlay((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          setupDismissed: dismissed,
         },
       }));
     },
@@ -259,20 +298,43 @@ export function useScheduleStore() {
 
   const togglePinSubgroup = useCallback(
     (lessonId: string, teacherId: string) => {
+      const targetLesson = merged.lessons.find((ls) => ls.id === lessonId);
       updateOverlay((prev) => {
         const nextPins = { ...prev.pinnedSubgroups };
-        if (nextPins[lessonId] === teacherId) {
+        const willUnpin = nextPins[lessonId] === teacherId;
+
+        if (targetLesson) {
+          const normalizedSubject = targetLesson.subject.trim().toLowerCase();
+          for (const ls of merged.lessons) {
+            if (ls.subject.trim().toLowerCase() !== normalizedSubject) continue;
+            const subgroups = ls.baseSubgroups ?? ls.subgroups;
+            if (
+              !subgroups ||
+              !subgroups.some((sg) => sg.teacherId === teacherId)
+            ) {
+              continue;
+            }
+            if (willUnpin) {
+              if (nextPins[ls.id] === teacherId) {
+                delete nextPins[ls.id];
+              }
+            } else {
+              nextPins[ls.id] = teacherId;
+            }
+          }
+        } else if (willUnpin) {
           delete nextPins[lessonId];
         } else {
           nextPins[lessonId] = teacherId;
         }
+
         return {
           ...prev,
           pinnedSubgroups: nextPins,
         };
       });
     },
-    [updateOverlay]
+    [merged.lessons, updateOverlay]
   );
 
   const setSubjectPinnedSubgroup = useCallback(
@@ -615,6 +677,8 @@ export function useScheduleStore() {
     allLessons: merged.lessons,
     targetGroupTeacherIds: merged.targetGroupTeacherIds,
     selectedGroup,
+    pinnedGroup,
+    setupDismissed,
     defaultGroup,
     defaultViewMode,
     viewMode,
@@ -626,6 +690,8 @@ export function useScheduleStore() {
     focusedTeacherId,
     subjectTeacherOverrides,
     setSelectedGroup,
+    pinGroup,
+    setSetupDismissed,
     setDefaultGroup,
     setViewMode,
     setDefaultViewMode,

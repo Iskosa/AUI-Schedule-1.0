@@ -1,8 +1,18 @@
 import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
-import { Calendar, Columns3, MapPin, Plus, UserCheck, X } from 'lucide-react';
+import {
+  Calendar,
+  Columns3,
+  MapPin,
+  Pin,
+  Plus,
+  UserCheck,
+  Users,
+  X,
+} from 'lucide-react';
 import type {
   EffectiveTeacher,
   GroupFilter,
+  GroupId,
   GroupInfo,
   ScheduleScopeMode,
   ViewMode,
@@ -12,13 +22,18 @@ import { GroupSwitcher } from './GroupSwitcher';
 
 interface ScheduleToolbarProps {
   selectedGroup: GroupFilter;
+  pinnedGroup: GroupId | null;
   onSelectGroup: (group: GroupFilter) => void;
+  onPinGroup: (group: GroupId) => void;
   groups: GroupInfo[];
   teachers: EffectiveTeacher[];
   onOpenTeacher: (teacherId: string) => void;
   viewMode: ViewMode;
   onChangeViewMode: (mode: ViewMode) => void;
   onAddLesson: () => void;
+  pinnedSubjectsCount: number;
+  totalStreamSubjectsCount: number;
+  onOpenQuickSetup: () => void;
   scheduleScopeMode?: ScheduleScopeMode;
   focusedTeacherName?: string | null;
   onClearTeacherScope?: () => void;
@@ -26,13 +41,18 @@ interface ScheduleToolbarProps {
 
 export function ScheduleToolbar({
   selectedGroup,
+  pinnedGroup,
   onSelectGroup,
+  onPinGroup,
   groups,
   teachers,
   onOpenTeacher,
   viewMode,
   onChangeViewMode,
   onAddLesson,
+  pinnedSubjectsCount,
+  totalStreamSubjectsCount,
+  onOpenQuickSetup,
   scheduleScopeMode = 'group',
   focusedTeacherName = null,
   onClearTeacherScope,
@@ -64,12 +84,46 @@ export function ScheduleToolbar({
       aria-label="Панель управления расписанием"
       className="flex flex-wrap items-center justify-between gap-2.5"
     >
-      {/* Left: Groups or Teacher Scope Pill */}
+      {/* Left: Groups + Quick Pin Controls or Teacher Scope Pill */}
       <div className="flex flex-wrap items-center gap-2">
         <GroupSwitcher
           selectedGroup={selectedGroup}
+          pinnedGroup={pinnedGroup}
           onSelectGroup={onSelectGroup}
         />
+
+        {scheduleScopeMode === 'group' &&
+          selectedGroup !== 'ALL' &&
+          selectedGroup !== pinnedGroup && (
+            <m.button
+              type="button"
+              onClick={() => onPinGroup(selectedGroup)}
+              {...tapProps}
+              title={`Закрепить ${selectedGroup} как свою группу`}
+              className="p5-skew border-2 border-[#050505] bg-[#FFE600] px-2.5 py-1 text-[#050505] shadow-[3px_3px_0_#E60012] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white"
+            >
+              <span className="p5-unskew inline-flex items-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider">
+                <Pin className="h-3 w-3" />
+                <span>Закрепить {selectedGroup}</span>
+              </span>
+            </m.button>
+          )}
+
+        {scheduleScopeMode === 'group' &&
+          pinnedGroup &&
+          selectedGroup !== pinnedGroup && (
+            <m.button
+              type="button"
+              onClick={() => onSelectGroup(pinnedGroup)}
+              {...tapProps}
+              title="Вернуться к своей закреплённой группе"
+              className="p5-skew border-2 border-white bg-[#060606] px-2.5 py-1 text-[#FFE600] shadow-[3px_3px_0_#050505] transition-colors hover:border-[#FFE600] hover:bg-[#E60012] hover:text-white"
+            >
+              <span className="p5-unskew inline-flex items-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider">
+                <span>★ {pinnedGroup}</span>
+              </span>
+            </m.button>
+          )}
 
         {scheduleScopeMode === 'teacher' && focusedTeacherName && (
           <div className="p5-skew inline-flex items-center border-2 border-[#050505] bg-[#FFE600] px-2.5 py-1 text-[#050505] shadow-[3px_3px_0_#E60012]">
@@ -189,6 +243,36 @@ export function ScheduleToolbar({
             </m.button>
           </div>
         </LayoutGroup>
+
+        {/* Quick Stream Teachers & My Group CTA */}
+        <m.button
+          type="button"
+          onClick={onOpenQuickSetup}
+          {...tapProps}
+          title="Выбрать свою группу и преподавателей потоков"
+          className={`p5-skew border-2 px-3 py-1.5 shadow-[3px_3px_0_#050505] transition-colors ${
+            totalStreamSubjectsCount > 0 &&
+            pinnedSubjectsCount < totalStreamSubjectsCount
+              ? 'border-[#050505] bg-[#FFE600] text-[#050505] hover:border-white hover:bg-[#E60012] hover:text-white'
+              : 'border-white bg-[#060606] text-white hover:border-[#FFE600] hover:text-[#FFE600]'
+          }`}
+        >
+          <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+            <Users className="h-3.5 w-3.5" />
+            <span>Мои преп.</span>
+            {totalStreamSubjectsCount > 0 && (
+              <span
+                className={`px-1 py-0.5 font-condensed text-[10px] font-bold leading-none ${
+                  pinnedSubjectsCount < totalStreamSubjectsCount
+                    ? 'bg-[#050505] text-[#FFE600]'
+                    : 'bg-[#E60012] text-white'
+                }`}
+              >
+                {pinnedSubjectsCount}/{totalStreamSubjectsCount}
+              </span>
+            )}
+          </span>
+        </m.button>
 
         {/* Add Lesson CTA */}
         <m.button

@@ -2,6 +2,7 @@ import { DAYS, STORAGE_KEY, TARGET_GROUPS } from '../constants/schedule';
 import type {
   DayOfWeek,
   GroupFilter,
+  GroupId,
   Lesson,
   ScheduleOverlay,
   ScheduleScopeMode,
@@ -14,8 +15,10 @@ export function createEmptyOverlay(): ScheduleOverlay {
     version: 1,
     updatedAt: new Date().toISOString(),
     settings: {
-      selectedGroup: 'COMSE26A',
-      defaultGroup: 'COMSE26A',
+      selectedGroup: 'ALL',
+      defaultGroup: 'ALL',
+      pinnedGroup: null,
+      setupDismissed: false,
       hideSaturdayConflicts: false,
       reduceMotion: false,
       saturdayNotesCollapsed: false,
@@ -42,7 +45,14 @@ function sanitizeGroupFilter(val: unknown): GroupFilter {
   if (typeof val === 'string' && TARGET_GROUPS.includes(val as never)) {
     return val as GroupFilter;
   }
-  return 'COMSE26A';
+  return 'ALL';
+}
+
+function sanitizePinnedGroup(val: unknown): GroupId | null {
+  if (typeof val === 'string' && TARGET_GROUPS.includes(val as GroupId)) {
+    return val as GroupId;
+  }
+  return null;
 }
 
 function sanitizeOptionalGroupFilter(val: unknown): GroupFilter | undefined {
@@ -108,6 +118,16 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
   const selectedGroup = sanitizeGroupFilter(settingsRaw.selectedGroup);
   const defaultGroup =
     sanitizeOptionalGroupFilter(settingsRaw.defaultGroup) ?? selectedGroup;
+  const pinnedGroup =
+    'pinnedGroup' in settingsRaw
+      ? sanitizePinnedGroup(settingsRaw.pinnedGroup)
+      : defaultGroup !== 'ALL'
+        ? defaultGroup
+        : null;
+  const setupDismissed =
+    typeof settingsRaw.setupDismissed === 'boolean'
+      ? settingsRaw.setupDismissed
+      : Boolean(pinnedGroup && Object.keys(pinnedSubgroups).length > 0);
 
   return {
     version: 1,
@@ -121,6 +141,8 @@ export function normalizeOverlay(raw: unknown): ScheduleOverlay | null {
       selectedDay: sanitizeDay(settingsRaw.selectedDay),
       defaultGroup,
       defaultViewMode: sanitizeViewMode(settingsRaw.defaultViewMode),
+      pinnedGroup,
+      setupDismissed,
       hideSaturdayConflicts: Boolean(settingsRaw.hideSaturdayConflicts),
       reduceMotion: Boolean(settingsRaw.reduceMotion),
       saturdayNotesCollapsed: Boolean(settingsRaw.saturdayNotesCollapsed),
@@ -147,7 +169,19 @@ export function loadOverlay(): ScheduleOverlay {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return createEmptyOverlay();
     const parsed = JSON.parse(raw);
-    return normalizeOverlay(parsed) ?? createEmptyOverlay();
+    const normalized = normalizeOverlay(parsed);
+    if (!normalized) return createEmptyOverlay();
+    if (normalized.settings.pinnedGroup) {
+      return {
+        ...normalized,
+        settings: {
+          ...normalized.settings,
+          selectedGroup: normalized.settings.pinnedGroup,
+          scheduleScopeMode: 'group',
+        },
+      };
+    }
+    return normalized;
   } catch {
     return createEmptyOverlay();
   }

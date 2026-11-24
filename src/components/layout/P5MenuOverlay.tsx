@@ -13,6 +13,7 @@ import {
 import type {
   ActiveTab,
   GroupFilter,
+  GroupId,
   ScheduleScopeMode,
 } from '../../types/schedule';
 import { getCursorSpring, getTapPressProps, P5_EASE } from '../../utils/p5Motion';
@@ -23,6 +24,7 @@ interface P5MenuOverlayProps {
   onClose: () => void;
   activeTab: ActiveTab;
   selectedGroup: GroupFilter;
+  pinnedGroup: GroupId | null;
   scheduleScopeMode: ScheduleScopeMode;
   focusedTeacherName: string | null;
   teacherCount: number;
@@ -38,6 +40,7 @@ interface P5MenuOverlayProps {
   onSelectSettings: () => void;
   onAddLesson: () => void;
   onOpenBackup: () => void;
+  onOpenQuickSetup: () => void;
 }
 
 export function P5MenuOverlay({
@@ -45,6 +48,7 @@ export function P5MenuOverlay({
   onClose,
   activeTab,
   selectedGroup,
+  pinnedGroup,
   scheduleScopeMode,
   focusedTeacherName,
   teacherCount,
@@ -60,6 +64,7 @@ export function P5MenuOverlay({
   onSelectSettings,
   onAddLesson,
   onOpenBackup,
+  onOpenQuickSetup,
 }: P5MenuOverlayProps) {
   const reduced = useReducedMotion();
   const cursorSpring = getCursorSpring(reduced);
@@ -419,6 +424,19 @@ export function P5MenuOverlay({
 
                     <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
                       <dt className="font-condensed text-xs font-bold uppercase tracking-wider text-neutral-300">
+                        Моя группа
+                      </dt>
+                      <dd
+                        className={`font-display text-sm uppercase ${
+                          pinnedGroup ? 'text-[#FFE600]' : 'text-neutral-400'
+                        }`}
+                      >
+                        {pinnedGroup ? `★ ${pinnedGroup}` : 'Не выбрана'}
+                      </dd>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
+                      <dt className="font-condensed text-xs font-bold uppercase tracking-wider text-neutral-300">
                         Свои преподаватели
                       </dt>
                       <dd className="font-display text-sm text-white">
@@ -457,6 +475,17 @@ export function P5MenuOverlay({
                   </dl>
 
                   <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                    <m.button
+                      type="button"
+                      onClick={onOpenQuickSetup}
+                      {...tapProps}
+                      className="p5-skew border-2 border-white bg-[#050505] px-3 py-2 text-[#FFE600] shadow-[3px_3px_0_#E60012] transition-colors hover:border-[#FFE600] hover:bg-[#FFE600] hover:text-[#050505]"
+                    >
+                      <span className="p5-unskew inline-flex items-center justify-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                        <span>★ Группа и преп.</span>
+                      </span>
+                    </m.button>
+
                     <m.button
                       type="button"
                       onClick={onToggleSfx}

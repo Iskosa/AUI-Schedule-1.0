@@ -16,25 +16,24 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import {
-  DAY_ORDER,
-  DAY_SHORT_RU,
-  TARGET_GROUPS,
-} from '../../constants/schedule';
+import { TARGET_GROUPS } from '../../constants/schedule';
 import type {
   EffectiveLesson,
   EffectiveTeacher,
   GroupFilter,
+  GroupId,
   GroupInfo,
   ScheduleScopeMode,
   ViewMode,
 } from '../../types/schedule';
 import { getCursorSpring, getTapPressProps } from '../../utils/p5Motion';
+import { extractStreamSubjects } from '../../utils/streams';
 import { filterLessonsByGroup } from '../../utils/time';
 import { RansomTitle } from '../common/RansomTitle';
 
 interface SettingsViewProps {
   selectedGroup: GroupFilter;
+  pinnedGroup: GroupId | null;
   defaultGroup: GroupFilter;
   defaultViewMode: ViewMode;
   hideSaturdayConflicts: boolean;
@@ -48,6 +47,7 @@ interface SettingsViewProps {
   groups: GroupInfo[];
   subjectTeacherOverrides: Record<string, string>;
   lastCreatedTeacherId: string | null;
+  onPinGroup: (group: GroupId | null) => void;
   onSetDefaultGroup: (group: GroupFilter) => void;
   onSetDefaultViewMode: (mode: ViewMode) => void;
   onSetHideSaturdayConflicts: (hide: boolean) => void;
@@ -61,23 +61,6 @@ interface SettingsViewProps {
   ) => void;
   onAddTeacher: () => void;
   onBackToSchedule: () => void;
-}
-
-interface StreamTeacherOption {
-  teacherId: string;
-  teacherName: string;
-  rooms: string[];
-}
-
-interface StreamSubjectGroup {
-  subjectKey: string;
-  subject: string;
-  slots: string[];
-  lessonCount: number;
-  teachers: StreamTeacherOption[];
-  pinnedTeacherId: string | null;
-  isPartialPin: boolean;
-  overrideTeacher: EffectiveTeacher | null;
 }
 
 function P5SwitchRow({
@@ -123,6 +106,7 @@ function P5SwitchRow({
 
 export function SettingsView({
   selectedGroup,
+  pinnedGroup,
   defaultGroup,
   defaultViewMode,
   hideSaturdayConflicts,
@@ -136,6 +120,7 @@ export function SettingsView({
   groups,
   subjectTeacherOverrides,
   lastCreatedTeacherId,
+  onPinGroup,
   onSetDefaultGroup,
   onSetDefaultViewMode,
   onSetHideSaturdayConflicts,
@@ -157,102 +142,15 @@ export function SettingsView({
   );
 
   // Group all stream subjects (having subgroups / baseSubgroups) by normalized subject name
-  const streamSubjects = useMemo<StreamSubjectGroup[]>(() => {
-    const map = new Map<
-      string,
-      {
-        subject: string;
-        lessons: EffectiveLesson[];
-      }
-    >();
-
-    for (const ls of scopedLessons) {
-      const sgs = ls.baseSubgroups ?? ls.subgroups;
-      if (!sgs || sgs.length === 0) continue;
-      const key = ls.subject.trim().toLowerCase();
-      const existing = map.get(key);
-      if (existing) {
-        existing.lessons.push(ls);
-      } else {
-        map.set(key, {
-          subject: ls.subject,
-          lessons: [ls],
-        });
-      }
-    }
-
-    const result: StreamSubjectGroup[] = [];
-    for (const [subjectKey, entry] of map.entries()) {
-      const sortedLessons = [...entry.lessons].sort((a, b) => {
-        const dayDiff = (DAY_ORDER[a.day] ?? 99) - (DAY_ORDER[b.day] ?? 99);
-        if (dayDiff !== 0) return dayDiff;
-        return a.startTime.localeCompare(b.startTime);
-      });
-
-      const slotLabels = Array.from(
-        new Set(
-          sortedLessons.map(
-            (ls) => `${DAY_SHORT_RU[ls.day].toUpperCase()} ${ls.startTime}`
-          )
-        )
-      );
-
-      const teacherMap = new Map<string, StreamTeacherOption>();
-      for (const ls of sortedLessons) {
-        const sgs = ls.baseSubgroups ?? ls.subgroups ?? [];
-        for (const sg of sgs) {
-          const tid = sg.teacherId ?? sg.teacherName;
-          const tName =
-            (sg.teacherId && teachersById[sg.teacherId]?.name) || sg.teacherName;
-          const existingOption = teacherMap.get(tid);
-          const roomTrimmed = sg.room.trim();
-          if (existingOption) {
-            if (roomTrimmed && !existingOption.rooms.includes(roomTrimmed)) {
-              existingOption.rooms.push(roomTrimmed);
-            }
-          } else {
-            teacherMap.set(tid, {
-              teacherId: tid,
-              teacherName: tName,
-              rooms: roomTrimmed ? [roomTrimmed] : [],
-            });
-          }
-        }
-      }
-
-      const pinnedIds = sortedLessons
-        .map((ls) => ls.pinnedSubgroupTeacherId)
-        .filter((id): id is string => Boolean(id));
-      const uniquePinned = Array.from(new Set(pinnedIds));
-
-      let pinnedTeacherId: string | null = null;
-      let isPartialPin = false;
-      if (uniquePinned.length === 1) {
-        pinnedTeacherId = uniquePinned[0];
-        isPartialPin = pinnedIds.length < sortedLessons.length;
-      } else if (uniquePinned.length > 1) {
-        pinnedTeacherId = uniquePinned[0];
-        isPartialPin = true;
-      }
-
-      const overrideId = subjectTeacherOverrides[subjectKey];
-      const overrideTeacher =
-        overrideId && teachersById[overrideId] ? teachersById[overrideId] : null;
-
-      result.push({
-        subjectKey,
-        subject: entry.subject,
-        slots: slotLabels,
-        lessonCount: sortedLessons.length,
-        teachers: Array.from(teacherMap.values()),
-        pinnedTeacherId,
-        isPartialPin,
-        overrideTeacher,
-      });
-    }
-
-    return result.sort((a, b) => a.subject.localeCompare(b.subject));
-  }, [scopedLessons, subjectTeacherOverrides, teachersById]);
+  const streamSubjects = useMemo(
+    () =>
+      extractStreamSubjects(
+        scopedLessons,
+        teachersById,
+        subjectTeacherOverrides
+      ),
+    [scopedLessons, subjectTeacherOverrides, teachersById]
+  );
 
   // All unique subjects available for arbitrary teacher override
   const allSubjectOptions = useMemo(() => {
@@ -345,27 +243,68 @@ export function SettingsView({
   return (
     <div className="space-y-4">
       {/* Header Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-white border-l-[6px] border-l-[#E60012] bg-[#060606] px-4 py-3 shadow-[5px_5px_0_#050505]">
-        <div className="flex flex-wrap items-center gap-3">
-          <RansomTitle text="SETTINGS" as="h2" size="md" />
-          <span className="p5-skew border-2 border-white bg-[#E60012] px-2.5 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-white">
-            <span className="p5-unskew block">
-              {selectedGroup === 'ALL' ? 'ВСЕ ГРУППЫ' : selectedGroup}
+      <div className="space-y-3 border-2 border-white border-l-[6px] border-l-[#E60012] bg-[#060606] px-4 py-3 shadow-[5px_5px_0_#050505]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <RansomTitle text="SETTINGS" as="h2" size="md" />
+            <span className="p5-skew border-2 border-white bg-[#E60012] px-2.5 py-0.5 font-condensed text-xs font-bold uppercase tracking-wider text-white">
+              <span className="p5-unskew block">
+                {selectedGroup === 'ALL' ? 'ВСЕ ГРУППЫ' : selectedGroup}
+              </span>
             </span>
-          </span>
+          </div>
+
+          <m.button
+            type="button"
+            onClick={onBackToSchedule}
+            {...tapProps}
+            className="p5-skew border-2 border-[#050505] bg-white px-3.5 py-1.5 text-[#050505] shadow-[4px_4px_0_#E60012] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white"
+          >
+            <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>К расписанию</span>
+            </span>
+          </m.button>
         </div>
 
-        <m.button
-          type="button"
-          onClick={onBackToSchedule}
-          {...tapProps}
-          className="p5-skew border-2 border-[#050505] bg-white px-3.5 py-1.5 text-[#050505] shadow-[4px_4px_0_#E60012] transition-colors hover:border-white hover:bg-[#E60012] hover:text-white"
-        >
-          <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span>К расписанию</span>
+        {/* 4-Group Quick Selector & Pin Bar */}
+        <div className="flex flex-wrap items-center gap-2 border-t border-white/15 pt-2.5">
+          <span className="font-condensed text-[11px] font-bold uppercase tracking-wider text-neutral-300">
+            Моя группа:
           </span>
-        </m.button>
+          <div className="grid flex-1 grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:items-center">
+            {TARGET_GROUPS.map((gid) => {
+              const isPinned = pinnedGroup === gid;
+              return (
+                <button
+                  key={gid}
+                  type="button"
+                  onClick={() => onPinGroup(gid)}
+                  className={`p5-skew border-2 px-2.5 py-1 transition-colors ${
+                    isPinned
+                      ? 'border-[#050505] bg-[#FFE600] text-[#050505] shadow-[3px_3px_0_#E60012]'
+                      : 'border-white/50 bg-[#050505] text-white hover:border-white'
+                  }`}
+                >
+                  <span className="p5-unskew inline-flex items-center justify-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider">
+                    {isPinned && <span>★</span>}
+                    <span>{gid}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {pinnedGroup && (
+            <button
+              type="button"
+              onClick={() => onPinGroup(null)}
+              className="inline-flex items-center gap-1 border border-white/40 bg-[#050505] px-2 py-1 font-condensed text-[11px] font-bold uppercase tracking-wider text-neutral-300 transition-colors hover:border-[#E60012] hover:bg-[#E60012] hover:text-white"
+            >
+              <PinOff className="h-3 w-3" />
+              <span>Снять</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main 2-Column P5R Settings Grid */}

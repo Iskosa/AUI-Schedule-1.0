@@ -11,6 +11,7 @@ import { P5TransitionSlash } from './components/common/P5TransitionSlash';
 import { AppShell } from './components/layout/AppShell';
 import { LiveHudBar } from './components/layout/LiveHudBar';
 import { DayView } from './components/schedule/DayView';
+import { GroupOnboardingBanner } from './components/schedule/GroupOnboardingBanner';
 import { LessonDetailModal } from './components/schedule/LessonDetailModal';
 import { ScheduleToolbar } from './components/schedule/ScheduleToolbar';
 import { WeekView } from './components/schedule/WeekView';
@@ -26,6 +27,7 @@ import type {
   EffectiveLesson,
   EffectiveTeacher,
   GroupFilter,
+  GroupId,
   ViewMode,
 } from './types/schedule';
 import {
@@ -36,6 +38,7 @@ import {
   playSwitch,
   toggleSfx,
 } from './utils/p5Sound';
+import { extractStreamSubjects, getPinnedTeacherIds } from './utils/streams';
 import {
   computeLiveHudState,
   filterLessonsByGroup,
@@ -71,6 +74,11 @@ const LessonEditorModal = lazy(() =>
 const TeacherEditorModal = lazy(() =>
   import('./components/teachers/TeacherEditorModal').then((mod) => ({
     default: mod.TeacherEditorModal,
+  }))
+);
+const QuickSetupModal = lazy(() =>
+  import('./components/schedule/QuickSetupModal').then((mod) => ({
+    default: mod.QuickSetupModal,
   }))
 );
 
@@ -153,6 +161,7 @@ export default function App() {
   });
 
   const [backupOpen, setBackupOpen] = useState(false);
+  const [quickSetupOpen, setQuickSetupOpen] = useState(false);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -160,6 +169,7 @@ export default function App() {
   const lessonEditorActivated = useActivated(lessonEditorState.open);
   const teacherEditorActivated = useActivated(teacherEditorState.open);
   const backupActivated = useActivated(backupOpen);
+  const quickSetupActivated = useActivated(quickSetupOpen);
 
   useEffect(() => {
     document.documentElement.classList.toggle(
@@ -230,30 +240,63 @@ export default function App() {
 
   const streamStats = useMemo(() => {
     const scoped = filterLessonsByGroup(store.allLessons, store.selectedGroup);
-    const bySubject = new Map<string, EffectiveLesson[]>();
-    for (const ls of scoped) {
-      const sgs = ls.baseSubgroups ?? ls.subgroups;
-      if (!sgs || sgs.length === 0) continue;
-      const key = ls.subject.trim().toLowerCase();
-      const arr = bySubject.get(key) ?? [];
-      arr.push(ls);
-      bySubject.set(key, arr);
-    }
-    let pinnedCount = 0;
-    for (const groupLessons of bySubject.values()) {
-      if (groupLessons.some((ls) => Boolean(ls.pinnedSubgroupTeacherId))) {
-        pinnedCount += 1;
-      }
-    }
+    const groups = extractStreamSubjects(
+      scoped,
+      store.teachersById,
+      store.subjectTeacherOverrides
+    );
     return {
-      total: bySubject.size,
-      pinned: pinnedCount,
+      total: groups.length,
+      pinned: groups.filter((g) => Boolean(g.pinnedTeacherId)).length,
     };
-  }, [store.allLessons, store.selectedGroup]);
+  }, [store.allLessons, store.selectedGroup, store.teachersById, store.subjectTeacherOverrides]);
+
+  const pinnedTeacherIds = useMemo(
+    () => getPinnedTeacherIds(store.allLessons),
+    [store.allLessons]
+  );
 
   const triggerSlash = useCallback(() => {
     setSlashId((n) => n + 1);
   }, []);
+
+  const handlePinGroup = useCallback(
+    (group: GroupId | null) => {
+      playConfirm();
+      store.pinGroup(group);
+      setToast(
+        group
+          ? `Группа ${group} закреплена`
+          : 'Закрепление группы снято'
+      );
+    },
+    [store]
+  );
+
+  const handleSetSubjectPinnedSubgroup = useCallback(
+    (subject: string, teacherId: string | null) => {
+      playConfirm();
+      store.setSubjectPinnedSubgroup(subject, teacherId);
+      setToast(
+        teacherId
+          ? `Преподаватель закреплён для «${subject}»`
+          : `Закрепление для «${subject}» сброшено`
+      );
+    },
+    [store]
+  );
+
+  const handleShowTeacherSchedule = useCallback(
+    (teacherId: string) => {
+      playSwitch();
+      store.setScheduleScopeMode('teacher', teacherId);
+      if (activeTab !== 'schedule') {
+        triggerSlash();
+        setActiveTab('schedule');
+      }
+    },
+    [activeTab, store, triggerSlash]
+  );
 
   const handleToggleSfx = () => {
     setSfxEnabled(toggleSfx());
@@ -410,6 +453,7 @@ export default function App() {
           lessonEditorState.open ||
           teacherEditorState.open ||
           backupOpen ||
+          quickSetupOpen ||
           confirmState
       );
 
@@ -470,6 +514,7 @@ export default function App() {
     handleSelectGroup,
     lessonEditorState.open,
     menuOpen,
+    quickSetupOpen,
     store.selectedDay,
     store.viewMode,
     teacherEditorState.open,
@@ -552,14 +597,41 @@ export default function App() {
       >
         {activeTab === 'schedule' ? (
           <div key="tab-schedule" className="space-y-4">
+            {!store.setupDismissed &&
+              (!store.pinnedGroup || streamStats.pinned < streamStats.total) && (
+                <GroupOnboardingBanner
+                  groups={store.baseData?.groups ?? []}
+                  pinnedGroup={store.pinnedGroup}
+                  pinnedSubjectsCount={streamStats.pinned}
+                  totalStreamSubjectsCount={streamStats.total}
+                  onPinGroup={(gid) => handlePinGroup(gid)}
+                  onOpenQuickSetup={() => {
+                    playOpen();
+                    setQuickSetupOpen(true);
+                  }}
+                  onDismiss={() => {
+                    playCancel();
+                    store.setSetupDismissed(true);
+                  }}
+                />
+              )}
+
             <ScheduleToolbar
               selectedGroup={store.selectedGroup}
+              pinnedGroup={store.pinnedGroup}
               onSelectGroup={handleSelectGroup}
+              onPinGroup={(gid) => handlePinGroup(gid)}
               groups={store.baseData?.groups ?? []}
               teachers={store.teachers}
               onOpenTeacher={handleOpenTeacher}
               viewMode={store.viewMode}
               onChangeViewMode={handleChangeViewMode}
+              pinnedSubjectsCount={streamStats.pinned}
+              totalStreamSubjectsCount={streamStats.total}
+              onOpenQuickSetup={() => {
+                playOpen();
+                setQuickSetupOpen(true);
+              }}
               scheduleScopeMode={store.scheduleScopeMode}
               focusedTeacherName={focusedTeacherName}
               onClearTeacherScope={() => {
@@ -630,7 +702,13 @@ export default function App() {
               <TeachersView
                 teachers={store.teachers}
                 lessons={store.lessons}
+                allLessons={store.allLessons}
+                groups={store.baseData?.groups ?? []}
+                teachersById={store.teachersById}
+                subjectTeacherOverrides={store.subjectTeacherOverrides}
                 targetGroupTeacherIds={store.targetGroupTeacherIds}
+                pinnedGroup={store.pinnedGroup}
+                pinnedTeacherIds={pinnedTeacherIds}
                 selectedTeacherId={selectedTeacherId}
                 onSelectTeacher={handleSelectTeacher}
                 onAddTeacher={() => {
@@ -649,6 +727,8 @@ export default function App() {
                   setConfirmState({ kind: 'deleteTeacher', teacher });
                 }}
                 onSelectLesson={handleOpenLessonDetail}
+                onSetSubjectPinnedSubgroup={handleSetSubjectPinnedSubgroup}
+                onShowTeacherSchedule={handleShowTeacherSchedule}
               />
             </Suspense>
           </div>
@@ -657,6 +737,7 @@ export default function App() {
             <Suspense fallback={<TabLoadingFallback />}>
               <SettingsView
                 selectedGroup={store.selectedGroup}
+                pinnedGroup={store.pinnedGroup}
                 defaultGroup={store.defaultGroup}
                 defaultViewMode={store.defaultViewMode ?? store.viewMode}
                 hideSaturdayConflicts={store.hideSaturdayConflicts}
@@ -670,6 +751,7 @@ export default function App() {
                 groups={store.baseData?.groups ?? []}
                 subjectTeacherOverrides={store.subjectTeacherOverrides}
                 lastCreatedTeacherId={lastCreatedTeacherId}
+                onPinGroup={handlePinGroup}
                 onSetDefaultGroup={(group) => {
                   playConfirm();
                   store.setDefaultGroup(group);
@@ -701,15 +783,7 @@ export default function App() {
                       : 'Полная кинетика P5R включена'
                   );
                 }}
-                onSetSubjectPinnedSubgroup={(subject, teacherId) => {
-                  playConfirm();
-                  store.setSubjectPinnedSubgroup(subject, teacherId);
-                  setToast(
-                    teacherId
-                      ? `Преподаватель закреплён для «${subject}»`
-                      : `Закрепление для «${subject}» сброшено`
-                  );
-                }}
+                onSetSubjectPinnedSubgroup={handleSetSubjectPinnedSubgroup}
                 onSetSubjectTeacherOverride={(subject, teacherId) => {
                   playConfirm();
                   store.setSubjectTeacherOverride(subject, teacherId);
@@ -744,6 +818,7 @@ export default function App() {
             }}
             activeTab={activeTab}
             selectedGroup={store.selectedGroup}
+            pinnedGroup={store.pinnedGroup}
             scheduleScopeMode={store.scheduleScopeMode}
             focusedTeacherName={focusedTeacherName}
             teacherCount={store.teachers.length}
@@ -778,6 +853,11 @@ export default function App() {
               setMenuOpen(false);
               setBackupOpen(true);
             }}
+            onOpenQuickSetup={() => {
+              setMenuOpen(false);
+              playOpen();
+              setQuickSetupOpen(true);
+            }}
           />
         </Suspense>
       )}
@@ -805,7 +885,7 @@ export default function App() {
         onTogglePinSubgroup={(lessonId, teacherId) => {
           store.togglePinSubgroup(lessonId, teacherId);
           playConfirm();
-          setToast('Настройка подгруппы обновлена');
+          setToast('Преподаватель обновлён на все пары предмета');
         }}
         onOpenTeacher={handleOpenTeacher}
       />
@@ -817,7 +897,9 @@ export default function App() {
             editingLesson={lessonEditorState.editingLesson}
             defaultDay={lessonEditorState.defaultDay}
             defaultGroup={
-              store.selectedGroup === 'ALL' ? 'COMSE26A' : store.selectedGroup
+              store.selectedGroup === 'ALL'
+                ? store.pinnedGroup ?? 'COMSE26A'
+                : store.selectedGroup
             }
             teachers={store.teachers}
             teachersById={store.teachersById}
@@ -866,6 +948,35 @@ export default function App() {
               setConfirmState({ kind: 'resetExcel' });
             }}
             onReloadBase={store.reloadBaseData}
+          />
+        </Suspense>
+      )}
+
+      {quickSetupActivated && (
+        <Suspense fallback={null}>
+          <QuickSetupModal
+            open={quickSetupOpen}
+            onClose={() => {
+              playCancel();
+              setQuickSetupOpen(false);
+            }}
+            groups={store.baseData?.groups ?? []}
+            selectedGroup={store.selectedGroup}
+            pinnedGroup={store.pinnedGroup}
+            allLessons={store.allLessons}
+            teachersById={store.teachersById}
+            subjectTeacherOverrides={store.subjectTeacherOverrides}
+            onPinGroup={handlePinGroup}
+            onSetSubjectPinnedSubgroup={handleSetSubjectPinnedSubgroup}
+            onOpenSettings={() => {
+              setQuickSetupOpen(false);
+              handleTabChange('settings');
+            }}
+            onComplete={() => {
+              playConfirm();
+              store.setSetupDismissed(true);
+              setQuickSetupOpen(false);
+            }}
           />
         </Suspense>
       )}

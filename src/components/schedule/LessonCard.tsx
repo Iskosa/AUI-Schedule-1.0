@@ -17,14 +17,11 @@ interface LessonCardProps {
   onClick: () => void;
 }
 
-function formatSubgroupBadge(count: number): string {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${count} ПОДГРУППА ▸`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return `${count} ПОДГРУППЫ ▸`;
+function formatSubgroupBadge(count: number, isCompact: boolean): string {
+  if (isCompact) {
+    return `${count} ПРЕП. · ВЫБРАТЬ ▸`;
   }
-  return `${count} ПОДГРУПП ▸`;
+  return `ВЫБРАТЬ ПРЕП. (${count}) ▸`;
 }
 
 export function LessonCard({
@@ -202,7 +199,7 @@ export function LessonCard({
                 <div>
                   <span className="inline-flex items-center gap-1 whitespace-nowrap border border-white/80 bg-[#E60012] px-2 py-0.5 font-condensed text-[11px] font-bold uppercase leading-tight tracking-wide text-white shadow-[2px_2px_0_#000000]">
                     <Users className="h-3 w-3 shrink-0" />
-                    <span>{formatSubgroupBadge(lesson.subgroups!.length)}</span>
+                    <span>{formatSubgroupBadge(lesson.subgroups!.length, true)}</span>
                   </span>
                 </div>
               ) : (
@@ -251,7 +248,7 @@ export function LessonCard({
                     <span className="inline-flex items-center gap-1.5 whitespace-nowrap border border-white/80 bg-[#E60012] px-2.5 py-0.5 font-condensed text-xs font-bold uppercase leading-tight tracking-wide text-white shadow-[2px_2px_0_#000000]">
                       <Users className="h-3.5 w-3.5 shrink-0" />
                       <span>
-                        {formatSubgroupBadge(lesson.subgroups!.length)}
+                        {formatSubgroupBadge(lesson.subgroups!.length, false)}
                       </span>
                     </span>
                   </div>

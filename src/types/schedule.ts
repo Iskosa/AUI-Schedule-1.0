@@ -112,6 +112,8 @@ export interface OverlaySettings {
   selectedDay?: DayOfWeek;
   defaultGroup?: GroupFilter;
   defaultViewMode?: ViewMode;
+  pinnedGroup?: GroupId | null;
+  setupDismissed?: boolean;
   hideSaturdayConflicts?: boolean;
   reduceMotion?: boolean;
   saturdayNotesCollapsed?: boolean;

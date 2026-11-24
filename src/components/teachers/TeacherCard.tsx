@@ -8,6 +8,7 @@ interface TeacherCardProps {
   lessonCount: number;
   isSelected: boolean;
   isHovered: boolean;
+  isPinned?: boolean;
   onHoverStart: () => void;
   onSelect: () => void;
 }
@@ -27,6 +28,7 @@ export function TeacherCard({
   lessonCount,
   isSelected,
   isHovered,
+  isPinned = false,
   onHoverStart,
   onSelect,
 }: TeacherCardProps) {
@@ -81,6 +83,11 @@ export function TeacherCard({
               <h3 className="break-words font-display text-sm uppercase tracking-wide text-white">
                 {teacher.name}
               </h3>
+              {isPinned && (
+                <span className="border border-[#0B0B0B] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0B0B0B]">
+                  ★ МОЙ
+                </span>
+              )}
               {teacher.isCustom && (
                 <span className="bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0B0B0B]">
                   СВОЙ

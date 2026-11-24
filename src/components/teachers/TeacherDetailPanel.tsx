@@ -6,6 +6,8 @@ import {
   Globe,
   MapPin,
   Pencil,
+  Pin,
+  PinOff,
   Trash2,
   Users,
 } from 'lucide-react';
@@ -19,25 +21,36 @@ import type {
   EffectiveTeacher,
   GroupId,
 } from '../../types/schedule';
+import { getTeacherStreamOptions } from '../../utils/streams';
 import { NotesWithLinks } from '../common/NotesWithLinks';
 import { RansomTitle } from '../common/RansomTitle';
 
 interface TeacherDetailPanelProps {
   teacher: EffectiveTeacher | null;
   lessons: EffectiveLesson[];
+  allLessons: EffectiveLesson[];
+  teachersById: Record<string, EffectiveTeacher>;
+  subjectTeacherOverrides: Record<string, string>;
   onBackToList?: () => void;
   onEdit: (teacher: EffectiveTeacher) => void;
   onDelete: (teacher: EffectiveTeacher) => void;
   onSelectLesson: (lesson: EffectiveLesson) => void;
+  onSetSubjectPinnedSubgroup: (subject: string, teacherId: string | null) => void;
+  onShowTeacherSchedule: (teacherId: string) => void;
 }
 
 export function TeacherDetailPanel({
   teacher,
   lessons,
+  allLessons,
+  teachersById,
+  subjectTeacherOverrides,
   onBackToList,
   onEdit,
   onDelete,
   onSelectLesson,
+  onSetSubjectPinnedSubgroup,
+  onShowTeacherSchedule,
 }: TeacherDetailPanelProps) {
   if (!teacher) {
     return (
@@ -76,6 +89,12 @@ export function TeacherDetailPanel({
   );
 
   const filledStars = Math.min(5, teacherLessons.length);
+  const streamOptions = getTeacherStreamOptions(
+    teacher.id,
+    allLessons,
+    teachersById,
+    subjectTeacherOverrides
+  );
 
   return (
     <div className="p5-shadow overflow-x-clip border-2 border-white border-t-[6px] border-t-[#E60012] bg-[#0D0D0D]">
@@ -124,6 +143,16 @@ export function TeacherDetailPanel({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onShowTeacherSchedule(teacher.id)}
+              className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#FFE600] px-3 py-1.5 text-[#0D0D0D] transition-transform hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            >
+              <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                <CalendarDays className="h-3.5 w-3.5" />
+                <span>В расписании</span>
+              </span>
+            </button>
             <button
               type="button"
               onClick={() => onEdit(teacher)}
@@ -192,6 +221,55 @@ export function TeacherDetailPanel({
 
       {/* Confidant Dossier Body */}
       <div className="space-y-4 p-4 sm:p-5">
+        {/* 1-Click Stream Teacher Pinning */}
+        {streamOptions.length > 0 && (
+          <div className="p5-shadow-sm border-2 border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#161616] p-3.5">
+            <div className="flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider text-[#FFE600]">
+              <Pin className="h-3.5 w-3.5" />
+              <span>ЗАКРЕПИТЬ КАК МОЕГО ПРЕПОДАВАТЕЛЯ</span>
+            </div>
+            <p className="mt-1 text-xs text-neutral-300">
+              Закрепится на все потоковые пары выбранного предмета за всю неделю.
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {streamOptions.map((group) => {
+                const isPinned = group.pinnedTeacherId === teacher.id;
+                return (
+                  <button
+                    key={group.subjectKey}
+                    type="button"
+                    onClick={() =>
+                      onSetSubjectPinnedSubgroup(
+                        group.subject,
+                        isPinned ? null : teacher.id
+                      )
+                    }
+                    className={`p5-skew border-2 px-3 py-1.5 transition-transform hover:-translate-y-0.5 ${
+                      isPinned
+                        ? 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D] shadow-[3px_3px_0_#E60012]'
+                        : 'border-white bg-[#0D0D0D] text-white shadow-[3px_3px_0_#0D0D0D] hover:border-[#FFE600] hover:text-[#FFE600]'
+                    }`}
+                  >
+                    <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
+                      {isPinned ? (
+                        <>
+                          <PinOff className="h-3.5 w-3.5" />
+                          <span>★ МОЙ · {group.subject}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Pin className="h-3.5 w-3.5 text-[#E60012]" />
+                          <span>Закрепить · {group.subject}</span>
+                        </>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Office Hours */}
         <div
           className={`p5-shadow-sm border-2 bg-[#161616] p-3.5 ${

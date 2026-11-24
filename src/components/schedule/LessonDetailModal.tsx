@@ -123,7 +123,7 @@ export function LessonDetailModal({
                 Потоки / подгруппы ({lesson.subgroups!.length})
               </h3>
               <span className="text-[11px] text-neutral-300">
-                Закрепите свою подгруппу (localStorage)
+                Выберите своего преподавателя — закрепится на все пары этого предмета за неделю
               </span>
             </div>
             <div className="space-y-2.5">
@@ -161,7 +161,7 @@ export function LessonDetailModal({
                         )}
                         {isPinned && (
                           <span className="border border-[#0D0D0D] bg-[#FFE600] px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase tracking-wider text-[#0D0D0D]">
-                            ★ МОЯ ПОДГРУППА
+                            ★ МОЙ ПРЕПОДАВАТЕЛЬ
                           </span>
                         )}
                       </div>
@@ -194,7 +194,7 @@ export function LessonDetailModal({
                           ) : (
                             <>
                               <Pin className="h-3.5 w-3.5" />
-                              <span>Моя подгруппа</span>
+                              <span>Мой преп.</span>
                             </>
                           )}
                         </span>

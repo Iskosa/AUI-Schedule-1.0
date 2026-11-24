@@ -1,16 +1,18 @@
 import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { Users } from 'lucide-react';
 import { TARGET_GROUPS } from '../../constants/schedule';
-import type { GroupFilter } from '../../types/schedule';
+import type { GroupFilter, GroupId } from '../../types/schedule';
 import { getCursorSpring } from '../../utils/p5Motion';
 
 interface GroupSwitcherProps {
   selectedGroup: GroupFilter;
+  pinnedGroup?: GroupId | null;
   onSelectGroup: (group: GroupFilter) => void;
 }
 
 export function GroupSwitcher({
   selectedGroup,
+  pinnedGroup = null,
   onSelectGroup,
 }: GroupSwitcherProps) {
   const reduced = useReducedMotion();
@@ -54,8 +56,17 @@ export function GroupSwitcher({
                   className="p5-skew pointer-events-none absolute inset-0 z-0 border-2 border-white bg-[#060606] shadow-[3px_3px_0_#050505] transition-colors hover:border-[#E60012]"
                 />
               )}
-              <span className="relative z-10 inline-flex items-center font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
-                {gid}
+              <span className="relative z-10 inline-flex items-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
+                <span>{gid}</span>
+                {pinnedGroup === gid && (
+                  <span
+                    title="Ваша закреплённая группа"
+                    aria-label="Закреплённая группа"
+                    className="text-[11px] leading-none text-[#FFE600]"
+                  >
+                    ★
+                  </span>
+                )}
               </span>
             </m.button>
           );
