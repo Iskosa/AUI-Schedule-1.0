@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, Globe, MapPin, Pin, User, Users } from 'lucide-react';
 import { LESSON_TYPE_LABELS } from '../../constants/schedule';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -82,7 +82,7 @@ export function LessonCard({
       : 'border-white shadow-[5px_5px_0_#000000] md:hover:shadow-[6px_6px_0_#E60012] active:shadow-[1px_1px_0_#000000]';
 
   return (
-    <motion.div
+    <m.div
       role="button"
       tabIndex={0}
       onClick={onClick}
@@ -122,7 +122,7 @@ export function LessonCard({
             />
             <span
               style={{ clipPath: 'polygon(100% 0, 0 0, 100% 100%)' }}
-              className="absolute top-0 right-0 h-5 w-5 origin-top-right scale-50 bg-[#E60012] opacity-0 transition-all duration-100 md:group-hover:scale-100 md:group-hover:opacity-100"
+              className="absolute top-0 right-0 h-5 w-5 origin-top-right scale-50 bg-[#E60012] opacity-0 transition-[transform,opacity] duration-100 md:group-hover:scale-100 md:group-hover:opacity-100"
             />
           </>
         )}
@@ -184,7 +184,7 @@ export function LessonCard({
 
             <div className="space-y-1.5 text-xs">
               {pinnedSubgroup ? (
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-medium text-[#FFE600]">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[#FFE600]">
                   <span className="inline-flex min-w-0 items-center gap-1">
                     <Pin className="h-3 w-3 shrink-0" />
                     <span className="break-words font-semibold">
@@ -258,7 +258,7 @@ export function LessonCard({
                 ) : lesson.teacherName ? (
                   <div className="inline-flex min-w-0 items-center gap-1.5 text-neutral-200">
                     <User className="h-3.5 w-3.5 shrink-0 text-[#E60012]" />
-                    <span className="break-words font-medium">
+                    <span className="break-words font-semibold">
                       {lesson.teacherName}
                     </span>
                   </div>
@@ -335,6 +335,6 @@ export function LessonCard({
           </div>
         )}
       </div>
-    </motion.div>
+    </m.div>
   );
 }

@@ -61,7 +61,7 @@ export function NotesWithLinks({ notes, compact = false }: NotesWithLinksProps) 
                 e.stopPropagation();
                 playOpen();
               }}
-              className="p5-skew p5-shadow-sm mx-1 my-0.5 inline-block align-middle border-2 border-[#0D0D0D] bg-[#FFE600] px-2.5 py-0.5 text-[#0D0D0D] transition hover:border-white hover:bg-[#E60012] hover:text-white"
+              className="p5-skew p5-shadow-sm mx-1 my-0.5 inline-block align-middle border-2 border-[#0D0D0D] bg-[#FFE600] px-2.5 py-0.5 text-[#0D0D0D] hover:border-white hover:bg-[#E60012] hover:text-white"
             >
               <span className="p5-unskew inline-flex items-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider">
                 <span>{getLinkLabel(token.value)}</span>

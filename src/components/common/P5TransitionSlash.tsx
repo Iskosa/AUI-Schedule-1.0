@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 
 interface P5TransitionSlashProps {
   slashId: number;
@@ -20,7 +20,7 @@ export function P5TransitionSlash({ slashId }: P5TransitionSlashProps) {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-40 overflow-hidden select-none"
     >
-      <motion.div
+      <m.div
         key={activeId}
         initial={{ x: '-125%' }}
         animate={{ x: '125%' }}
@@ -66,7 +66,7 @@ export function P5TransitionSlash({ slashId }: P5TransitionSlashProps) {
             clipPath: 'polygon(28% 0%, 30.5% 0%, 11.5% 100%, 9% 100%)',
           }}
         />
-      </motion.div>
+      </m.div>
     </div>
   );
 }

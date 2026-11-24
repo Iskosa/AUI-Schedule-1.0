@@ -1,5 +1,5 @@
 import { Fragment, useEffect, type ReactNode } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 import {
   getModalMotionProps,
@@ -74,7 +74,7 @@ export function Modal({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B0B0B]/85 p-3 sm:p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -87,7 +87,7 @@ export function Modal({
             className="p5-halftone-red pointer-events-none absolute inset-0 opacity-45"
           />
 
-          <motion.div
+          <m.div
             role="dialog"
             aria-modal="true"
             aria-label={title}
@@ -97,7 +97,7 @@ export function Modal({
           >
             {/* Protruding Nameplate (slams in 60ms after box) + Close Button */}
             <div className="pointer-events-none relative z-20 -mb-4 flex items-start justify-between gap-2 px-1.5 sm:-mb-5 sm:px-3">
-              <motion.div
+              <m.div
                 {...modalTitleMotion}
                 className={`pointer-events-auto min-w-0 max-w-full border-[3px] border-[#0B0B0B] bg-white px-3 py-1.5 text-[#0B0B0B] shadow-[4px_4px_0_#E60012] sm:px-4 sm:py-2 ${
                   reduced ? '-rotate-2' : ''
@@ -106,9 +106,9 @@ export function Modal({
                 <h2 className="break-words font-display text-xs uppercase leading-snug tracking-wide sm:text-base">
                   {renderDialogueTitle(title)}
                 </h2>
-              </motion.div>
+              </m.div>
 
-              <motion.button
+              <m.button
                 type="button"
                 onClick={onClose}
                 aria-label="Закрыть"
@@ -116,7 +116,7 @@ export function Modal({
                 className="pointer-events-auto p5-skew shrink-0 border-[3px] border-white bg-[#E60012] p-1.5 text-white shadow-[3px_3px_0_#0B0B0B] transition-colors hover:bg-white hover:text-[#0B0B0B]"
               >
                 <X className="p5-unskew h-4 w-4 sm:h-5 sm:w-5" />
-              </motion.button>
+              </m.button>
             </div>
 
             {/* Clipped Dialogue Box */}
@@ -139,8 +139,8 @@ export function Modal({
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

@@ -131,7 +131,7 @@ export function BackupModal({
                 text: 'Файл резервной копии JSON скачан.',
               });
             }}
-            className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2.5 text-[#0D0D0D] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2.5 text-[#0D0D0D] transition-transform hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
             <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
               <Download className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function BackupModal({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2.5 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2.5 text-white transition-transform hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
             <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
               <Upload className="h-4 w-4 text-[#FFE600]" />
@@ -163,7 +163,7 @@ export function BackupModal({
             type="button"
             disabled={reloading}
             onClick={() => void handleReload()}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-3.5 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600] disabled:opacity-50"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-3.5 py-2 text-white transition-transform hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600] disabled:opacity-50"
           >
             <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-xs font-bold uppercase tracking-wider">
               <RefreshCw
@@ -176,7 +176,7 @@ export function BackupModal({
           <button
             type="button"
             onClick={onRequestReset}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#E60012] px-3.5 py-2 text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#E60012] px-3.5 py-2 text-white transition-transform hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
           >
             <span className="p5-unskew flex items-center justify-center gap-2 font-condensed text-xs font-bold uppercase tracking-wider">
               <RotateCcw className="h-3.5 w-3.5" />

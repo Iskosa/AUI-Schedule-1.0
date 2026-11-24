@@ -174,7 +174,7 @@ export function TeacherEditorModal({
             <button
               type="button"
               onClick={addOfficeHourSlot}
-              className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#FFE600] px-2.5 py-1 text-[#0D0D0D] transition hover:border-white hover:bg-[#E60012] hover:text-white"
+              className="p5-skew p5-shadow-sm border-2 border-[#0D0D0D] bg-[#FFE600] px-2.5 py-1 text-[#0D0D0D] hover:border-white hover:bg-[#E60012] hover:text-white"
             >
               <span className="p5-unskew inline-flex items-center gap-1 font-condensed text-xs font-bold uppercase tracking-wider">
                 <Plus className="h-3.5 w-3.5" />
@@ -246,7 +246,7 @@ export function TeacherEditorModal({
                     type="button"
                     onClick={() => removeOfficeHour(idx)}
                     aria-label="Удалить слот Office Hours"
-                    className="flex items-center justify-center border border-white/40 bg-[#161616] p-1.5 text-white transition hover:bg-[#E60012] sm:col-span-1"
+                    className="flex items-center justify-center border border-white/40 bg-[#161616] p-1.5 text-white hover:bg-[#E60012] sm:col-span-1"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -273,7 +273,7 @@ export function TeacherEditorModal({
           <button
             type="button"
             onClick={onClose}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition-transform hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
             <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
               Отмена
@@ -281,7 +281,7 @@ export function TeacherEditorModal({
           </button>
           <button
             type="submit"
-            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-5 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-5 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition-transform hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
             <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
               {editingTeacher ? 'Сохранить' : 'Добавить'}

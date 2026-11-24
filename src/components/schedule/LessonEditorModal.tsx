@@ -236,7 +236,7 @@ export function LessonEditorModal({
                   key={gid}
                   type="button"
                   onClick={() => toggleGroup(gid)}
-                  className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition ${
+                  className={`p5-skew p5-shadow-sm border-2 px-3 py-1.5 transition-transform ${
                     selected
                       ? `-translate-y-0.5 ${GROUP_BADGE_STYLES[gid]} ring-2 ring-[#FFE600]`
                       : 'border-white/50 bg-[#161616] text-neutral-300 hover:border-[#FFE600] hover:text-[#FFE600]'
@@ -309,7 +309,7 @@ export function LessonEditorModal({
                 setStartTime(preset.startTime);
                 setEndTime(preset.endTime);
               }}
-              className={`rounded-none border-2 px-2 py-1 font-condensed text-[11px] font-bold uppercase transition ${
+              className={`rounded-none border-2 px-2 py-1 font-condensed text-[11px] font-bold uppercase ${
                 startTime === preset.startTime && endTime === preset.endTime
                   ? 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D]'
                   : 'border-white/40 bg-[#161616] text-neutral-200 hover:border-[#FFE600] hover:text-[#FFE600]'
@@ -364,7 +364,7 @@ export function LessonEditorModal({
           </div>
 
           <div className="flex items-end">
-            <label className="flex w-full cursor-pointer items-center gap-2.5 border-2 border-white bg-[#161616] px-3.5 py-2.5 text-sm font-semibold text-white transition hover:border-[#FFE600]">
+            <label className="flex w-full cursor-pointer items-center gap-2.5 border-2 border-white bg-[#161616] px-3.5 py-2.5 text-sm font-semibold text-white hover:border-[#FFE600]">
               <input
                 type="checkbox"
                 checked={isOnline}
@@ -417,7 +417,7 @@ export function LessonEditorModal({
                         type="button"
                         onClick={() => toggleTeacher(tid)}
                         aria-label={`Убрать ${label}`}
-                        className="border border-white/40 bg-[#161616] p-1 text-white transition hover:bg-[#E60012]"
+                        className="border border-white/40 bg-[#161616] p-1 text-white hover:bg-[#E60012]"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -452,7 +452,7 @@ export function LessonEditorModal({
                     key={t.id}
                     type="button"
                     onClick={() => toggleTeacher(t.id)}
-                    className={`flex w-full items-center justify-between px-2.5 py-1.5 text-left text-xs transition ${
+                    className={`flex w-full items-center justify-between px-2.5 py-1.5 text-left text-xs ${
                       selected
                         ? 'bg-[#E60012] font-bold text-white'
                         : 'text-neutral-200 hover:bg-[#161616] hover:text-[#FFE600]'
@@ -510,7 +510,7 @@ export function LessonEditorModal({
           <button
             type="button"
             onClick={onClose}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition-transform hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
             <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
               Отмена
@@ -518,7 +518,7 @@ export function LessonEditorModal({
           </button>
           <button
             type="submit"
-            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-5 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-5 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition-transform hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
             <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
               {editingLesson ? 'Сохранить изменения' : 'Добавить пару'}

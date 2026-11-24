@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { BookOpen, Clock, MapPin } from 'lucide-react';
 import type { EffectiveTeacher } from '../../types/schedule';
 import { getCursorSpring, getTapPressProps } from '../../utils/p5Motion';
@@ -36,7 +36,7 @@ export function TeacherCard({
   const filledStars = Math.min(5, lessonCount);
 
   return (
-    <motion.button
+    <m.button
       type="button"
       onClick={onSelect}
       onMouseEnter={onHoverStart}
@@ -52,26 +52,26 @@ export function TeacherCard({
 
       {/* Running crimson Confidant hover stripe */}
       {isHovered && (
-        <motion.div
+        <m.div
           layoutId="p5-confidant-hover-bar"
           aria-hidden="true"
           transition={cursorSpring}
           className="pointer-events-none absolute -inset-x-1 inset-y-0 z-0"
         >
           <div className="p5-skew h-full w-full -rotate-[0.8deg] border border-white/75 bg-[#E60012]/90 shadow-[4px_4px_0_#000000]" />
-        </motion.div>
+        </m.div>
       )}
 
       {/* Running active Confidant stripe with yellow highlight */}
       {isSelected && (
-        <motion.div
+        <m.div
           layoutId="p5-confidant-active-bar"
           aria-hidden="true"
           transition={cursorSpring}
           className="pointer-events-none absolute -inset-x-1 inset-y-0 z-0"
         >
           <div className="p5-skew h-full w-full -rotate-[1deg] border-l-4 border-[#FFE600] bg-[#E60012] shadow-[5px_5px_0_#FFE600]" />
-        </motion.div>
+        </m.div>
       )}
 
       <div className="relative z-10 space-y-2 p-3 sm:p-3.5">
@@ -153,6 +153,6 @@ export function TeacherCard({
           </div>
         )}
       </div>
-    </motion.button>
+    </m.button>
   );
 }

@@ -1,27 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AnimatePresence,
   MotionConfig,
-  motion,
+  m,
   useReducedMotion,
 } from 'framer-motion';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
-import { BackupModal } from './components/common/BackupModal';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
 import { P5TransitionSlash } from './components/common/P5TransitionSlash';
 import { AppShell } from './components/layout/AppShell';
 import { LiveHudBar } from './components/layout/LiveHudBar';
-import { P5MenuOverlay } from './components/layout/P5MenuOverlay';
 import { DayView } from './components/schedule/DayView';
 import { LessonDetailModal } from './components/schedule/LessonDetailModal';
-import { LessonEditorModal } from './components/schedule/LessonEditorModal';
 import { ScheduleToolbar } from './components/schedule/ScheduleToolbar';
 import { WeekView } from './components/schedule/WeekView';
-import { SettingsView } from './components/settings/SettingsView';
-import { TeacherEditorModal } from './components/teachers/TeacherEditorModal';
-import { TeachersView } from './components/teachers/TeachersView';
 import { DAYS, TARGET_GROUPS } from './constants/schedule';
-import { useLiveClock } from './hooks/useLiveClock';
 import {
   useScheduleStore,
   type LessonDraftInput,
@@ -50,15 +43,82 @@ import {
   getWeekdayOrSunday,
 } from './utils/time';
 
+const TeachersView = lazy(() =>
+  import('./components/teachers/TeachersView').then((mod) => ({
+    default: mod.TeachersView,
+  }))
+);
+const SettingsView = lazy(() =>
+  import('./components/settings/SettingsView').then((mod) => ({
+    default: mod.SettingsView,
+  }))
+);
+const P5MenuOverlay = lazy(() =>
+  import('./components/layout/P5MenuOverlay').then((mod) => ({
+    default: mod.P5MenuOverlay,
+  }))
+);
+const BackupModal = lazy(() =>
+  import('./components/common/BackupModal').then((mod) => ({
+    default: mod.BackupModal,
+  }))
+);
+const LessonEditorModal = lazy(() =>
+  import('./components/schedule/LessonEditorModal').then((mod) => ({
+    default: mod.LessonEditorModal,
+  }))
+);
+const TeacherEditorModal = lazy(() =>
+  import('./components/teachers/TeacherEditorModal').then((mod) => ({
+    default: mod.TeacherEditorModal,
+  }))
+);
+
 type ConfirmState =
   | { kind: 'deleteLesson'; lesson: EffectiveLesson }
   | { kind: 'deleteTeacher'; teacher: EffectiveTeacher }
   | { kind: 'resetExcel' }
   | null;
 
+function useActivated(active: boolean): boolean {
+  const [activated, setActivated] = useState(active);
+  if (active && !activated) {
+    setActivated(true);
+  }
+  return activated;
+}
+
+function TabLoadingFallback() {
+  return (
+    <div className="flex min-h-[260px] items-center justify-center p-6">
+      <div className="p5-skew border-2 border-white bg-[#060606] px-5 py-3 shadow-[4px_4px_0_#E60012]">
+        <div className="p5-unskew flex items-center gap-2.5">
+          <Loader2 className="h-4 w-4 animate-spin text-[#E60012]" />
+          <span className="font-condensed text-xs font-bold uppercase tracking-wider text-white">
+            Загрузка раздела...
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function computeLiveDaySnapshot(lessons: EffectiveLesson[]) {
+  const now = new Date();
+  const todayDay = getWeekdayOrSunday(now);
+  const currentIds = computeLiveHudState(now, lessons, 'ALL').currentLessons.map(
+    (ls) => ls.id
+  );
+  currentIds.sort();
+  return {
+    todayDay,
+    currentIdsKey: currentIds.join('|'),
+    currentLessonIds: new Set(currentIds),
+  };
+}
+
 export default function App() {
   const store = useScheduleStore();
-  const now = useLiveClock(1000);
   const systemReduced = useReducedMotion();
   const reduced = store.reduceMotion || systemReduced;
 
@@ -96,6 +156,11 @@ export default function App() {
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [toast, setToast] = useState<string | null>(null);
 
+  const menuActivated = useActivated(menuOpen);
+  const lessonEditorActivated = useActivated(lessonEditorState.open);
+  const teacherEditorActivated = useActivated(teacherEditorState.open);
+  const backupActivated = useActivated(backupOpen);
+
   useEffect(() => {
     document.documentElement.classList.toggle(
       'p5-reduce-motion',
@@ -109,15 +174,51 @@ export default function App() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
-  const currentLessonIds = useMemo(
-    () =>
-      new Set(
-        computeLiveHudState(now, store.lessons, 'ALL').currentLessons.map(
-          (ls) => ls.id
-        )
-      ),
-    [now, store.lessons]
+  const [liveSnapshot, setLiveSnapshot] = useState(() =>
+    computeLiveDaySnapshot(store.lessons)
   );
+
+  useEffect(() => {
+    let timeoutId: number | undefined;
+
+    const sync = () => {
+      const next = computeLiveDaySnapshot(store.lessons);
+      setLiveSnapshot((prev) =>
+        prev.todayDay === next.todayDay &&
+        prev.currentIdsKey === next.currentIdsKey
+          ? prev
+          : next
+      );
+    };
+
+    const scheduleNext = () => {
+      const current = new Date();
+      const msUntilNextMinute =
+        60_000 - (current.getSeconds() * 1000 + current.getMilliseconds()) + 50;
+      timeoutId = window.setTimeout(() => {
+        sync();
+        scheduleNext();
+      }, msUntilNextMinute);
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+        sync();
+        scheduleNext();
+      }
+    };
+
+    sync();
+    scheduleNext();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [store.lessons]);
+
+  const { todayDay, currentLessonIds } = liveSnapshot;
 
   const detailLesson = detailLessonId
     ? store.lessons.find((ls) => ls.id === detailLessonId) ?? null
@@ -194,14 +295,14 @@ export default function App() {
   );
 
   const handleJumpToToday = useCallback(() => {
-    const studyToday = getDefaultStudyDay(now);
+    const studyToday = getDefaultStudyDay(new Date());
     playSwitch();
     store.setSelectedDay(studyToday);
     if (activeTab !== 'schedule') {
       triggerSlash();
       setActiveTab('schedule');
     }
-  }, [activeTab, now, store, triggerSlash]);
+  }, [activeTab, store, triggerSlash]);
 
   const handleSelectTeacher = (teacherId: string | null) => {
     if (teacherId) {
@@ -402,7 +503,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => void store.reloadBaseData()}
-            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#050505] transition hover:-translate-y-0.5 hover:bg-white hover:text-[#050505]"
+            className="p5-skew inline-block border-2 border-white bg-[#E60012] px-4 py-2 text-white shadow-[4px_4px_0_#050505] transition-transform hover:-translate-y-0.5 hover:bg-white hover:text-[#050505]"
           >
             <span className="p5-unskew inline-flex items-center gap-2 font-condensed text-sm font-bold uppercase tracking-wider">
               <RefreshCw className="h-4 w-4" />
@@ -414,7 +515,6 @@ export default function App() {
     );
   }
 
-  const todayDay = getWeekdayOrSunday(now);
   const scheduleContentKey = `${store.selectedGroup}-${store.scheduleScopeMode}-${
     store.focusedTeacherId ?? 'none'
   }-${store.viewMode}-${store.viewMode === 'day' ? store.selectedDay : 'week'}`;
@@ -438,7 +538,6 @@ export default function App() {
         }}
         hud={
           <LiveHudBar
-            now={now}
             lessons={store.lessons}
             selectedGroup={store.selectedGroup}
             selectedDay={store.selectedDay}
@@ -527,153 +626,161 @@ export default function App() {
           </div>
         ) : activeTab === 'teachers' ? (
           <div key="tab-teachers">
-            <TeachersView
-              teachers={store.teachers}
-              lessons={store.lessons}
-              targetGroupTeacherIds={store.targetGroupTeacherIds}
-              selectedTeacherId={selectedTeacherId}
-              onSelectTeacher={handleSelectTeacher}
-              onAddTeacher={() => {
-                playOpen();
-                setTeacherEditorState({ open: true, editingTeacher: null });
-              }}
-              onEditTeacher={(teacher) => {
-                playOpen();
-                setTeacherEditorState({
-                  open: true,
-                  editingTeacher: teacher,
-                });
-              }}
-              onDeleteTeacher={(teacher) => {
-                playOpen();
-                setConfirmState({ kind: 'deleteTeacher', teacher });
-              }}
-              onSelectLesson={handleOpenLessonDetail}
-            />
+            <Suspense fallback={<TabLoadingFallback />}>
+              <TeachersView
+                teachers={store.teachers}
+                lessons={store.lessons}
+                targetGroupTeacherIds={store.targetGroupTeacherIds}
+                selectedTeacherId={selectedTeacherId}
+                onSelectTeacher={handleSelectTeacher}
+                onAddTeacher={() => {
+                  playOpen();
+                  setTeacherEditorState({ open: true, editingTeacher: null });
+                }}
+                onEditTeacher={(teacher) => {
+                  playOpen();
+                  setTeacherEditorState({
+                    open: true,
+                    editingTeacher: teacher,
+                  });
+                }}
+                onDeleteTeacher={(teacher) => {
+                  playOpen();
+                  setConfirmState({ kind: 'deleteTeacher', teacher });
+                }}
+                onSelectLesson={handleOpenLessonDetail}
+              />
+            </Suspense>
           </div>
         ) : (
           <div key="tab-settings">
-            <SettingsView
-              selectedGroup={store.selectedGroup}
-              defaultGroup={store.defaultGroup}
-              defaultViewMode={store.defaultViewMode ?? store.viewMode}
-              hideSaturdayConflicts={store.hideSaturdayConflicts}
-              sfxEnabled={sfxEnabled}
-              reduceMotion={store.reduceMotion}
-              scheduleScopeMode={store.scheduleScopeMode}
-              focusedTeacherId={store.focusedTeacherId}
-              allLessons={store.allLessons}
-              teachers={store.teachers}
-              teachersById={store.teachersById}
-              groups={store.baseData?.groups ?? []}
-              subjectTeacherOverrides={store.subjectTeacherOverrides}
-              lastCreatedTeacherId={lastCreatedTeacherId}
-              onSetDefaultGroup={(group) => {
-                playConfirm();
-                store.setDefaultGroup(group);
-                setToast(`Группа по умолчанию: ${group === 'ALL' ? 'ВСЕ' : group}`);
-              }}
-              onSetDefaultViewMode={(mode) => {
-                playConfirm();
-                store.setDefaultViewMode(mode);
-                setToast(
-                  `Вид по умолчанию: ${mode === 'day' ? 'День' : 'Неделя'}`
-                );
-              }}
-              onSetHideSaturdayConflicts={(hide) => {
-                playSwitch();
-                store.setHideSaturdayConflicts(hide);
-                setToast(
-                  hide
-                    ? 'Спорные субботние очные пары скрыты'
-                    : 'Спорные субботние очные пары снова показаны'
-                );
-              }}
-              onToggleSfx={handleToggleSfx}
-              onSetReduceMotion={(enabled) => {
-                playSwitch();
-                store.setReduceMotion(enabled);
-                setToast(
-                  enabled
-                    ? 'Анимации уменьшены'
-                    : 'Полная кинетика P5R включена'
-                );
-              }}
-              onSetSubjectPinnedSubgroup={(subject, teacherId) => {
-                playConfirm();
-                store.setSubjectPinnedSubgroup(subject, teacherId);
-                setToast(
-                  teacherId
-                    ? `Преподаватель закреплён для «${subject}»`
-                    : `Закрепление для «${subject}» сброшено`
-                );
-              }}
-              onSetSubjectTeacherOverride={(subject, teacherId) => {
-                playConfirm();
-                store.setSubjectTeacherOverride(subject, teacherId);
-                setToast(
-                  teacherId
-                    ? `Преподаватель для «${subject}» переопределён`
-                    : `Переопределение для «${subject}» снято`
-                );
-              }}
-              onSetScheduleScopeMode={(mode, teacherId) => {
-                playSwitch();
-                store.setScheduleScopeMode(mode, teacherId);
-              }}
-              onAddTeacher={() => {
-                playOpen();
-                setTeacherEditorState({ open: true, editingTeacher: null });
-              }}
-              onBackToSchedule={() => handleTabChange('schedule')}
-            />
+            <Suspense fallback={<TabLoadingFallback />}>
+              <SettingsView
+                selectedGroup={store.selectedGroup}
+                defaultGroup={store.defaultGroup}
+                defaultViewMode={store.defaultViewMode ?? store.viewMode}
+                hideSaturdayConflicts={store.hideSaturdayConflicts}
+                sfxEnabled={sfxEnabled}
+                reduceMotion={store.reduceMotion}
+                scheduleScopeMode={store.scheduleScopeMode}
+                focusedTeacherId={store.focusedTeacherId}
+                allLessons={store.allLessons}
+                teachers={store.teachers}
+                teachersById={store.teachersById}
+                groups={store.baseData?.groups ?? []}
+                subjectTeacherOverrides={store.subjectTeacherOverrides}
+                lastCreatedTeacherId={lastCreatedTeacherId}
+                onSetDefaultGroup={(group) => {
+                  playConfirm();
+                  store.setDefaultGroup(group);
+                  setToast(`Группа по умолчанию: ${group === 'ALL' ? 'ВСЕ' : group}`);
+                }}
+                onSetDefaultViewMode={(mode) => {
+                  playConfirm();
+                  store.setDefaultViewMode(mode);
+                  setToast(
+                    `Вид по умолчанию: ${mode === 'day' ? 'День' : 'Неделя'}`
+                  );
+                }}
+                onSetHideSaturdayConflicts={(hide) => {
+                  playSwitch();
+                  store.setHideSaturdayConflicts(hide);
+                  setToast(
+                    hide
+                      ? 'Спорные субботние очные пары скрыты'
+                      : 'Спорные субботние очные пары снова показаны'
+                  );
+                }}
+                onToggleSfx={handleToggleSfx}
+                onSetReduceMotion={(enabled) => {
+                  playSwitch();
+                  store.setReduceMotion(enabled);
+                  setToast(
+                    enabled
+                      ? 'Анимации уменьшены'
+                      : 'Полная кинетика P5R включена'
+                  );
+                }}
+                onSetSubjectPinnedSubgroup={(subject, teacherId) => {
+                  playConfirm();
+                  store.setSubjectPinnedSubgroup(subject, teacherId);
+                  setToast(
+                    teacherId
+                      ? `Преподаватель закреплён для «${subject}»`
+                      : `Закрепление для «${subject}» сброшено`
+                  );
+                }}
+                onSetSubjectTeacherOverride={(subject, teacherId) => {
+                  playConfirm();
+                  store.setSubjectTeacherOverride(subject, teacherId);
+                  setToast(
+                    teacherId
+                      ? `Преподаватель для «${subject}» переопределён`
+                      : `Переопределение для «${subject}» снято`
+                  );
+                }}
+                onSetScheduleScopeMode={(mode, teacherId) => {
+                  playSwitch();
+                  store.setScheduleScopeMode(mode, teacherId);
+                }}
+                onAddTeacher={() => {
+                  playOpen();
+                  setTeacherEditorState({ open: true, editingTeacher: null });
+                }}
+                onBackToSchedule={() => handleTabChange('schedule')}
+              />
+            </Suspense>
           </div>
         )}
       </AppShell>
 
-      <P5MenuOverlay
-        open={menuOpen}
-        onClose={() => {
-          playCancel();
-          setMenuOpen(false);
-        }}
-        activeTab={activeTab}
-        selectedGroup={store.selectedGroup}
-        scheduleScopeMode={store.scheduleScopeMode}
-        focusedTeacherName={focusedTeacherName}
-        teacherCount={store.teachers.length}
-        pinnedSubjectsCount={streamStats.pinned}
-        totalStreamSubjectsCount={streamStats.total}
-        overrideCount={Object.keys(store.subjectTeacherOverrides).length}
-        overlayChangeCount={store.overlayChangeCount}
-        hideSaturdayConflicts={store.hideSaturdayConflicts}
-        sfxEnabled={sfxEnabled}
-        onToggleSfx={handleToggleSfx}
-        onSelectSchedule={() => {
-          setMenuOpen(false);
-          handleTabChange('schedule');
-        }}
-        onSelectTeachers={() => {
-          setMenuOpen(false);
-          handleTabChange('teachers');
-        }}
-        onSelectSettings={() => {
-          setMenuOpen(false);
-          handleTabChange('settings');
-        }}
-        onAddLesson={() => {
-          setMenuOpen(false);
-          setLessonEditorState({
-            open: true,
-            editingLesson: null,
-            defaultDay: store.selectedDay,
-          });
-        }}
-        onOpenBackup={() => {
-          setMenuOpen(false);
-          setBackupOpen(true);
-        }}
-      />
+      {menuActivated && (
+        <Suspense fallback={null}>
+          <P5MenuOverlay
+            open={menuOpen}
+            onClose={() => {
+              playCancel();
+              setMenuOpen(false);
+            }}
+            activeTab={activeTab}
+            selectedGroup={store.selectedGroup}
+            scheduleScopeMode={store.scheduleScopeMode}
+            focusedTeacherName={focusedTeacherName}
+            teacherCount={store.teachers.length}
+            pinnedSubjectsCount={streamStats.pinned}
+            totalStreamSubjectsCount={streamStats.total}
+            overrideCount={Object.keys(store.subjectTeacherOverrides).length}
+            overlayChangeCount={store.overlayChangeCount}
+            hideSaturdayConflicts={store.hideSaturdayConflicts}
+            sfxEnabled={sfxEnabled}
+            onToggleSfx={handleToggleSfx}
+            onSelectSchedule={() => {
+              setMenuOpen(false);
+              handleTabChange('schedule');
+            }}
+            onSelectTeachers={() => {
+              setMenuOpen(false);
+              handleTabChange('teachers');
+            }}
+            onSelectSettings={() => {
+              setMenuOpen(false);
+              handleTabChange('settings');
+            }}
+            onAddLesson={() => {
+              setMenuOpen(false);
+              setLessonEditorState({
+                open: true,
+                editingLesson: null,
+                defaultDay: store.selectedDay,
+              });
+            }}
+            onOpenBackup={() => {
+              setMenuOpen(false);
+              setBackupOpen(true);
+            }}
+          />
+        </Suspense>
+      )}
 
       <LessonDetailModal
         lesson={detailLesson}
@@ -703,53 +810,65 @@ export default function App() {
         onOpenTeacher={handleOpenTeacher}
       />
 
-      <LessonEditorModal
-        open={lessonEditorState.open}
-        editingLesson={lessonEditorState.editingLesson}
-        defaultDay={lessonEditorState.defaultDay}
-        defaultGroup={
-          store.selectedGroup === 'ALL' ? 'COMSE26A' : store.selectedGroup
-        }
-        teachers={store.teachers}
-        teachersById={store.teachersById}
-        existingLessons={store.allLessons}
-        onClose={() => {
-          playCancel();
-          setLessonEditorState((prev) => ({ ...prev, open: false }));
-        }}
-        onSave={handleSaveLesson}
-      />
+      {lessonEditorActivated && (
+        <Suspense fallback={null}>
+          <LessonEditorModal
+            open={lessonEditorState.open}
+            editingLesson={lessonEditorState.editingLesson}
+            defaultDay={lessonEditorState.defaultDay}
+            defaultGroup={
+              store.selectedGroup === 'ALL' ? 'COMSE26A' : store.selectedGroup
+            }
+            teachers={store.teachers}
+            teachersById={store.teachersById}
+            existingLessons={store.allLessons}
+            onClose={() => {
+              playCancel();
+              setLessonEditorState((prev) => ({ ...prev, open: false }));
+            }}
+            onSave={handleSaveLesson}
+          />
+        </Suspense>
+      )}
 
-      <TeacherEditorModal
-        open={teacherEditorState.open}
-        editingTeacher={teacherEditorState.editingTeacher}
-        onClose={() => {
-          playCancel();
-          setTeacherEditorState((prev) => ({ ...prev, open: false }));
-        }}
-        onSave={handleSaveTeacher}
-      />
+      {teacherEditorActivated && (
+        <Suspense fallback={null}>
+          <TeacherEditorModal
+            open={teacherEditorState.open}
+            editingTeacher={teacherEditorState.editingTeacher}
+            onClose={() => {
+              playCancel();
+              setTeacherEditorState((prev) => ({ ...prev, open: false }));
+            }}
+            onSave={handleSaveTeacher}
+          />
+        </Suspense>
+      )}
 
-      <BackupModal
-        open={backupOpen}
-        onClose={() => {
-          playCancel();
-          setBackupOpen(false);
-        }}
-        overlay={store.overlay}
-        changeCount={store.overlayChangeCount}
-        onExport={store.exportBackup}
-        onImport={(text) => {
-          const res = store.importBackup(text);
-          if (res.ok) setToast('Резервная копия импортирована');
-          return res;
-        }}
-        onRequestReset={() => {
-          playOpen();
-          setConfirmState({ kind: 'resetExcel' });
-        }}
-        onReloadBase={store.reloadBaseData}
-      />
+      {backupActivated && (
+        <Suspense fallback={null}>
+          <BackupModal
+            open={backupOpen}
+            onClose={() => {
+              playCancel();
+              setBackupOpen(false);
+            }}
+            overlay={store.overlay}
+            changeCount={store.overlayChangeCount}
+            onExport={store.exportBackup}
+            onImport={(text) => {
+              const res = store.importBackup(text);
+              if (res.ok) setToast('Резервная копия импортирована');
+              return res;
+            }}
+            onRequestReset={() => {
+              playOpen();
+              setConfirmState({ kind: 'resetExcel' });
+            }}
+            onReloadBase={store.reloadBaseData}
+          />
+        </Suspense>
+      )}
 
       <ConfirmDialog
         open={Boolean(confirmState)}
@@ -793,7 +912,7 @@ export default function App() {
 
       <AnimatePresence>
         {toast && (
-          <motion.div
+          <m.div
             key="p5-toast"
             role="status"
             initial={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
@@ -805,7 +924,7 @@ export default function App() {
             <span className="p5-unskew block font-condensed uppercase tracking-wide">
               {toast}
             </span>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </MotionConfig>

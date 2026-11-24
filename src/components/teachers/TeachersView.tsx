@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { Plus, Search, X } from 'lucide-react';
 import type { EffectiveLesson, EffectiveTeacher } from '../../types/schedule';
 import {
@@ -110,7 +110,7 @@ export function TeachersView({
                 type="button"
                 onClick={() => setQuery('')}
                 aria-label="Очистить поиск"
-                className="absolute top-1.5 right-1.5 border border-white/60 bg-[#050505] p-1 text-white transition hover:border-[#FFE600] hover:bg-[#E60012]"
+                className="absolute top-1.5 right-1.5 border border-white/60 bg-[#050505] p-1 text-white hover:border-[#FFE600] hover:bg-[#E60012]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -120,7 +120,7 @@ export function TeachersView({
           <div className="flex flex-wrap items-center gap-2">
             <LayoutGroup id="p5-teacher-filters">
               <div className="inline-flex flex-wrap items-center gap-1.5">
-                <motion.button
+                <m.button
                   type="button"
                   onClick={() => {
                     if (onlyTargetGroups) playSwitch();
@@ -134,14 +134,14 @@ export function TeachersView({
                   }`}
                 >
                   {!onlyTargetGroups ? (
-                    <motion.div
+                    <m.div
                       layoutId="p5-teacher-filter-cursor"
                       aria-hidden="true"
                       transition={cursorSpring}
                       className="pointer-events-none absolute inset-0 z-0"
                     >
                       <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
-                    </motion.div>
+                    </m.div>
                   ) : (
                     <div
                       aria-hidden="true"
@@ -151,9 +151,9 @@ export function TeachersView({
                   <span className="relative z-10 block font-condensed text-xs font-bold uppercase tracking-wider">
                     Все ({teachers.length})
                   </span>
-                </motion.button>
+                </m.button>
 
-                <motion.button
+                <m.button
                   type="button"
                   onClick={() => {
                     if (!onlyTargetGroups) playSwitch();
@@ -167,14 +167,14 @@ export function TeachersView({
                   }`}
                 >
                   {onlyTargetGroups ? (
-                    <motion.div
+                    <m.div
                       layoutId="p5-teacher-filter-cursor"
                       aria-hidden="true"
                       transition={cursorSpring}
                       className="pointer-events-none absolute inset-0 z-0"
                     >
                       <div className="p5-skew h-full w-full -rotate-[1.2deg] border border-white bg-[#E60012] shadow-[3px_3px_0_#000000]" />
-                    </motion.div>
+                    </m.div>
                   ) : (
                     <div
                       aria-hidden="true"
@@ -184,11 +184,11 @@ export function TeachersView({
                   <span className="relative z-10 block font-condensed text-xs font-bold uppercase tracking-wider">
                     Наши 4 группы ({targetCount})
                   </span>
-                </motion.button>
+                </m.button>
               </div>
             </LayoutGroup>
 
-            <motion.button
+            <m.button
               type="button"
               onClick={onAddTeacher}
               {...tapProps}
@@ -198,7 +198,7 @@ export function TeachersView({
                 <Plus className="h-3.5 w-3.5" />
                 <span>Добавить преподавателя</span>
               </span>
-            </motion.button>
+            </m.button>
           </div>
         </div>
       </div>
@@ -217,7 +217,7 @@ export function TeachersView({
             </div>
           ) : (
             <LayoutGroup id="p5-confidants-list">
-              <motion.div
+              <m.div
                 key={onlyTargetGroups ? 'target-only' : 'all-teachers'}
                 variants={containerVariants}
                 initial="hidden"
@@ -226,7 +226,7 @@ export function TeachersView({
                 className="max-h-[70vh] space-y-2 overflow-x-clip overflow-y-auto px-2.5 py-2"
               >
                 {filteredTeachers.map((teacher) => (
-                  <motion.div key={teacher.id} variants={itemVariants}>
+                  <m.div key={teacher.id} variants={itemVariants}>
                     <TeacherCard
                       teacher={teacher}
                       lessonCount={lessonCountsByTeacher[teacher.id] ?? 0}
@@ -235,9 +235,9 @@ export function TeachersView({
                       onHoverStart={() => setHoveredTeacherId(teacher.id)}
                       onSelect={() => onSelectTeacher(teacher.id)}
                     />
-                  </motion.div>
+                  </m.div>
                 ))}
-              </motion.div>
+              </m.div>
             </LayoutGroup>
           )}
         </div>
@@ -248,7 +248,7 @@ export function TeachersView({
             activeTeacher ? 'block' : 'hidden lg:block'
           }`}
         >
-          <motion.div
+          <m.div
             key={activeTeacher?.id ?? 'empty'}
             {...panelMotion}
           >
@@ -260,7 +260,7 @@ export function TeachersView({
               onDelete={onDeleteTeacher}
               onSelectLesson={onSelectLesson}
             />
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </div>

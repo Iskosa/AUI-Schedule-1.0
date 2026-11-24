@@ -27,7 +27,7 @@
 
 html,
 body {
-  background-color: var(--p5-black);
+  background-color: #080808;
   color: var(--p5-white);
   font-family: var(--font-sans);
   overflow-x: clip;
@@ -120,6 +120,16 @@ body {
   clip-path: polygon(2% 8%, 100% 0%, 97% 92%, 0% 100%);
 }
 
+.p5-bg-plane-primary {
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 24% 100%, 38% 58%, 43% 60%);
+}
+
+@media (max-width: 639px) {
+  .p5-bg-plane-primary {
+    clip-path: polygon(64% 0, 100% 0, 100% 100%, 36% 100%);
+  }
+}
+
 .p5-halftone {
   background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
   background-size: 12px 12px;
@@ -130,18 +140,10 @@ body {
   background-size: 11px 11px;
 }
 
-.p5-halftone-edge-right {
-  background-image: radial-gradient(rgba(5, 5, 5, 0.34) 3px, transparent 3px);
-  background-size: 16px 16px;
-  -webkit-mask-image: linear-gradient(125deg, transparent 36%, rgba(0, 0, 0, 0.92) 92%);
-  mask-image: linear-gradient(125deg, transparent 36%, rgba(0, 0, 0, 0.92) 92%);
-}
-
-.p5-halftone-edge-left {
-  background-image: radial-gradient(rgba(230, 0, 18, 0.28) 2.5px, transparent 2.5px);
-  background-size: 15px 15px;
-  -webkit-mask-image: linear-gradient(-55deg, transparent 48%, rgba(0, 0, 0, 0.9) 96%);
-  mask-image: linear-gradient(-55deg, transparent 48%, rgba(0, 0, 0, 0.9) 96%);
+.p5-halftone-svg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='3' cy='3' r='1.35' fill='%23000000' fill-opacity='0.28'/%3E%3Ccircle cx='9' cy='9' r='1.35' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E");
+  background-size: 12px 12px;
+  background-repeat: repeat;
 }
 
 .p5-shadow {
@@ -173,7 +175,7 @@ body {
   border: 2px solid var(--p5-white);
   background-color: var(--p5-black);
   color: var(--p5-white);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease;
 }
 
 .p5-input:focus {
@@ -198,19 +200,34 @@ body {
 
 @keyframes p5-star-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg) translateZ(0);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+@keyframes p5-star-spin-reverse {
+  from {
+    transform: rotate(360deg) translateZ(0);
+  }
+  to {
+    transform: rotate(0deg) translateZ(0);
   }
 }
 
 .p5-star-spin {
-  animation: p5-star-spin 56s linear infinite;
+  animation: p5-star-spin 72s linear infinite;
   will-change: transform;
 }
 
-.p5-reduce-motion .p5-star-spin {
+.p5-star-spin-reverse {
+  animation: p5-star-spin-reverse 96s linear infinite;
+  will-change: transform;
+}
+
+.p5-reduce-motion .p5-star-spin,
+.p5-reduce-motion .p5-star-spin-reverse {
   animation: none !important;
 }
 
@@ -224,7 +241,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .p5-star-spin {
+  .p5-star-spin,
+  .p5-star-spin-reverse {
     animation: none !important;
   }
 

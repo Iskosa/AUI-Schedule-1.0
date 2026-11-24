@@ -1,4 +1,4 @@
-import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import {
   DAY_LABELS_RU,
@@ -98,7 +98,7 @@ export function DayView({
               const active = selectedDay === day;
               const dayIsToday = day === todayDay;
               return (
-                <motion.button
+                <m.button
                   key={day}
                   type="button"
                   onClick={() => onSelectDay(day)}
@@ -106,14 +106,14 @@ export function DayView({
                   className="relative px-2 py-1.5 text-left text-white"
                 >
                   {active ? (
-                    <motion.div
+                    <m.div
                       layoutId="p5-day-cursor-mobile"
                       aria-hidden="true"
                       transition={cursorSpring}
                       className="pointer-events-none absolute inset-0 z-0"
                     >
                       <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-white bg-[#E60012] shadow-[4px_4px_0_#050505]" />
-                    </motion.div>
+                    </m.div>
                   ) : (
                     <div
                       aria-hidden="true"
@@ -143,7 +143,7 @@ export function DayView({
                       {count}
                     </span>
                   </span>
-                </motion.button>
+                </m.button>
               );
             })}
           </div>
@@ -216,7 +216,7 @@ export function DayView({
                 const dayIsToday = day === todayDay;
 
                 return (
-                  <motion.button
+                  <m.button
                     key={day}
                     type="button"
                     onClick={() => onSelectDay(day)}
@@ -224,14 +224,14 @@ export function DayView({
                     className="relative px-3.5 py-2 text-left text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE600]"
                   >
                     {active ? (
-                      <motion.div
+                      <m.div
                         layoutId="p5-day-cursor-desktop"
                         aria-hidden="true"
                         transition={cursorSpring}
                         className="pointer-events-none absolute inset-0 z-0"
                       >
                         <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-white bg-[#E60012] shadow-[4px_4px_0_#050505]" />
-                      </motion.div>
+                      </m.div>
                     ) : (
                       <div
                         aria-hidden="true"
@@ -268,7 +268,7 @@ export function DayView({
                         </span>
                       </span>
                     </span>
-                  </motion.button>
+                  </m.button>
                 );
               })}
             </div>
@@ -326,7 +326,7 @@ export function DayView({
               <button
                 type="button"
                 onClick={() => onAddLessonForDay(selectedDay)}
-                className="p5-skew mt-4 border-2 border-[#050505] bg-white px-4 py-2 text-[#050505] shadow-[4px_4px_0_#E60012] transition hover:border-white hover:bg-[#E60012] hover:text-white"
+                className="p5-skew mt-4 border-2 border-[#050505] bg-white px-4 py-2 text-[#050505] shadow-[4px_4px_0_#E60012] hover:border-white hover:bg-[#E60012] hover:text-white"
               >
                 <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
                   <Plus className="h-4 w-4" />
@@ -335,7 +335,7 @@ export function DayView({
               </button>
             </div>
           ) : (
-            <motion.div
+            <m.div
               key={`${selectedDay}-${selectedGroup}-${scopeMode}-${focusedTeacherId ?? ''}`}
               variants={containerVariants}
               initial="hidden"
@@ -347,7 +347,7 @@ export function DayView({
               }
             >
               {dayLessons.map((lesson, idx) => (
-                <motion.div key={lesson.id} variants={itemVariants}>
+                <m.div key={lesson.id} variants={itemVariants}>
                   <LessonCard
                     lesson={lesson}
                     selectedGroup={selectedGroup}
@@ -358,9 +358,9 @@ export function DayView({
                     isCurrent={currentLessonIds.has(lesson.id)}
                     onClick={() => onSelectLesson(lesson)}
                   />
-                </motion.div>
+                </m.div>
               ))}
-            </motion.div>
+            </m.div>
           )}
         </div>
       </div>

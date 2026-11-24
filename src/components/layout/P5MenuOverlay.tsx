@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import {
   CalendarDays,
   Database,
@@ -170,7 +170,7 @@ export function P5MenuOverlay({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           role="dialog"
           aria-modal="true"
           aria-label="Меню паузы Persona 5"
@@ -226,12 +226,11 @@ export function P5MenuOverlay({
               />
             </svg>
 
-            <div className="p5-halftone-edge-right absolute inset-0" />
-            <div className="p5-halftone-edge-left absolute inset-0" />
+            <div className="p5-halftone-svg absolute inset-0" />
 
             <svg
               viewBox="-100 -100 200 200"
-              className="p5-star-spin absolute -top-16 -right-16 h-80 w-80 text-[#E60012]/25"
+              className="p5-star-spin hidden sm:block absolute -top-16 -right-16 h-80 w-80 text-[#E60012]/25"
             >
               <polygon
                 points="0,-92 24,-30 90,-28 38,14 56,78 0,40 -56,78 -38,14 -90,-28 -24,-30"
@@ -254,7 +253,7 @@ export function P5MenuOverlay({
                 </span>
               </div>
 
-              <motion.button
+              <m.button
                 type="button"
                 onClick={onClose}
                 {...tapProps}
@@ -268,13 +267,13 @@ export function P5MenuOverlay({
                   </span>
                   <X className="h-4 w-4" />
                 </span>
-              </motion.button>
+              </m.button>
             </div>
 
             {/* Center Content: Slanted Staircase Menu (Left) + Profile Card (Right) */}
             <div className="my-auto grid grid-cols-1 items-center gap-8 py-6 lg:grid-cols-12 lg:gap-10">
               {/* Slanted Staircase */}
-              <motion.nav
+              <m.nav
                 aria-label="Навигация меню паузы"
                 initial={reduced ? { opacity: 0 } : { x: -36, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -296,7 +295,7 @@ export function P5MenuOverlay({
                           key={item.id}
                           className={indentClasses[idx] ?? 'ml-0'}
                         >
-                          <motion.button
+                          <m.button
                             type="button"
                             onMouseEnter={() => {
                               if (focusedIndex !== idx) {
@@ -315,14 +314,14 @@ export function P5MenuOverlay({
                             className="group relative flex w-full max-w-xl items-center justify-between gap-3 px-4 py-2.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE600] sm:px-6 sm:py-3"
                           >
                             {isFocused ? (
-                              <motion.div
+                              <m.div
                                 layoutId="p5-pause-cursor"
                                 aria-hidden="true"
                                 transition={cursorSpring}
                                 className="pointer-events-none absolute inset-0 z-0 filter-[drop-shadow(6px_6px_0_#E60012)]"
                               >
                                 <div className="p5-clip-pause-cursor h-full w-full -rotate-[1deg] bg-white" />
-                              </motion.div>
+                              </m.div>
                             ) : (
                               <div
                                 aria-hidden="true"
@@ -369,16 +368,16 @@ export function P5MenuOverlay({
                                 {item.badge}
                               </span>
                             )}
-                          </motion.button>
+                          </m.button>
                         </li>
                       );
                     })}
                   </ul>
                 </LayoutGroup>
-              </motion.nav>
+              </m.nav>
 
               {/* Right Summary Panel */}
-              <motion.aside
+              <m.aside
                 initial={reduced ? { opacity: 0 } : { x: 32, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={reduced ? { opacity: 0 } : { x: 24, opacity: 0 }}
@@ -458,7 +457,7 @@ export function P5MenuOverlay({
                   </dl>
 
                   <div className="mt-5 flex flex-wrap items-center gap-2.5">
-                    <motion.button
+                    <m.button
                       type="button"
                       onClick={onToggleSfx}
                       {...tapProps}
@@ -476,9 +475,9 @@ export function P5MenuOverlay({
                         )}
                         <span>SFX: {sfxEnabled ? 'ON' : 'OFF'}</span>
                       </span>
-                    </motion.button>
+                    </m.button>
 
-                    <motion.button
+                    <m.button
                       type="button"
                       onClick={onClose}
                       {...tapProps}
@@ -487,10 +486,10 @@ export function P5MenuOverlay({
                       <span className="p5-unskew block font-condensed text-xs font-bold uppercase tracking-wider">
                         НАЗАД [ESC]
                       </span>
-                    </motion.button>
+                    </m.button>
                   </div>
                 </div>
-              </motion.aside>
+              </m.aside>
             </div>
 
             {/* Bottom Keyboard Hints */}
@@ -499,7 +498,7 @@ export function P5MenuOverlay({
               <span>LOCAL OVERLAY: AIU_P5R_SCHEDULE_OVERLAY_V1</span>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

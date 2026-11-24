@@ -59,12 +59,21 @@ export function getDefaultStudyDay(date: Date): DayOfWeek {
   return JS_WEEKDAY_TO_DAY[date.getDay()] ?? 'MONDAY';
 }
 
+const russianDateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const clockFormatter = new Intl.DateTimeFormat('ru-RU', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+});
+
 export function formatRussianDate(date: Date): string {
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
+  return russianDateFormatter.format(date);
 }
 
 export function formatRussianWeekday(date: Date): string {
@@ -74,12 +83,7 @@ export function formatRussianWeekday(date: Date): string {
 }
 
 export function formatClock(date: Date): string {
-  return new Intl.DateTimeFormat('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  }).format(date);
+  return clockFormatter.format(date);
 }
 
 export function formatCountdown(totalSeconds: number): string {
@@ -106,6 +110,7 @@ export interface NextHudSlot {
   startTime: string;
   lessons: EffectiveLesson[];
   startsInSeconds: number;
+  startsAtMs: number;
 }
 
 export interface LiveHudState {
@@ -114,6 +119,7 @@ export interface LiveHudState {
   isSunday: boolean;
   currentLessons: EffectiveLesson[];
   currentEndsInSeconds: number | null;
+  currentEndsAtMs: number | null;
   nextSlot: NextHudSlot | null;
 }
 
@@ -174,6 +180,7 @@ export function computeLiveHudState(
 
   let currentLessons: EffectiveLesson[] = [];
   let currentEndsInSeconds: number | null = null;
+  let currentEndsAtMs: number | null = null;
 
   if (todayDay !== 'SUNDAY') {
     const todaysLessons = filtered.filter((ls) => ls.day === todayDay);
@@ -184,10 +191,21 @@ export function computeLiveHudState(
     });
 
     if (currentLessons.length > 0) {
-      const soonestEnd = Math.min(
-        ...currentLessons.map((ls) => parseTimeToMinutes(ls.endTime) * 60)
+      const soonestEndMinutes = Math.min(
+        ...currentLessons.map((ls) => parseTimeToMinutes(ls.endTime))
       );
-      currentEndsInSeconds = Math.max(0, soonestEnd - nowTotalSeconds);
+      const endTarget = new Date(now);
+      endTarget.setHours(
+        Math.floor(soonestEndMinutes / 60),
+        soonestEndMinutes % 60,
+        0,
+        0
+      );
+      currentEndsAtMs = endTarget.getTime();
+      currentEndsInSeconds = Math.max(
+        0,
+        soonestEndMinutes * 60 - nowTotalSeconds
+      );
     }
 
     const remainingToday = todaysLessons
@@ -197,13 +215,17 @@ export function computeLiveHudState(
     if (remainingToday.length > 0) {
       const nextStart = remainingToday[0].startTime;
       const slotLessons = remainingToday.filter((ls) => ls.startTime === nextStart);
-      const startSec = parseTimeToMinutes(nextStart) * 60;
+      const { hours, minutes } = getTimeParts(nextStart);
+      const startTarget = new Date(now);
+      startTarget.setHours(hours, minutes, 0, 0);
+      const startSec = (hours * 60 + minutes) * 60;
       return {
         phase,
         todayDay,
         isSunday,
         currentLessons,
         currentEndsInSeconds,
+        currentEndsAtMs,
         nextSlot: {
           day: todayDay,
           dayOffset: 0,
@@ -211,6 +233,7 @@ export function computeLiveHudState(
           startTime: nextStart,
           lessons: slotLessons,
           startsInSeconds: Math.max(0, startSec - nowTotalSeconds),
+          startsAtMs: startTarget.getTime(),
         },
       };
     }
@@ -248,6 +271,7 @@ export function computeLiveHudState(
       startTime: earliestStart,
       lessons: slotLessons,
       startsInSeconds,
+      startsAtMs: targetDate.getTime(),
     };
     break;
   }
@@ -258,6 +282,7 @@ export function computeLiveHudState(
     isSunday,
     currentLessons,
     currentEndsInSeconds,
+    currentEndsAtMs,
     nextSlot,
   };
 }

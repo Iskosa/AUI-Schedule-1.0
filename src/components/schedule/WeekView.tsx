@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
 import { DAY_LABELS_RU, DAY_SHORT_EN, DAYS } from '../../constants/schedule';
 import type {
@@ -76,7 +76,7 @@ export function WeekView({
               )}
 
               <div
-                className={`p5-skew -rotate-1 border-2 px-3 py-2 transition-all duration-100 group-hover:rotate-0 ${
+                className={`p5-skew -rotate-1 border-2 px-3 py-2 transition-transform duration-100 group-hover:rotate-0 ${
                   isToday
                     ? 'border-[#050505] bg-[#FFE600] text-[#050505] shadow-[5px_5px_0_#050505]'
                     : 'border-white bg-[#060606] text-white shadow-[4px_4px_0_#050505] group-hover:bg-[#E60012]'
@@ -141,14 +141,14 @@ export function WeekView({
                   </div>
                 </div>
               ) : (
-                <motion.div
+                <m.div
                   variants={colVariants}
                   initial="hidden"
                   animate="visible"
                   className="space-y-5 pt-3"
                 >
                   {dayLessons.map((lesson, idx) => (
-                    <motion.div key={lesson.id} variants={itemVariants}>
+                    <m.div key={lesson.id} variants={itemVariants}>
                       <LessonCard
                         lesson={lesson}
                         selectedGroup={selectedGroup}
@@ -159,9 +159,9 @@ export function WeekView({
                         isCurrent={currentLessonIds.has(lesson.id)}
                         onClick={() => onSelectLesson(lesson)}
                       />
-                    </motion.div>
+                    </m.div>
                   ))}
-                </motion.div>
+                </m.div>
               )}
             </div>
           </div>

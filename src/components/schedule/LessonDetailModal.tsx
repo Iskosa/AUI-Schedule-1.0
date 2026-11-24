@@ -138,7 +138,7 @@ export function LessonDetailModal({
                 return (
                   <div
                     key={`${sg.teacherId ?? sg.teacherName}-${idx}`}
-                    className={`p5-shadow-sm flex flex-wrap items-center justify-between gap-2.5 border-2 px-3.5 py-2.5 transition ${
+                    className={`p5-shadow-sm flex flex-wrap items-center justify-between gap-2.5 border-2 px-3.5 py-2.5 ${
                       isPinned
                         ? 'border-[#FFE600] border-l-[6px] border-l-[#E60012] bg-[#161616]'
                         : 'border-white/70 bg-[#161616]'
@@ -150,7 +150,7 @@ export function LessonDetailModal({
                           <button
                             type="button"
                             onClick={() => onOpenTeacher(sg.teacherId!)}
-                            className="text-left text-sm font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 transition hover:text-white"
+                            className="text-left text-sm font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 hover:text-white"
                           >
                             {sg.teacherName}
                           </button>
@@ -179,7 +179,7 @@ export function LessonDetailModal({
                         onClick={() =>
                           onTogglePinSubgroup(lesson.id, sg.teacherId!)
                         }
-                        className={`p5-skew border-2 px-3 py-1.5 transition hover:-translate-y-0.5 ${
+                        className={`p5-skew border-2 px-3 py-1.5 transition-transform hover:-translate-y-0.5 ${
                           isPinned
                             ? 'border-white bg-[#E60012] text-white shadow-[3px_3px_0_#0D0D0D] hover:bg-white hover:text-[#0D0D0D]'
                             : 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D] shadow-[3px_3px_0_#E60012] hover:border-white hover:bg-[#E60012] hover:text-white'
@@ -217,7 +217,7 @@ export function LessonDetailModal({
                   <button
                     type="button"
                     onClick={() => onOpenTeacher(singleTeacher.id)}
-                    className="text-left text-sm font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 transition hover:text-white"
+                    className="text-left text-sm font-bold text-[#FFE600] underline decoration-[#E60012] decoration-2 underline-offset-4 hover:text-white"
                   >
                     {singleTeacher.name}
                   </button>
@@ -257,7 +257,7 @@ export function LessonDetailModal({
           <button
             type="button"
             onClick={() => onDelete(lesson)}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#0D0D0D] px-3.5 py-2 text-white transition hover:-translate-y-0.5 hover:bg-[#E60012]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#0D0D0D] px-3.5 py-2 text-white transition-transform hover:-translate-y-0.5 hover:bg-[#E60012]"
           >
             <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
               <Trash2 className="h-4 w-4 text-[#FFE600]" />
@@ -268,7 +268,7 @@ export function LessonDetailModal({
           <button
             type="button"
             onClick={() => onEdit(lesson)}
-            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
+            className="p5-skew border-2 border-[#0D0D0D] bg-[#FFE600] px-4 py-2 text-[#0D0D0D] shadow-[4px_4px_0_#E60012] transition-transform hover:-translate-y-0.5 hover:border-white hover:bg-[#E60012] hover:text-white"
           >
             <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
               <Pencil className="h-4 w-4" />

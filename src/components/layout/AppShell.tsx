@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { CalendarDays, Menu, Users, Volume2, VolumeX } from 'lucide-react';
 import type { ActiveTab } from '../../types/schedule';
 import { getCursorSpring, getTapPressProps } from '../../utils/p5Motion';
 import { RansomTitle } from '../common/RansomTitle';
+import { AppBackground } from './AppBackground';
 
 interface AppShellProps {
   activeTab: ActiveTab;
@@ -37,74 +38,15 @@ export function AppShell({
   const tapProps = getTapPressProps(reduced);
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#050505] text-white">
-      {/* Living P5R diagonal crimson/black split comic backdrop */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
-      >
-        <svg
-          viewBox="0 0 1440 900"
-          preserveAspectRatio="xMidYMid slice"
-          className="h-full w-full"
-        >
-          <rect width="1440" height="900" fill="#050505" />
-
-          {/* Sweeping deep crimson diagonal split with angular comic step */}
-          <polygon
-            points="780,0 1440,0 1440,900 320,900 505,530 565,555"
-            fill="#C80010"
-          />
-
-          {/* Secondary vivid scarlet jagged plane across the right wing */}
-          <polygon
-            points="1060,0 1440,0 1440,620 820,900 945,460"
-            fill="#E60012"
-            opacity="0.88"
-          />
-
-          {/* Pitch-black jagged wedge biting into the bottom-right crimson */}
-          <polygon
-            points="1440,560 1440,900 950,900 1245,705"
-            fill="#050505"
-          />
-
-          {/* Sharp crimson shard piercing the bottom-left black field */}
-          <polygon points="0,680 230,900 0,900" fill="#D90012" />
-          <polygon points="0,785 115,900 0,900" fill="#050505" />
-
-          {/* Crisp stark white comic cut-in seam along the main diagonal split */}
-          <polyline
-            points="780,0 565,555 505,530 320,900"
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth="3"
-            opacity="0.22"
-          />
-        </svg>
-
-        {/* Graphic comic halftone dots concentrated toward viewport edges */}
-        <div className="p5-halftone-edge-right absolute inset-0" />
-        <div className="p5-halftone-edge-left absolute inset-0" />
-
-        {/* Subtle slow GPU-rotated 5-point P5R star watermark */}
-        <svg
-          viewBox="-100 -100 200 200"
-          className="p5-star-spin absolute -right-14 -bottom-14 h-72 w-72 text-[#E60012]/20"
-        >
-          <polygon
-            points="0,-92 24,-30 90,-28 38,14 56,78 0,40 -56,78 -38,14 -90,-28 -24,-30"
-            fill="currentColor"
-          />
-        </svg>
-      </div>
+    <div className="relative isolate min-h-screen overflow-x-clip text-white">
+      <AppBackground />
 
       {/* Compact Sticky Top Navigation Bar */}
       <header className="sticky top-0 z-30 overflow-hidden border-b-[3px] border-[#E60012] bg-[#050505]">
         <svg
           aria-hidden="true"
           viewBox="-100 -100 200 200"
-          className="p5-star-spin pointer-events-none absolute -top-7 -right-5 h-24 w-24 text-[#E60012]/25 select-none"
+          className="p5-star-spin pointer-events-none hidden sm:block absolute -top-7 -right-5 h-24 w-24 text-[#E60012]/25 select-none"
         >
           <polygon
             points="0,-92 24,-30 90,-28 38,14 56,78 0,40 -56,78 -38,14 -90,-28 -24,-30"
@@ -127,7 +69,7 @@ export function AppShell({
               aria-label="Основные разделы"
               className="order-3 flex w-full items-center gap-2 sm:order-2 sm:w-auto sm:justify-center"
             >
-              <motion.button
+              <m.button
                 type="button"
                 onClick={() => onTabChange('schedule')}
                 {...tapProps}
@@ -138,14 +80,14 @@ export function AppShell({
                 }`}
               >
                 {activeTab === 'schedule' ? (
-                  <motion.div
+                  <m.div
                     layoutId="p5-nav-cursor"
                     aria-hidden="true"
                     transition={cursorSpring}
                     className="pointer-events-none absolute inset-0 z-0"
                   >
                     <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-white bg-[#E60012] shadow-[4px_4px_0_#000000]" />
-                  </motion.div>
+                  </m.div>
                 ) : (
                   <div
                     aria-hidden="true"
@@ -156,9 +98,9 @@ export function AppShell({
                   <CalendarDays className="h-3.5 w-3.5" />
                   <span>Расписание</span>
                 </span>
-              </motion.button>
+              </m.button>
 
-              <motion.button
+              <m.button
                 type="button"
                 onClick={() => onTabChange('teachers')}
                 {...tapProps}
@@ -169,14 +111,14 @@ export function AppShell({
                 }`}
               >
                 {activeTab === 'teachers' ? (
-                  <motion.div
+                  <m.div
                     layoutId="p5-nav-cursor"
                     aria-hidden="true"
                     transition={cursorSpring}
                     className="pointer-events-none absolute inset-0 z-0"
                   >
                     <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-white bg-[#E60012] shadow-[4px_4px_0_#000000]" />
-                  </motion.div>
+                  </m.div>
                 ) : (
                   <div
                     aria-hidden="true"
@@ -196,13 +138,13 @@ export function AppShell({
                     {teacherCount}
                   </span>
                 </span>
-              </motion.button>
+              </m.button>
             </nav>
           </LayoutGroup>
 
           {/* Compact SFX indicator + Prominent P5R MENU (ESC) button */}
           <div className="order-2 flex shrink-0 items-center gap-2 sm:order-3">
-            <motion.button
+            <m.button
               type="button"
               onClick={onToggleSfx}
               aria-pressed={sfxEnabled}
@@ -226,9 +168,9 @@ export function AppShell({
                   <VolumeX className="h-3.5 w-3.5" />
                 )}
               </span>
-            </motion.button>
+            </m.button>
 
-            <motion.button
+            <m.button
               type="button"
               onClick={onOpenMenu}
               aria-expanded={menuOpen}
@@ -252,7 +194,7 @@ export function AppShell({
                   {overlayChangeCount}
                 </span>
               )}
-            </motion.button>
+            </m.button>
           </div>
         </div>
       </header>

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { Globe, MapPin, Pin, User } from 'lucide-react';
 import { DAY_PHASE_LABELS, DAY_SHORT_RU } from '../../constants/schedule';
+import { useMinuteClock } from '../../hooks/useLiveClock';
 import type {
   DayOfWeek,
   EffectiveLesson,
@@ -10,15 +11,10 @@ import type {
   ViewMode,
 } from '../../types/schedule';
 import { getHudFlipMotionProps } from '../../utils/p5Motion';
-import {
-  computeLiveHudState,
-  formatClock,
-  formatCountdown,
-  formatRussianWeekday,
-} from '../../utils/time';
+import { computeLiveHudState, formatRussianWeekday } from '../../utils/time';
+import { LiveClockBadge, LiveCountdown } from './LiveCountdown';
 
 interface LiveHudBarProps {
-  now: Date;
   lessons: EffectiveLesson[];
   selectedGroup: GroupFilter;
   selectedDay?: DayOfWeek;
@@ -98,7 +94,6 @@ function getHeroLessonMeta(
 }
 
 export function LiveHudBar({
-  now,
   lessons,
   selectedGroup,
   selectedDay,
@@ -109,21 +104,22 @@ export function LiveHudBar({
   onSelectLesson,
   onJumpToToday,
 }: LiveHudBarProps) {
+  const minuteNow = useMinuteClock();
   const reduced = useReducedMotion();
   const hudFlipMotion = getHudFlipMotionProps(reduced);
 
   const hud = useMemo(
     () =>
-      computeLiveHudState(now, lessons, selectedGroup, {
+      computeLiveHudState(minuteNow, lessons, selectedGroup, {
         scopeMode,
         focusedTeacherId,
       }),
-    [now, lessons, selectedGroup, scopeMode, focusedTeacherId]
+    [minuteNow, lessons, selectedGroup, scopeMode, focusedTeacherId]
   );
 
   const phaseMeta = DAY_PHASE_LABELS[hud.phase];
-  const dayNum = String(now.getDate());
-  const monthNum = String(now.getMonth() + 1).padStart(2, '0');
+  const dayNum = String(minuteNow.getDate());
+  const monthNum = String(minuteNow.getMonth() + 1).padStart(2, '0');
   const flipKey =
     showSelectedDayChip && viewMode === 'day' && selectedDay
       ? `${hud.todayDay}-${selectedDay}`
@@ -153,9 +149,9 @@ export function LiveHudBar({
   const extraLessonsCount = isLiveNow
     ? Math.max(0, hud.currentLessons.length - 1)
     : Math.max(0, (hud.nextSlot?.lessons.length ?? 0) - 1);
-  const timerSeconds = isLiveNow
-    ? hud.currentEndsInSeconds
-    : hud.nextSlot?.startsInSeconds ?? null;
+  const targetMs = isLiveNow
+    ? hud.currentEndsAtMs
+    : hud.nextSlot?.startsAtMs ?? null;
 
   const isViewingNonTodayDay = Boolean(
     showSelectedDayChip &&
@@ -171,14 +167,14 @@ export function LiveHudBar({
     >
       {/* Left Zone: Iconic P5R Calendar Polygon + Protruding Weekday & Phase */}
       <div className="lg:col-span-5" style={{ perspective: 600 }}>
-        <motion.div
+        <m.div
           key={flipKey}
           {...hudFlipMotion}
           style={{ transformOrigin: '50% 0%' }}
           className="flex items-center"
         >
           {/* Giant tilted date polygon (clickable return to today) */}
-          <motion.button
+          <m.button
             type="button"
             onClick={onJumpToToday}
             title="Вернуться к сегодняшнему дню"
@@ -197,7 +193,7 @@ export function LiveHudBar({
                 </span>
               </div>
             </div>
-          </motion.button>
+          </m.button>
 
           {/* Protruding tilted metadata stack overlapping the calendar polygon */}
           <div className="relative z-20 -ml-2.5 flex min-w-0 flex-col items-start gap-1.5 sm:-ml-4">
@@ -208,12 +204,12 @@ export function LiveHudBar({
                     hud.isSunday ? 'text-[#E60012]' : 'text-[#050505]'
                   }`}
                 >
-                  {formatRussianWeekday(now)}
+                  {formatRussianWeekday(minuteNow)}
                 </span>
               </div>
 
               {isViewingNonTodayDay && selectedDay && (
-                <motion.button
+                <m.button
                   type="button"
                   onClick={onJumpToToday}
                   title="Вернуться на сегодняшний день"
@@ -223,7 +219,7 @@ export function LiveHudBar({
                   className="-rotate-2 cursor-pointer border-2 border-white bg-[#E60012] px-2 py-1 font-condensed text-[11px] font-bold uppercase leading-none text-white shadow-[3px_3px_0_#050505] transition-colors hover:border-[#050505] hover:bg-[#FFE600] hover:text-[#050505]"
                 >
                   → {DAY_SHORT_RU[selectedDay].toUpperCase()}
-                </motion.button>
+                </m.button>
               )}
             </div>
 
@@ -236,18 +232,16 @@ export function LiveHudBar({
                 </span>
               </span>
 
-              <span className="border-2 border-white bg-[#050505] px-2 py-0.5 font-condensed text-xs font-bold tabular-nums tracking-widest text-white shadow-[3px_3px_0_#050505] sm:text-sm">
-                {formatClock(now)}
-              </span>
+              <LiveClockBadge />
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </div>
 
       {/* Right Zone: Asymmetric Skewed Next / Current Lesson Hero Card */}
       <div className="min-w-0 pt-2 lg:col-span-7 lg:pt-0">
         {activePrimary && activeMeta ? (
-          <motion.button
+          <m.button
             type="button"
             onClick={() => onSelectLesson(activePrimary)}
             whileHover={reduced ? undefined : { y: -3, scale: 1.01 }}
@@ -344,7 +338,7 @@ export function LiveHudBar({
                         </span>
                       )}
                       {activeMeta.teacherText ? (
-                        <span className="inline-flex min-w-0 items-center gap-1 font-medium text-neutral-200">
+                        <span className="inline-flex min-w-0 items-center gap-1 font-semibold text-neutral-200">
                           <User className="h-3.5 w-3.5 shrink-0 text-[#E60012]" />
                           <span className="break-words">
                             {activeMeta.teacherText}
@@ -362,20 +356,14 @@ export function LiveHudBar({
                 </div>
               </div>
 
-              {timerSeconds !== null && (
-                <div className="p5-skew shrink-0 self-start border-2 border-[#050505] bg-[#FFE600] px-3.5 py-1.5 text-[#050505] shadow-[4px_4px_0_#E60012] sm:self-center">
-                  <div className="p5-unskew flex flex-col items-start sm:items-end">
-                    <span className="font-condensed text-[10px] font-bold uppercase leading-none tracking-widest text-[#050505]">
-                      {isLiveNow ? 'ДО КОНЦА' : 'ЧЕРЕЗ'}
-                    </span>
-                    <span className="mt-0.5 whitespace-nowrap font-display text-lg leading-none tabular-nums text-[#050505] sm:text-2xl">
-                      {formatCountdown(timerSeconds)}
-                    </span>
-                  </div>
-                </div>
+              {targetMs !== null && (
+                <LiveCountdown
+                  targetMs={targetMs}
+                  label={isLiveNow ? 'ДО КОНЦА' : 'ЧЕРЕЗ'}
+                />
               )}
             </div>
-          </motion.button>
+          </m.button>
         ) : (
           <div className="border-2 border-white bg-[#060606] px-4 py-3 shadow-[5px_5px_0_#050505]">
             <p className="font-display text-sm uppercase tracking-wider text-white">

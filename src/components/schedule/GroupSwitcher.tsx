@@ -1,4 +1,4 @@
-import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { Users } from 'lucide-react';
 import { TARGET_GROUPS } from '../../constants/schedule';
 import type { GroupFilter } from '../../types/schedule';
@@ -32,7 +32,7 @@ export function GroupSwitcher({
         {TARGET_GROUPS.map((gid) => {
           const active = selectedGroup === gid;
           return (
-            <motion.button
+            <m.button
               key={gid}
               type="button"
               onClick={() => onSelectGroup(gid)}
@@ -40,14 +40,14 @@ export function GroupSwitcher({
               className="relative px-3 py-1.5 text-white transition-colors"
             >
               {active ? (
-                <motion.div
+                <m.div
                   layoutId="p5-group-cursor"
                   aria-hidden="true"
                   transition={cursorSpring}
                   className="pointer-events-none absolute inset-0 z-0"
                 >
                   <div className="p5-skew h-full w-full -rotate-[1.2deg] border-2 border-white bg-[#E60012] shadow-[4px_4px_0_#050505]" />
-                </motion.div>
+                </m.div>
               ) : (
                 <div
                   aria-hidden="true"
@@ -57,25 +57,25 @@ export function GroupSwitcher({
               <span className="relative z-10 inline-flex items-center font-condensed text-xs font-bold uppercase tracking-wider sm:text-sm">
                 {gid}
               </span>
-            </motion.button>
+            </m.button>
           );
         })}
 
-        <motion.button
+        <m.button
           type="button"
           onClick={() => onSelectGroup('ALL')}
           {...tapProps}
           className="relative px-3 py-1.5 text-white transition-colors"
         >
           {selectedGroup === 'ALL' ? (
-            <motion.div
+            <m.div
               layoutId="p5-group-cursor"
               aria-hidden="true"
               transition={cursorSpring}
               className="pointer-events-none absolute inset-0 z-0"
             >
               <div className="p5-skew h-full w-full -rotate-[1.2deg] border-2 border-white bg-[#E60012] shadow-[4px_4px_0_#050505]" />
-            </motion.div>
+            </m.div>
           ) : (
             <div
               aria-hidden="true"
@@ -86,7 +86,7 @@ export function GroupSwitcher({
             <Users className="h-3.5 w-3.5" />
             <span>ВСЕ</span>
           </span>
-        </motion.button>
+        </m.button>
       </div>
     </LayoutGroup>
   );

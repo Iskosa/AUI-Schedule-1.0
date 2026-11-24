@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import {
   ArrowLeft,
   BookOpen,
@@ -355,7 +355,7 @@ export function SettingsView({
           </span>
         </div>
 
-        <motion.button
+        <m.button
           type="button"
           onClick={onBackToSchedule}
           {...tapProps}
@@ -365,7 +365,7 @@ export function SettingsView({
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>К расписанию</span>
           </span>
-        </motion.button>
+        </m.button>
       </div>
 
       {/* Main 2-Column P5R Settings Grid */}
@@ -465,7 +465,7 @@ export function SettingsView({
                                 isSelected ? null : opt.teacherId
                               )
                             }
-                            className={`flex items-center justify-between gap-2 border-2 px-3 py-2 text-left transition-all ${
+                            className={`flex items-center justify-between gap-2 border-2 px-3 py-2 text-left ${
                               isSelected
                                 ? 'border-[#FFE600] bg-[#060606] text-[#FFE600] shadow-[4px_4px_0_#E60012]'
                                 : 'border-white/40 bg-[#060606] text-white hover:border-white'
@@ -522,7 +522,7 @@ export function SettingsView({
                 </p>
               </div>
 
-              <motion.button
+              <m.button
                 type="button"
                 onClick={onAddTeacher}
                 {...tapProps}
@@ -532,7 +532,7 @@ export function SettingsView({
                   <Plus className="h-3.5 w-3.5" />
                   <span>Новый преподаватель</span>
                 </span>
-              </motion.button>
+              </m.button>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-12">
@@ -623,7 +623,7 @@ export function SettingsView({
                           onSetSubjectTeacherOverride(ov.displaySubject, null)
                         }
                         aria-label={`Сбросить переопределение для ${ov.displaySubject}`}
-                        className="ml-1 border border-white/40 px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase text-neutral-300 transition hover:border-[#E60012] hover:bg-[#E60012] hover:text-white"
+                        className="ml-1 border border-white/40 px-1.5 py-0.5 font-condensed text-[10px] font-bold uppercase text-neutral-300 hover:border-[#E60012] hover:bg-[#E60012] hover:text-white"
                       >
                         <RotateCcw className="inline h-3 w-3" />
                       </button>
@@ -655,7 +655,7 @@ export function SettingsView({
                   className="relative px-3.5 py-1.5 text-white"
                 >
                   {scheduleScopeMode === 'group' ? (
-                    <motion.div
+                    <m.div
                       layoutId="p5-scope-mode-cursor"
                       transition={cursorSpring}
                       className="p5-skew pointer-events-none absolute inset-0 z-0 border-2 border-white bg-[#E60012] shadow-[3px_3px_0_#050505]"
@@ -677,7 +677,7 @@ export function SettingsView({
                   className="relative px-3.5 py-1.5 text-white"
                 >
                   {scheduleScopeMode === 'teacher' ? (
-                    <motion.div
+                    <m.div
                       layoutId="p5-scope-mode-cursor"
                       transition={cursorSpring}
                       className="p5-skew pointer-events-none absolute inset-0 z-0 border-2 border-white bg-[#E60012] shadow-[3px_3px_0_#050505]"

@@ -33,7 +33,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
+            className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-4 py-2 text-white transition-transform hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
           >
             <span className="p5-unskew block font-condensed text-sm font-bold uppercase tracking-wider">
               {cancelLabel}
@@ -42,7 +42,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className={`p5-skew border-2 px-4 py-2 transition hover:-translate-y-0.5 ${
+            className={`p5-skew border-2 px-4 py-2 transition-transform hover:-translate-y-0.5 ${
               danger
                 ? 'border-white bg-[#E60012] text-white shadow-[4px_4px_0_#FFE600] hover:bg-white hover:text-[#0D0D0D]'
                 : 'border-[#0D0D0D] bg-[#FFE600] text-[#0D0D0D] shadow-[4px_4px_0_#E60012] hover:border-white hover:bg-[#E60012] hover:text-white'

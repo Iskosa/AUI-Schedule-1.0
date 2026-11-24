@@ -85,7 +85,7 @@ export function TeacherDetailPanel({
           <button
             type="button"
             onClick={onBackToList}
-            className="p5-skew p5-shadow-sm inline-block border-2 border-[#0D0D0D] bg-white px-3 py-1.5 text-[#0D0D0D] transition hover:bg-[#FFE600] lg:hidden"
+            className="p5-skew p5-shadow-sm inline-block border-2 border-[#0D0D0D] bg-white px-3 py-1.5 text-[#0D0D0D] hover:bg-[#FFE600] lg:hidden"
           >
             <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
               <ArrowLeft className="h-3.5 w-3.5" />
@@ -127,7 +127,7 @@ export function TeacherDetailPanel({
             <button
               type="button"
               onClick={() => onEdit(teacher)}
-              className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-3 py-1.5 text-white transition hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
+              className="p5-skew p5-shadow-sm border-2 border-white bg-[#161616] px-3 py-1.5 text-white transition-transform hover:-translate-y-0.5 hover:border-[#FFE600] hover:text-[#FFE600]"
             >
               <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
                 <Pencil className="h-3.5 w-3.5 text-[#FFE600]" />
@@ -137,7 +137,7 @@ export function TeacherDetailPanel({
             <button
               type="button"
               onClick={() => onDelete(teacher)}
-              className="p5-skew p5-shadow-sm border-2 border-white bg-[#E60012] px-3 py-1.5 text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
+              className="p5-skew p5-shadow-sm border-2 border-white bg-[#E60012] px-3 py-1.5 text-white transition-transform hover:-translate-y-0.5 hover:bg-white hover:text-[#0D0D0D]"
             >
               <span className="p5-unskew inline-flex items-center gap-1.5 font-condensed text-xs font-bold uppercase tracking-wider">
                 <Trash2 className="h-3.5 w-3.5" />
@@ -303,7 +303,7 @@ export function TeacherDetailPanel({
                     key={ls.id}
                     type="button"
                     onClick={() => onSelectLesson(ls)}
-                    className="group p5-shadow-sm flex w-full flex-col gap-2 border-2 border-white bg-[#161616] p-3 text-left transition hover:-translate-y-0.5 hover:bg-[#E60012]"
+                    className="group p5-shadow-sm flex w-full flex-col gap-2 border-2 border-white bg-[#161616] p-3 text-left transition-transform hover:-translate-y-0.5 hover:bg-[#E60012]"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="p5-skew inline-block border-2 border-[#0D0D0D] bg-white px-2.5 py-0.5 text-[#0D0D0D]">

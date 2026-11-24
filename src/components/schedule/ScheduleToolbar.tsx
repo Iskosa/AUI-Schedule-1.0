@@ -1,4 +1,4 @@
-import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
+import { LayoutGroup, m, useReducedMotion } from 'framer-motion';
 import { Calendar, Columns3, MapPin, Plus, UserCheck, X } from 'lucide-react';
 import type {
   EffectiveTeacher,
@@ -130,7 +130,7 @@ export function ScheduleToolbar({
             aria-label="Режим отображения расписания"
             className="inline-flex items-center gap-1.5"
           >
-            <motion.button
+            <m.button
               type="button"
               onClick={() => onChangeViewMode('day')}
               {...tapProps}
@@ -139,14 +139,14 @@ export function ScheduleToolbar({
               }`}
             >
               {viewMode === 'day' ? (
-                <motion.div
+                <m.div
                   layoutId="p5-viewmode-cursor"
                   aria-hidden="true"
                   transition={cursorSpring}
                   className="pointer-events-none absolute inset-0 z-0"
                 >
                   <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-[#050505] bg-white shadow-[4px_4px_0_#050505]" />
-                </motion.div>
+                </m.div>
               ) : (
                 <div
                   aria-hidden="true"
@@ -157,9 +157,9 @@ export function ScheduleToolbar({
                 <Calendar className="h-3.5 w-3.5" />
                 <span>День</span>
               </span>
-            </motion.button>
+            </m.button>
 
-            <motion.button
+            <m.button
               type="button"
               onClick={() => onChangeViewMode('week')}
               {...tapProps}
@@ -168,14 +168,14 @@ export function ScheduleToolbar({
               }`}
             >
               {viewMode === 'week' ? (
-                <motion.div
+                <m.div
                   layoutId="p5-viewmode-cursor"
                   aria-hidden="true"
                   transition={cursorSpring}
                   className="pointer-events-none absolute inset-0 z-0"
                 >
                   <div className="p5-skew h-full w-full -rotate-[1deg] border-2 border-[#050505] bg-white shadow-[4px_4px_0_#050505]" />
-                </motion.div>
+                </m.div>
               ) : (
                 <div
                   aria-hidden="true"
@@ -186,12 +186,12 @@ export function ScheduleToolbar({
                 <Columns3 className="h-3.5 w-3.5" />
                 <span>Неделя</span>
               </span>
-            </motion.button>
+            </m.button>
           </div>
         </LayoutGroup>
 
         {/* Add Lesson CTA */}
-        <motion.button
+        <m.button
           type="button"
           onClick={onAddLesson}
           {...tapProps}
@@ -201,7 +201,7 @@ export function ScheduleToolbar({
             <Plus className="h-3.5 w-3.5" />
             <span>Пара</span>
           </span>
-        </motion.button>
+        </m.button>
       </div>
     </section>
   );
