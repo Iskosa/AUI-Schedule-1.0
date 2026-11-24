@@ -1,0 +1,1721 @@
+{
+  "meta": {
+    "semester": "2026-2027 FALL SEMESTER",
+    "generatedAt": "2026-11-24T08:35:11Z",
+    "sourceUrl": "https://docs.google.com/spreadsheets/d/1EKBtXh6KMGzqrgh8P_x1-gIwkV5sP6TFfyH-fHMpiOI/edit?usp=drivesdk",
+    "saturdayNotes": [
+      "SATURDAY — web-based interdisciplinary sessions only",
+      "No classes are held on campus on Saturday (instruction 5). The sessions above are taught online and are taken from the university schedule.",
+      "ONE-OFF SESSIONS — not weekly, no slot in the grid",
+      "These courses are taught online. The university file shows one offline meeting each, with its date, so they take no weekly hour and no room in the grid."
+    ],
+    "saturdayOnlineSessions": [
+      {
+        "groupsRaw": "COMSE-26A, COMSE-26B, COMCEH-26, COMCIF-26",
+        "groupIds": [
+          "COMSE26A",
+          "COMSE26B",
+          "COMSEH26",
+          "COMCIF26"
+        ],
+        "course": "Manas Studies",
+        "details": "Dr. Kunduz Zhuzupekova — web-based"
+      },
+      {
+        "groupsRaw": "MATDAIS-25",
+        "groupIds": [],
+        "course": "History of Kyrgyzstan",
+        "details": "Ms. Symbat Esenkan kyzy — web-based"
+      },
+      {
+        "groupsRaw": "EEAIR-26",
+        "groupIds": [],
+        "course": "History of Kyrgyzstan",
+        "details": "Ms. Symbat Esenkan kyzy — web-based"
+      }
+    ],
+    "oneOffSessions": [
+      {
+        "groupsRaw": "EEAIR-26",
+        "groupIds": [],
+        "course": "History of Kyrgyzstan",
+        "details": "Tuesday — Ms. Symbat Esenkan kyzy 15.09.26 / Offline"
+      },
+      {
+        "groupsRaw": "IEMIT-26",
+        "groupIds": [],
+        "course": "Geography of Kyrgyzstan 06.10.26",
+        "details": "Tuesday —"
+      },
+      {
+        "groupsRaw": "MATDAIS-26, MATMIE-26",
+        "groupIds": [],
+        "course": "History of Kyrgyzstan",
+        "details": "Wednesday — Ms. Symbat Esenkan kyzy B205"
+      },
+      {
+        "groupsRaw": "MATDAIS-25",
+        "groupIds": [],
+        "course": "Geography of Kyrgyzstan 02.10.26",
+        "details": "Friday — B 113"
+      },
+      {
+        "groupsRaw": "MATMIE-25",
+        "groupIds": [],
+        "course": "Geography of Kyrgyzstan 09.10.26",
+        "details": "Friday —"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "id": "COMSE26B",
+      "name": "COMSE-26B",
+      "year": 1,
+      "shift": "morning",
+      "weeklyHours": 25,
+      "earliest": "08:00",
+      "latest": "12:25",
+      "advisor": "Azhar Kazakbaeva",
+      "advisorRoom": "B107"
+    },
+    {
+      "id": "COMSE26A",
+      "name": "COMSE-26A",
+      "year": 1,
+      "shift": "morning",
+      "weeklyHours": 25,
+      "earliest": "08:00",
+      "latest": "13:40",
+      "advisor": "Azhar Kazakbaeva",
+      "advisorRoom": "B107"
+    },
+    {
+      "id": "COMSEH26",
+      "name": "COMCEH-26",
+      "year": 1,
+      "shift": "morning",
+      "weeklyHours": 23,
+      "earliest": "08:00",
+      "latest": "12:25",
+      "advisor": "Zhazgul Alymbaeva",
+      "advisorRoom": "B107"
+    },
+    {
+      "id": "COMCIF26",
+      "name": "COMCIF-26",
+      "year": 1,
+      "shift": "morning",
+      "weeklyHours": 23,
+      "earliest": "08:00",
+      "latest": "12:25",
+      "advisor": "Erustan Erkebulanov",
+      "advisorRoom": "B207"
+    }
+  ],
+  "teachers": [
+    {
+      "id": "ahmad-sarosh",
+      "name": "Ahmad Sarosh",
+      "courses": [
+        "Calculus I",
+        "Linear Algebra"
+      ],
+      "officeHours": [
+        {
+          "day": "MONDAY",
+          "startTime": "14:00",
+          "endTime": "15:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "aichurok-mamytbekova",
+      "name": "Aichurok Mamytbekova",
+      "courses": [],
+      "officeHours": [],
+      "room": "Registrar's office",
+      "isCustom": false
+    },
+    {
+      "id": "aida-abibova",
+      "name": "Aida Abibova",
+      "courses": [
+        "English language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "aidar-asakeev",
+      "name": "Aidar Asakeev",
+      "courses": [
+        "Introduction to Engineering and Computer Science"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "aikokul-mamaeva",
+      "name": "Aikokul Mamaeva",
+      "courses": [],
+      "officeHours": [],
+      "room": "A202",
+      "isCustom": false
+    },
+    {
+      "id": "aizhamal-yntymak-k",
+      "name": "Aizhamal Yntymak k.",
+      "courses": [
+        "English language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "alimpieva-l-v",
+      "name": "Alimpieva L.V.",
+      "courses": [
+        "Russian language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "alymbek-koilubaev",
+      "name": "Alymbek Koilubaev",
+      "courses": [
+        "Introduction to Eng & CS",
+        "PE1: Game and Motion Design",
+        "PE: Digital Design"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "alymbekova-s-m",
+      "name": "Alymbekova S.M.",
+      "courses": [
+        "Russian language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "andrei-ermakov",
+      "name": "Andrei Ermakov",
+      "courses": [
+        "PE: 3D design and visualization"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "asina-bopusheva",
+      "name": "Asina Bopusheva",
+      "courses": [
+        "Introduction to Eng&CS",
+        "Programming language (Java)"
+      ],
+      "officeHours": [
+        {
+          "day": "MONDAY",
+          "startTime": "14:00",
+          "endTime": "15:25",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "azat-shaimbek-uulu",
+      "name": "Azat Shaimbek uulu",
+      "courses": [
+        "Physical Education"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "azhar-kazakbaeva",
+      "name": "Azhar Kazakbaeva",
+      "courses": [
+        "Advisor hour",
+        "Design and Analysis of Algorithms",
+        "Programming language (Java)"
+      ],
+      "officeHours": [
+        {
+          "day": "FRIDAY",
+          "startTime": "14:00",
+          "endTime": "15:25",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "bufatima-nurmakhammed-k",
+      "name": "Bufatima Nurmakhammed k",
+      "courses": [
+        "DE 1: Intro to Data Mining and Storage",
+        "PE: Business Analytics",
+        "PE: Machine Learning"
+      ],
+      "officeHours": [
+        {
+          "day": "THURSDAY",
+          "startTime": "08:00",
+          "endTime": "09:25",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "burul-shambetova",
+      "name": "Burul Shambetova",
+      "courses": [
+        "Basics of science research"
+      ],
+      "officeHours": [
+        {
+          "day": "THURSDAY",
+          "startTime": "14:00",
+          "endTime": "15:25",
+          "room": "A202"
+        }
+      ],
+      "room": "A202",
+      "isCustom": false
+    },
+    {
+      "id": "chokusheva-g-v",
+      "name": "Chokusheva G.V.",
+      "courses": [
+        "Russian language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "cholponbek-esenbek-uulu",
+      "name": "Cholponbek Esenbek uulu",
+      "courses": [
+        "Business Processes & QM",
+        "DE 1: Advanced software engineering",
+        "Project and Product Management"
+      ],
+      "officeHours": [
+        {
+          "day": "MONDAY",
+          "startTime": "09:30",
+          "endTime": "10:55",
+          "room": "B200"
+        }
+      ],
+      "room": "B200",
+      "isCustom": false
+    },
+    {
+      "id": "djolbulakova-ch",
+      "name": "Djolbulakova Ch.",
+      "courses": [
+        "Russian language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "emilbek-zholdoshbekov",
+      "name": "Emilbek Zholdoshbekov",
+      "courses": [
+        "Geography of Kyrgyzstan"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "ermek-doszhanov",
+      "name": "Ermek Doszhanov",
+      "courses": [
+        "Basics of science research"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "ermek-eshimbekov",
+      "name": "Ermek Eshimbekov",
+      "courses": [
+        "DataBases"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "erustan-erkebulanov",
+      "name": "Erustan Erkebulanov",
+      "courses": [
+        "Advisor hour",
+        "Computer architecture and operating systems",
+        "Computer Networks and Telecommunications",
+        "DE 1: AI Agents for Enterprice Processes Automation",
+        "PE 1: DevOps Essentials. Containerization and Automated Deployment in CI/CD"
+      ],
+      "officeHours": [
+        {
+          "day": "THURSDAY",
+          "startTime": "11:00",
+          "endTime": "12:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "gulnarida-zhalilova",
+      "name": "Gulnarida Zhalilova",
+      "courses": [
+        "Data science and specialty mathematics",
+        "DE: Data analysis and visualisation (elective)",
+        "PE: Data Mining"
+      ],
+      "officeHours": [
+        {
+          "day": "TUESDAY",
+          "startTime": "14:45",
+          "endTime": "16:10",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "hussein-chebsi",
+      "name": "Hussein Chebsi",
+      "courses": [
+        "Calculus 3",
+        "Calculus I"
+      ],
+      "officeHours": [
+        {
+          "day": "TUESDAY",
+          "startTime": "08:45",
+          "endTime": "10:10",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "kanykei-azhikulova",
+      "name": "Kanykei Azhikulova",
+      "courses": [
+        "Financial mathematics"
+      ],
+      "officeHours": [
+        {
+          "day": "THURSDAY",
+          "startTime": "10:15",
+          "endTime": "11:40",
+          "room": "B200"
+        }
+      ],
+      "room": "B200",
+      "isCustom": false
+    },
+    {
+      "id": "kunduz-zhuzupekova",
+      "name": "Kunduz Zhuzupekova",
+      "courses": [
+        "Manas Studies"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "kymbat-abdylda-kyzy",
+      "name": "Kymbat Abdylda kyzy",
+      "courses": [
+        "English language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "liliya-abdieva",
+      "name": "Liliya Abdieva",
+      "courses": [
+        "Computational Mathematics",
+        "DE: Optimization Methods",
+        "PE: Educational Technologies and Learning Systems"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "15:30",
+          "endTime": "16:55",
+          "room": "A212"
+        }
+      ],
+      "room": "A212",
+      "isCustom": false
+    },
+    {
+      "id": "mehtap-khan",
+      "name": "Mehtap Khan",
+      "courses": [
+        "Calculus I",
+        "Linear Algebra",
+        "Mathematical tools for signal calc"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "14:00",
+          "endTime": "15:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "mekia-gaso",
+      "name": "Mekia Gaso",
+      "courses": [
+        "Basics of science research",
+        "Design and Analysis of Algorithms"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "milana-taalaibekova",
+      "name": "Milana Taalaibekova",
+      "courses": [
+        "PE: Operational Risk Management"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "muhammad-tauheed-khan",
+      "name": "Muhammad Tauheed Khan",
+      "courses": [
+        "Electronic components&circuits",
+        "PE1: Artificial Intelligence and Deep Learning (group 1) / PE1: Artificial Intelligence and Deep Learning (group 2)",
+        "Programming&Interface of microcontrollers"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "11:00",
+          "endTime": "12:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "mutalip-osmanov",
+      "name": "Mutalip Osmanov",
+      "courses": [
+        "DataBases",
+        "OOP and Data bases",
+        "PE: Mobile App development"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "nargiza-zhumalieva",
+      "name": "Nargiza Zhumalieva",
+      "courses": [
+        "DataBases",
+        "PE 1: Generative AI"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "09:30",
+          "endTime": "10:55",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "niyazhan-shabdanaliev",
+      "name": "Niyazhan Shabdanaliev",
+      "courses": [
+        "Computer architecture and operating systems",
+        "DE 1: Engineering Economics",
+        "PE2: Vibe Coding / PE2: Blockchain development"
+      ],
+      "officeHours": [
+        {
+          "day": "TUESDAY",
+          "startTime": "11:00",
+          "endTime": "12:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "nurayim-kuletova",
+      "name": "Nurayim Kuletova",
+      "courses": [],
+      "officeHours": [],
+      "room": "A219",
+      "isCustom": false
+    },
+    {
+      "id": "nurbek-tenirberdiev",
+      "name": "Nurbek Tenirberdiev",
+      "courses": [
+        "Geography of Kyrgyzstan"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "nuriya-umerova",
+      "name": "Nuriya Umerova",
+      "courses": [
+        "English language"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "nuriza-elbakieva",
+      "name": "Nuriza Elbakieva",
+      "courses": [],
+      "officeHours": [],
+      "room": "B200",
+      "isCustom": false
+    },
+    {
+      "id": "nurlan-mukambaev",
+      "name": "Nurlan Mukambaev",
+      "courses": [
+        "Computer architecture and operating systems",
+        "PE: Principles of Electrical Engineering and Microelectronics",
+        "PE:Advanced Architectures in AI",
+        "Robotics Foundation"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "10:15",
+          "endTime": "11:40",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "nurmuhammed-abdullaev",
+      "name": "Nurmuhammed Abdullaev",
+      "courses": [
+        "Design and Analysis of Algorithms"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "nurzada-abdykadyrova",
+      "name": "Nurzada Abdykadyrova",
+      "courses": [
+        "Physical Education"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "remudin-mekuria",
+      "name": "Remudin Mekuria",
+      "courses": [
+        "Fundamentals of Scientific Research",
+        "PE: AI and Deep learning"
+      ],
+      "officeHours": [
+        {
+          "day": "MONDAY",
+          "startTime": "10:15",
+          "endTime": "11:40",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "sherali-matanov",
+      "name": "Sherali Matanov",
+      "courses": [
+        "Computational Mathematics"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "14:45",
+          "endTime": "16:10",
+          "room": "B200"
+        }
+      ],
+      "room": "B200",
+      "isCustom": false
+    },
+    {
+      "id": "tabrej-khan",
+      "name": "Tabrej Khan",
+      "courses": [
+        "PE 1: Information Security",
+        "PE1: Cybersecurity policy and risk management",
+        "PE: Cyber Attacts and Defences",
+        "PE: Cybersecurity foundation"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "talgat-mendekov",
+      "name": "Talgat Mendekov",
+      "courses": [
+        "DE 1: SDAT (Software Development Automation Testing)",
+        "DE: QA Testing",
+        "PE: Frontend (REACT + Spring Boot)",
+        "PE: QA Testing"
+      ],
+      "officeHours": [
+        {
+          "day": "MONDAY",
+          "startTime": "11:00",
+          "endTime": "12:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    },
+    {
+      "id": "tattybubu-arap-kyzy",
+      "name": "Tattybubu Arap kyzy",
+      "courses": [
+        "Linear Algebra",
+        "Probability and Statistics"
+      ],
+      "officeHours": [
+        {
+          "day": "WEDNESDAY",
+          "startTime": "14:00",
+          "endTime": "15:25",
+          "room": "A212"
+        }
+      ],
+      "room": "A212",
+      "isCustom": false
+    },
+    {
+      "id": "zamir-chynybekov",
+      "name": "Zamir Chynybekov",
+      "courses": [
+        "Physical Education"
+      ],
+      "officeHours": [],
+      "room": null,
+      "isCustom": false
+    },
+    {
+      "id": "zhazgul-alymbaeva",
+      "name": "Zhazgul Alymbaeva",
+      "courses": [
+        "Advisor hour",
+        "OOP",
+        "Programming language (Java)"
+      ],
+      "officeHours": [
+        {
+          "day": "TUESDAY",
+          "startTime": "11:00",
+          "endTime": "12:25",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "zhibek-naamatova",
+      "name": "Zhibek Naamatova",
+      "courses": [
+        "Introduction to Eng & CS",
+        "Introduction to Engineering and Computer Science",
+        "PE2: Deep Learning",
+        "Programming language (Python)"
+      ],
+      "officeHours": [
+        {
+          "day": "MONDAY",
+          "startTime": "11:00",
+          "endTime": "12:25",
+          "room": "B107"
+        }
+      ],
+      "room": "B107",
+      "isCustom": false
+    },
+    {
+      "id": "zulfikar-afzal",
+      "name": "Zulfikar Afzal",
+      "courses": [
+        "Calculus I",
+        "Linear Algebra"
+      ],
+      "officeHours": [
+        {
+          "day": "TUESDAY",
+          "startTime": "08:00",
+          "endTime": "09:25",
+          "room": "B207"
+        }
+      ],
+      "room": "B207",
+      "isCustom": false
+    }
+  ],
+  "lessons": [
+    {
+      "day": "MONDAY",
+      "startTime": "08:00",
+      "endTime": "10:10",
+      "subject": "Russian language",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "alymbekova-s-m",
+        "alimpieva-l-v",
+        "chokusheva-g-v",
+        "djolbulakova-ch"
+      ],
+      "teacherName": "Alymbekova S.M. / Alimpieva L.V. / Chokusheva G.V. / Djolbulakova Ch.",
+      "room": "B104 / B101 / B102 / B103",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "alymbekova-s-m",
+          "teacherName": "Alymbekova S.M.",
+          "room": "B104"
+        },
+        {
+          "teacherId": "alimpieva-l-v",
+          "teacherName": "Alimpieva L.V.",
+          "room": "B101"
+        },
+        {
+          "teacherId": "chokusheva-g-v",
+          "teacherName": "Chokusheva G.V.",
+          "room": "B102"
+        },
+        {
+          "teacherId": "djolbulakova-ch",
+          "teacherName": "Djolbulakova Ch.",
+          "room": "B103"
+        }
+      ],
+      "notes": "Потоки/подгруппы: Alymbekova S.M. (B104); Alimpieva L.V. (B101); Chokusheva G.V. (B102); Djolbulakova Ch. (B103)",
+      "id": "mon-0800-russian-language-comse26a-comse26b"
+    },
+    {
+      "day": "MONDAY",
+      "startTime": "10:15",
+      "endTime": "12:25",
+      "subject": "Russian language",
+      "type": "fixed",
+      "groupIds": [
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "alymbekova-s-m",
+        "alimpieva-l-v",
+        "chokusheva-g-v",
+        "djolbulakova-ch"
+      ],
+      "teacherName": "Alymbekova S.M. / Alimpieva L.V. / Chokusheva G.V. / Djolbulakova Ch.",
+      "room": "B104 / B101 / B102 / B103",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "alymbekova-s-m",
+          "teacherName": "Alymbekova S.M.",
+          "room": "B104"
+        },
+        {
+          "teacherId": "alimpieva-l-v",
+          "teacherName": "Alimpieva L.V.",
+          "room": "B101"
+        },
+        {
+          "teacherId": "chokusheva-g-v",
+          "teacherName": "Chokusheva G.V.",
+          "room": "B102"
+        },
+        {
+          "teacherId": "djolbulakova-ch",
+          "teacherName": "Djolbulakova Ch.",
+          "room": "B103"
+        }
+      ],
+      "notes": "Потоки/подгруппы: Alymbekova S.M. (B104); Alimpieva L.V. (B101); Chokusheva G.V. (B102); Djolbulakova Ch. (B103)",
+      "id": "mon-1015-russian-language-comseh26-comcif26"
+    },
+    {
+      "day": "MONDAY",
+      "startTime": "12:30",
+      "endTime": "13:10",
+      "subject": "Advisor hour",
+      "type": "advisor",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "zhazgul-alymbaeva",
+      "teacherIds": [
+        "zhazgul-alymbaeva"
+      ],
+      "teacherName": "Zhazgul Alymbaeva",
+      "room": "B101",
+      "isOnline": false,
+      "notes": null,
+      "id": "mon-1230-advisor-hour-comseh26"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Geography of Kyrgyzstan",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "emilbek-zholdoshbekov",
+      "teacherIds": [
+        "emilbek-zholdoshbekov"
+      ],
+      "teacherName": "Emilbek Zholdoshbekov",
+      "room": "B113",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0800-geography-of-kyrgyzstan-comse26a"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "zhibek-naamatova",
+      "teacherIds": [
+        "zhibek-naamatova"
+      ],
+      "teacherName": "Zhibek Naamatova",
+      "room": "B211",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0800-introduction-to-eng-cs-comse26b"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "alymbek-koilubaev",
+      "teacherIds": [
+        "alymbek-koilubaev"
+      ],
+      "teacherName": "Alymbek Koilubaev",
+      "room": "B109",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0800-introduction-to-eng-cs-comseh26"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "zhazgul-alymbaeva",
+      "teacherIds": [
+        "zhazgul-alymbaeva"
+      ],
+      "teacherName": "Zhazgul Alymbaeva",
+      "room": "B111",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0800-programming-language-java-comcif26"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "zhibek-naamatova",
+      "teacherIds": [
+        "zhibek-naamatova"
+      ],
+      "teacherName": "Zhibek Naamatova",
+      "room": "B103",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0930-introduction-to-eng-cs-comse26a"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Geography of Kyrgyzstan",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "emilbek-zholdoshbekov",
+      "teacherIds": [
+        "emilbek-zholdoshbekov"
+      ],
+      "teacherName": "Emilbek Zholdoshbekov",
+      "room": "B201",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0930-geography-of-kyrgyzstan-comse26b"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "zhazgul-alymbaeva",
+      "teacherIds": [
+        "zhazgul-alymbaeva"
+      ],
+      "teacherName": "Zhazgul Alymbaeva",
+      "room": "BIGLAB",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0930-programming-language-java-comseh26"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "alymbek-koilubaev",
+      "teacherIds": [
+        "alymbek-koilubaev"
+      ],
+      "teacherName": "Alymbek Koilubaev",
+      "room": "B104",
+      "isOnline": false,
+      "notes": null,
+      "id": "tue-0930-introduction-to-eng-cs-comcif26"
+    },
+    {
+      "day": "TUESDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "Physical Education",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B",
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "zamir-chynybekov",
+        "nurzada-abdykadyrova",
+        "azat-shaimbek-uulu"
+      ],
+      "teacherName": "Zamir Chynybekov / Nurzada Abdykadyrova / Azat Shaimbek uulu",
+      "room": "Sport Hall",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "zamir-chynybekov",
+          "teacherName": "Zamir Chynybekov",
+          "room": "Sport Hall"
+        },
+        {
+          "teacherId": "nurzada-abdykadyrova",
+          "teacherName": "Nurzada Abdykadyrova",
+          "room": "Sport Hall"
+        },
+        {
+          "teacherId": "azat-shaimbek-uulu",
+          "teacherName": "Azat Shaimbek uulu",
+          "room": "Sport Hall"
+        }
+      ],
+      "notes": "Преподаватели: Zamir Chynybekov, Nurzada Abdykadyrova, Azat Shaimbek uulu (Sport Hall)",
+      "id": "tue-1100-physical-education-comse26a-comse26b-comseh26-comcif26"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "B110 LAB",
+      "isOnline": false,
+      "notes": "Meet: https://meet.google.com/lookup/s4nf9negtghtecv5d5qnquokhs",
+      "id": "wed-0800-programming-language-java-comse26a"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "zhibek-naamatova",
+      "teacherIds": [
+        "zhibek-naamatova"
+      ],
+      "teacherName": "Zhibek Naamatova",
+      "room": "B101",
+      "isOnline": false,
+      "notes": null,
+      "id": "wed-0800-introduction-to-eng-cs-comse26b"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "alymbek-koilubaev",
+      "teacherIds": [
+        "alymbek-koilubaev"
+      ],
+      "teacherName": "Alymbek Koilubaev",
+      "room": "B103",
+      "isOnline": false,
+      "notes": null,
+      "id": "wed-0800-introduction-to-eng-cs-comseh26"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "zhazgul-alymbaeva",
+      "teacherIds": [
+        "zhazgul-alymbaeva"
+      ],
+      "teacherName": "Zhazgul Alymbaeva",
+      "room": "B111 LAB",
+      "isOnline": false,
+      "notes": null,
+      "id": "wed-0800-programming-language-java-comcif26"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Calculus I",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B",
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "ahmad-sarosh",
+        "hussein-chebsi",
+        "zulfikar-afzal",
+        "mehtap-khan"
+      ],
+      "teacherName": "Ahmad Sarosh / Hussein Chebsi / Zulfikar Afzal / Mehtap Khan",
+      "room": "B101 / B102 / B103 / B104",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "ahmad-sarosh",
+          "teacherName": "Ahmad Sarosh",
+          "room": "B101"
+        },
+        {
+          "teacherId": "hussein-chebsi",
+          "teacherName": "Hussein Chebsi",
+          "room": "B102"
+        },
+        {
+          "teacherId": "zulfikar-afzal",
+          "teacherName": "Zulfikar Afzal",
+          "room": "B103"
+        },
+        {
+          "teacherId": "mehtap-khan",
+          "teacherName": "Mehtap Khan",
+          "room": "B104"
+        }
+      ],
+      "notes": "Потоки: Ahmad Sarosh (B101); Hussein Chebsi (B102); Zulfikar Afzal (B103); Mehtap Khan (B104)",
+      "id": "wed-0930-calculus-i-comse26a-comse26b-comseh26-comcif26"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "B111 LAB",
+      "isOnline": false,
+      "notes": null,
+      "id": "wed-1100-programming-language-java-comse26b"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "11:00",
+      "endTime": "11:40",
+      "subject": "Advisor hour",
+      "type": "advisor",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "erustan-erkebulanov",
+      "teacherIds": [
+        "erustan-erkebulanov"
+      ],
+      "teacherName": "Erustan Erkebulanov",
+      "room": "B103",
+      "isOnline": false,
+      "notes": null,
+      "id": "wed-1100-advisor-hour-comcif26"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "14:00",
+      "endTime": "16:10",
+      "subject": "Geography of Kyrgyzstan",
+      "type": "fixed",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "nurbek-tenirberdiev",
+      "teacherIds": [
+        "nurbek-tenirberdiev"
+      ],
+      "teacherName": "Nurbek Tenirberdiev",
+      "room": "B205",
+      "isOnline": true,
+      "notes": "Онлайн-курс; единственное очное занятие 14.10.26 (согл. Satur_comments)",
+      "id": "wed-1400-geography-of-kyrgyzstan-comseh26"
+    },
+    {
+      "day": "WEDNESDAY",
+      "startTime": "14:00",
+      "endTime": "16:10",
+      "subject": "Geography of Kyrgyzstan",
+      "type": "fixed",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "nurbek-tenirberdiev",
+      "teacherIds": [
+        "nurbek-tenirberdiev"
+      ],
+      "teacherName": "Nurbek Tenirberdiev",
+      "room": "B205",
+      "isOnline": true,
+      "notes": "Онлайн-курс; единственное очное занятие 21.10.26 (согл. Satur_comments)",
+      "id": "wed-1400-geography-of-kyrgyzstan-comcif26"
+    },
+    {
+      "day": "THURSDAY",
+      "startTime": "08:00",
+      "endTime": "09:25",
+      "subject": "Linear Algebra",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B",
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "ahmad-sarosh",
+        "tattybubu-arap-kyzy",
+        "zulfikar-afzal",
+        "mehtap-khan"
+      ],
+      "teacherName": "Ahmad Sarosh / Tattybubu Arap kyzy / Zulfikar Afzal / Mehtap Khan",
+      "room": "B101 / B102 / B103 / B104",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "ahmad-sarosh",
+          "teacherName": "Ahmad Sarosh",
+          "room": "B101"
+        },
+        {
+          "teacherId": "tattybubu-arap-kyzy",
+          "teacherName": "Tattybubu Arap kyzy",
+          "room": "B102"
+        },
+        {
+          "teacherId": "zulfikar-afzal",
+          "teacherName": "Zulfikar Afzal",
+          "room": "B103"
+        },
+        {
+          "teacherId": "mehtap-khan",
+          "teacherName": "Mehtap Khan",
+          "room": "B104"
+        }
+      ],
+      "notes": "Потоки: Ahmad Sarosh (B101); Tattybubu Arap kyzy (B102); Zulfikar Afzal (B103); Mehtap Khan (B104)",
+      "id": "thu-0800-linear-algebra-comse26a-comse26b-comseh26-comcif26"
+    },
+    {
+      "day": "THURSDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Calculus I",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B",
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "ahmad-sarosh",
+        "hussein-chebsi",
+        "zulfikar-afzal",
+        "mehtap-khan"
+      ],
+      "teacherName": "Ahmad Sarosh / Hussein Chebsi / Zulfikar Afzal / Mehtap Khan",
+      "room": "B101 / B102 / B103 / B104",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "ahmad-sarosh",
+          "teacherName": "Ahmad Sarosh",
+          "room": "B101"
+        },
+        {
+          "teacherId": "hussein-chebsi",
+          "teacherName": "Hussein Chebsi",
+          "room": "B102"
+        },
+        {
+          "teacherId": "zulfikar-afzal",
+          "teacherName": "Zulfikar Afzal",
+          "room": "B103"
+        },
+        {
+          "teacherId": "mehtap-khan",
+          "teacherName": "Mehtap Khan",
+          "room": "B104"
+        }
+      ],
+      "notes": "Потоки: Ahmad Sarosh (B101); Hussein Chebsi (B102); Zulfikar Afzal (B103); Mehtap Khan (B104)",
+      "id": "thu-0930-calculus-i-comse26a-comse26b-comseh26-comcif26"
+    },
+    {
+      "day": "THURSDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "English language",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "aida-abibova",
+      "teacherIds": [
+        "aida-abibova"
+      ],
+      "teacherName": "Aida Abibova",
+      "room": "B201",
+      "isOnline": false,
+      "notes": null,
+      "id": "thu-1100-english-language-comse26a"
+    },
+    {
+      "day": "THURSDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "English language",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "aizhamal-yntymak-k",
+      "teacherIds": [
+        "aizhamal-yntymak-k"
+      ],
+      "teacherName": "Aizhamal Yntymak k.",
+      "room": "B202",
+      "isOnline": false,
+      "notes": null,
+      "id": "thu-1100-english-language-comse26b"
+    },
+    {
+      "day": "THURSDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "English language",
+      "type": "fixed",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "kymbat-abdylda-kyzy",
+      "teacherIds": [
+        "kymbat-abdylda-kyzy"
+      ],
+      "teacherName": "Kymbat Abdylda kyzy",
+      "room": "B203",
+      "isOnline": false,
+      "notes": null,
+      "id": "thu-1100-english-language-comseh26"
+    },
+    {
+      "day": "THURSDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "English language",
+      "type": "fixed",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "nuriya-umerova",
+      "teacherIds": [
+        "nuriya-umerova"
+      ],
+      "teacherName": "Nuriya Umerova",
+      "room": "B104",
+      "isOnline": false,
+      "notes": null,
+      "id": "thu-1100-english-language-comcif26"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "zhibek-naamatova",
+      "teacherIds": [
+        "zhibek-naamatova"
+      ],
+      "teacherName": "Zhibek Naamatova",
+      "room": "B105",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-0930-introduction-to-eng-cs-comse26a"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "LAB3(210)",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-0930-programming-language-java-comse26b"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSEH26"
+      ],
+      "teacherId": "zhazgul-alymbaeva",
+      "teacherIds": [
+        "zhazgul-alymbaeva"
+      ],
+      "teacherName": "Zhazgul Alymbaeva",
+      "room": "BIGLAB",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-0930-programming-language-java-comseh26"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "11:00",
+      "endTime": "12:25",
+      "subject": "Linear Algebra",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B",
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": null,
+      "teacherIds": [
+        "ahmad-sarosh",
+        "zulfikar-afzal",
+        "mehtap-khan",
+        "tattybubu-arap-kyzy"
+      ],
+      "teacherName": "Ahmad Sarosh / Zulfikar Afzal / Mehtap Khan / Tattybubu Arap kyzy",
+      "room": "B101 / B103 / B104 / B205",
+      "isOnline": false,
+      "subgroups": [
+        {
+          "teacherId": "ahmad-sarosh",
+          "teacherName": "Ahmad Sarosh",
+          "room": "B101"
+        },
+        {
+          "teacherId": "zulfikar-afzal",
+          "teacherName": "Zulfikar Afzal",
+          "room": "B103"
+        },
+        {
+          "teacherId": "mehtap-khan",
+          "teacherName": "Mehtap Khan",
+          "room": "B104"
+        },
+        {
+          "teacherId": "tattybubu-arap-kyzy",
+          "teacherName": "Tattybubu Arap kyzy",
+          "room": "B205"
+        }
+      ],
+      "notes": "Потоки: Ahmad Sarosh (B101); Zulfikar Afzal (B103); Mehtap Khan (B104); Tattybubu Arap kyzy (B205)",
+      "id": "fri-1100-linear-algebra-comse26a-comse26b-comseh26-comcif26"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "12:30",
+      "endTime": "13:55",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "LAB4(211)",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-1230-programming-language-java-comse26a"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "12:30",
+      "endTime": "13:55",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "alymbek-koilubaev",
+      "teacherIds": [
+        "alymbek-koilubaev"
+      ],
+      "teacherName": "Alymbek Koilubaev",
+      "room": "B213",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-1230-introduction-to-eng-cs-comcif26"
+    },
+    {
+      "day": "FRIDAY",
+      "startTime": "14:00",
+      "endTime": "14:40",
+      "subject": "Advisor hour",
+      "type": "advisor",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "B101",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-1400-advisor-hour-comse26a"
+    },
+    {
+      "day": "SATURDAY",
+      "startTime": "08:00",
+      "endTime": "10:10",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26A"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "BIGLAB",
+      "isOnline": false,
+      "notes": "ВНИМАНИЕ: стоит в сетке SATURDAY, но Satur_comments указывает отсутствие очных пар в субботу",
+      "id": "sat-0800-programming-language-java-comse26a"
+    },
+    {
+      "day": "SATURDAY",
+      "startTime": "10:15",
+      "endTime": "11:40",
+      "subject": "Manas Studies",
+      "type": "fixed",
+      "groupIds": [
+        "COMSE26A",
+        "COMSE26B",
+        "COMSEH26",
+        "COMCIF26"
+      ],
+      "teacherId": "kunduz-zhuzupekova",
+      "teacherIds": [
+        "kunduz-zhuzupekova"
+      ],
+      "teacherName": "Kunduz Zhuzupekova",
+      "room": null,
+      "isOnline": true,
+      "notes": "Web-based (указано в расписании и Satur_comments)",
+      "id": "sat-1015-manas-studies-comse26a-comse26b-comseh26-comcif26"
+    },
+    {
+      "day": "SATURDAY",
+      "startTime": "11:45",
+      "endTime": "13:40",
+      "subject": "Programming language (Java)",
+      "type": "regular",
+      "groupIds": [
+        "COMSE26B"
+      ],
+      "teacherId": "azhar-kazakbaeva",
+      "teacherIds": [
+        "azhar-kazakbaeva"
+      ],
+      "teacherName": "Azhar Kazakbaeva",
+      "room": "BIGLAB",
+      "isOnline": false,
+      "notes": "ВНИМАНИЕ: стоит в сетке SATURDAY, но Satur_comments указывает отсутствие очных пар в субботу",
+      "id": "sat-1145-programming-language-java-comse26b"
+    }
+  ]
+}
