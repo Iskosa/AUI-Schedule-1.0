@@ -1,7 +1,7 @@
 {
   "meta": {
     "semester": "2026-2027 FALL SEMESTER",
-    "generatedAt": "2026-11-24T08:35:11Z",
+    "generatedAt": "2026-11-25T11:00:26Z",
     "sourceUrl": "https://docs.google.com/spreadsheets/d/1EKBtXh6KMGzqrgh8P_x1-gIwkV5sP6TFfyH-fHMpiOI/edit?usp=drivesdk",
     "saturdayNotes": [
       "SATURDAY — web-based interdisciplinary sessions only",
@@ -1555,6 +1555,25 @@
     },
     {
       "day": "FRIDAY",
+      "startTime": "09:30",
+      "endTime": "10:55",
+      "subject": "Introduction to Eng & CS",
+      "type": "regular",
+      "groupIds": [
+        "COMCIF26"
+      ],
+      "teacherId": "alymbek-koilubaev",
+      "teacherIds": [
+        "alymbek-koilubaev"
+      ],
+      "teacherName": "Alymbek Koilubaev",
+      "room": "B213",
+      "isOnline": false,
+      "notes": null,
+      "id": "fri-0930-introduction-to-eng-cs-comcif26"
+    },
+    {
+      "day": "FRIDAY",
       "startTime": "11:00",
       "endTime": "12:25",
       "subject": "Linear Algebra",
@@ -1621,25 +1640,6 @@
     },
     {
       "day": "FRIDAY",
-      "startTime": "12:30",
-      "endTime": "13:55",
-      "subject": "Introduction to Eng & CS",
-      "type": "regular",
-      "groupIds": [
-        "COMCIF26"
-      ],
-      "teacherId": "alymbek-koilubaev",
-      "teacherIds": [
-        "alymbek-koilubaev"
-      ],
-      "teacherName": "Alymbek Koilubaev",
-      "room": "B213",
-      "isOnline": false,
-      "notes": null,
-      "id": "fri-1230-introduction-to-eng-cs-comcif26"
-    },
-    {
-      "day": "FRIDAY",
       "startTime": "14:00",
       "endTime": "14:40",
       "subject": "Advisor hour",
@@ -1656,25 +1656,6 @@
       "isOnline": false,
       "notes": null,
       "id": "fri-1400-advisor-hour-comse26a"
-    },
-    {
-      "day": "SATURDAY",
-      "startTime": "08:00",
-      "endTime": "10:10",
-      "subject": "Programming language (Java)",
-      "type": "regular",
-      "groupIds": [
-        "COMSE26A"
-      ],
-      "teacherId": "azhar-kazakbaeva",
-      "teacherIds": [
-        "azhar-kazakbaeva"
-      ],
-      "teacherName": "Azhar Kazakbaeva",
-      "room": "BIGLAB",
-      "isOnline": false,
-      "notes": "ВНИМАНИЕ: стоит в сетке SATURDAY, но Satur_comments указывает отсутствие очных пар в субботу",
-      "id": "sat-0800-programming-language-java-comse26a"
     },
     {
       "day": "SATURDAY",
@@ -1697,25 +1678,6 @@
       "isOnline": true,
       "notes": "Web-based (указано в расписании и Satur_comments)",
       "id": "sat-1015-manas-studies-comse26a-comse26b-comseh26-comcif26"
-    },
-    {
-      "day": "SATURDAY",
-      "startTime": "11:45",
-      "endTime": "13:40",
-      "subject": "Programming language (Java)",
-      "type": "regular",
-      "groupIds": [
-        "COMSE26B"
-      ],
-      "teacherId": "azhar-kazakbaeva",
-      "teacherIds": [
-        "azhar-kazakbaeva"
-      ],
-      "teacherName": "Azhar Kazakbaeva",
-      "room": "BIGLAB",
-      "isOnline": false,
-      "notes": "ВНИМАНИЕ: стоит в сетке SATURDAY, но Satur_comments указывает отсутствие очных пар в субботу",
-      "id": "sat-1145-programming-language-java-comse26b"
     }
   ]
 }
